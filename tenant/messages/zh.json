@@ -1,0 +1,11 @@
+{
+  "eyebrow": "NEIGHBOR LINK",
+  "title": "租客端",
+  "intro": "登录以继续进入你的房屋管理页面。",
+  "username": "用户名",
+  "password": "密码",
+  "signIn": "登录",
+  "signingIn": "登录中...",
+  "loginFailed": "登录失败，请检查用户名和密码。",
+  "language": "English"
+}

@@ -1,0 +1,11 @@
+{
+  "eyebrow": "NEIGHBOR LINK",
+  "title": "Tenant portal",
+  "intro": "Sign in to continue to your home dashboard.",
+  "username": "Username",
+  "password": "Password",
+  "signIn": "Sign in",
+  "signingIn": "Signing in...",
+  "loginFailed": "Login failed. Please check your username and password.",
+  "language": "中文"
+}

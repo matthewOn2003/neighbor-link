@@ -1,0 +1,56 @@
+# Dependencies
+**/node_modules/
+
+# Next.js
+**/.next/
+**/out/
+**/.vercel/
+
+# Production builds
+**/build/
+**/dist/
+
+# Local databases and runtime data
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+
+# Go build artifacts
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Coverage and test output
+coverage/
+**/coverage/
+
+# Logs and debug output
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.log
+
+# TypeScript and tooling caches
+*.tsbuildinfo
+.next/
+
+# Generated Next.js type files
+**/next-env.d.ts
+
+# IDE and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Certificates and private keys
+*.pem
+*.key
+*.crt
