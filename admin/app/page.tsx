@@ -1,26 +1,26 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { useApi } from "@/lib/useApi";
 import { useLocale } from "@/lib/i18n";
+import { FormButton, FormError, FormGuard, FormInput, rules, FormValues } from "@neighbor-link/formguard";
 
 export default function Home() {
   const router = useRouter();
   const api = useApi();
-  const { text, locale, setLocale } = useLocale();
-  const [username, setUsername] = useState("admin");
-  const [password, setPassword] = useState("");
+  const { locale, locales, setLocale, localeProperties } = useLocale();
+  const text = localeProperties.messages;
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  async function handleSubmit(values: FormValues) {
     setError("");
     setIsLoading(true);
 
     try {
-      await api("/auth/login", { username, password, role: "admin" });
+      await api("/auth/login", { ...values, role: "admin" });
       router.push("/dashboard");
     } catch (submitError) {
       setError(submitError instanceof Error && submitError.message !== "Request failed" ? submitError.message : text.loginFailed);
@@ -33,27 +33,26 @@ export default function Home() {
     <main className="login-shell">
       <section className="login-panel">
         <div className="login-header">
-          <p className="eyebrow">{text.eyebrow}</p>
-          <button type="button" className="locale-switch" onClick={() => setLocale(locale === "en" ? "zh" : "en")}>
-            {text.language}
+          <Image className="eyebrow" src="/neighbor-link-logo.svg" alt={text.eyebrow} width={1197} height={356} priority />
+          <button type="button" className="locale-switch" onClick={() => {
+            const currentIndex = locales.findIndex((item) => item.code === locale);
+            const nextLocale = locales[(currentIndex + 1) % locales.length];
+            if (nextLocale) setLocale(nextLocale.code);
+          }}>
+            {localeProperties.name_short}
           </button>
         </div>
-        <h1>{text.title}</h1>
-        <p className="intro">{text.intro}</p>
-        <form onSubmit={handleSubmit} className="login-form">
-          <label>
-            {text.username}
-            <input value={username} onChange={(event) => setUsername(event.target.value)} autoComplete="username" required />
-          </label>
-          <label>
-            {text.password}
-            <input value={password} onChange={(event) => setPassword(event.target.value)} type="password" autoComplete="current-password" required />
-          </label>
-          {error && <p className="form-error">{error}</p>}
-          <button type="submit" disabled={isLoading}>
-            {isLoading ? text.signingIn : text.signIn}
-          </button>
-        </form>
+        <FormGuard
+          initialValues={{ username: "admin", password: "" }}
+          onSubmit={handleSubmit}
+          className="login-form"
+          tokens={{ radius: "6px", focusColor: "#315b57", buttonBackground: "#315b57" }}
+        >
+          <FormInput name="username" label={text.username} autoComplete="username" validators={[rules.required(text.required)]} />
+          <FormInput name="password" label={text.password} type="password" autoComplete="current-password" validators={[rules.required(text.required)]} />
+          <FormError>{error}</FormError>
+          <FormButton loading={isLoading}>{isLoading ? text.signingIn : text.signIn}</FormButton>
+        </FormGuard>
       </section>
     </main>
   );

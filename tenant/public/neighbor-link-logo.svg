@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1197" height="356" viewBox="0 0 1197 356" role="img" aria-labelledby="logo-title logo-desc">
+  <title id="logo-title">NeighborLink logo</title>
+  <desc id="logo-desc">NeighborLink. Rent Smarter. Live Happier.</desc>
+  <g transform="translate(0 40)">
+    <g fill="none" stroke="#E9A52C" stroke-width="25" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M57 260 V154 L170 55 L286 154 V260"/>
+      <path d="M235 101 V69"/>
+      <path d="M91 205 C112 274 228 274 250 205"/>
+    </g>
+    <g fill="#E9A52C">
+      <rect x="139" y="145" width="30" height="30" rx="5"/>
+      <rect x="180" y="145" width="30" height="30" rx="5"/>
+      <rect x="139" y="185" width="30" height="30" rx="5"/>
+      <rect x="180" y="185" width="30" height="30" rx="5"/>
+    </g>
+  </g>
+  <text x="357" y="205" font-family="Arial, Helvetica, sans-serif" font-size="126" font-weight="700" letter-spacing="-4">
+    <tspan fill="#293238">Neighbor</tspan><tspan fill="#E9A52C">Link</tspan>
+  </text>
+  <text x="360" y="307" font-family="Arial, Helvetica, sans-serif" font-size="58" font-weight="400" letter-spacing="0" fill="#5B5F61">Rent Smarter. Live Happier.</text>
+</svg>

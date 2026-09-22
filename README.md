@@ -75,7 +75,7 @@ neighbor-link/
 
 ### 1. Configure the backend
 
-Copy `backend/.env.example` to `backend/.env` and set the values for your local environment.
+Copy `backend/.env.example` to `backend/.env` and set the values for your local environment. The backend loads this file automatically.
 
 Example:
 
@@ -92,7 +92,7 @@ The example credentials are for local development only. Do not use them in a dep
 
 ### 2. Start the backend
 
-From the repository root:
+From the repository root, run one command:
 
 ```powershell
 go -C backend run ./cmd/server/main.go
@@ -114,12 +114,14 @@ POST /api/v1/auth/login
 
 ### 3. Configure the frontend applications
 
-Copy the environment template in each frontend application:
+Each frontend reads its own `.env.local` automatically. Create these files once if they do not already exist:
 
 ```powershell
 Copy-Item tenant/.env.local.example tenant/.env.local
 Copy-Item admin/.env.local.example admin/.env.local
 ```
+
+Next.js automatically loads each `.env.local` file. No PowerShell `$env:` commands are required.
 
 Each frontend uses the backend URL through its Next.js server-side API route:
 
@@ -129,19 +131,25 @@ BACKEND_API_URL=http://localhost:8080
 
 ### 4. Start the tenant portal
 
+Open a separate terminal and run one command:
+
 ```powershell
-npm --prefix tenant install
 npm --prefix tenant run dev
 ```
+
+Run `npm --prefix tenant install` once before the first start if dependencies have not been installed.
 
 The tenant portal runs at `http://localhost:3000`.
 
 ### 5. Start the admin portal
 
+Open another terminal and run one command:
+
 ```powershell
-npm --prefix admin install
 npm --prefix admin run dev -- --port 3001
 ```
+
+Run `npm --prefix admin install` once before the first start if dependencies have not been installed.
 
 The admin portal runs at `http://localhost:3001`.
 

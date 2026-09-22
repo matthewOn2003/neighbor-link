@@ -7,5 +7,6 @@
   "signIn": "Sign in",
   "signingIn": "Signing in...",
   "loginFailed": "Login failed. Please check your username and password.",
-  "language": "中文"
+  "language": "中文",
+  "required": "This field is required"
 }

@@ -1,3 +1,5 @@
+@import "@neighbor-link/formguard/styles.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -14,7 +16,7 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: Roboto, Arial, sans-serif;
 }
 
 .login-shell {
@@ -22,22 +24,25 @@ body {
   display: grid;
   place-items: center;
   padding: 32px 20px;
-  background: radial-gradient(circle at top left, #f8d8bd 0, transparent 34%), var(--background);
+  background-image: url("/login-bg.jpg");
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
 }
 
 .login-panel {
-  width: min(100%, 430px);
+  width: min(100%, 500px);
   padding: 48px;
-  background: #fbfcf9;
+  background: #ffffff;
   border: 1px solid rgba(24, 50, 46, 0.09);
   box-shadow: 0 24px 70px rgba(24, 50, 46, 0.12);
 }
 
 .eyebrow {
+  display: block;
+  width: min(100%, 270px);
+  height: auto;
   margin: 0;
-  color: var(--accent-dark);
-  font: 700 0.72rem/1 Arial, sans-serif;
-  letter-spacing: 0.16em;
 }
 
 .login-header {
@@ -45,7 +50,7 @@ body {
   align-items: flex-start;
   justify-content: space-between;
   gap: 20px;
-  margin-bottom: 42px;
+  margin-bottom: 32px;
 }
 
 .locale-switch {
@@ -53,7 +58,7 @@ body {
   padding: 7px 10px;
   color: var(--foreground);
   background: transparent;
-  font: 700 0.72rem/1 Arial, sans-serif;
+  font: 700 0.72rem/1 Roboto, Arial, sans-serif;
   cursor: pointer;
 }
 
@@ -64,7 +69,8 @@ body {
 
 h1 {
   margin: 0;
-  font-size: clamp(2.4rem, 8vw, 3.5rem);
+  font-family: Roboto, Arial, sans-serif;
+  font-size: 2.5rem;
   line-height: 0.98;
   letter-spacing: 0;
 }
@@ -72,13 +78,13 @@ h1 {
 .intro {
   margin: 18px 0 36px;
   color: var(--ink-muted);
-  font: 1rem/1.6 Arial, sans-serif;
+  font: 1rem/1.6 Roboto, Arial, sans-serif;
 }
 
 .login-form {
   display: grid;
   gap: 20px;
-  font: 0.86rem/1.4 Arial, sans-serif;
+  font: 0.86rem/1.4 Roboto, Arial, sans-serif;
 }
 
 .login-form label {
@@ -99,7 +105,7 @@ h1 {
 
 .login-form input:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(216, 109, 67, 0.14);
+  /* box-shadow: 0 0 0 3px rgba(216, 109, 67, 0.14); */
 }
 
 .login-form button {

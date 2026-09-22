@@ -6,6 +6,8 @@ import (
 	"os"
 	"strings"
 
+	"github.com/joho/godotenv"
+
 	"backend/internal/pkg/database"
 	"backend/internal/user/delivery"
 	"backend/internal/user/repository"
@@ -13,6 +15,10 @@ import (
 )
 
 func main() {
+	if err := godotenv.Load(); err != nil {
+		log.Fatalf("加载 .env 失败: %v", err)
+	}
+
 	db, err := database.InitSQLite(requiredEnv("DB_PATH"))
 	if err != nil {
 		log.Fatalf("数据库初始化失败: %v", err)

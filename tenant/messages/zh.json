@@ -7,5 +7,6 @@
   "signIn": "登录",
   "signingIn": "登录中...",
   "loginFailed": "登录失败，请检查用户名和密码。",
-  "language": "English"
+  "language": "English",
+  "required": "此字段为必填项"
 }
