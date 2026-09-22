@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useApi } from "@/lib/useApi";
 import { useLocale } from "@/lib/i18n";
-import { FormButton, FormError, FormGuard, FormInput, rules, FormValues } from "@neighbor-link/formguard";
+import { FormButton, FormError, FormGuard, FormInput, rules, FormValues } from "@matthew2003/formguard";
 
 export default function Home() {
   const router = useRouter();
