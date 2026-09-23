@@ -1,0 +1,38 @@
+:root {
+  --background: #e9f0ed;
+  --foreground: #18322e;
+  --ink-muted: #6f807b;
+  --accent: #d86d43;
+  --accent-dark: #b84f2d;
+  --line: #d8e2de;
+  --panel-background: #ffffff;
+  --panel-border: rgba(24, 50, 46, 0.09);
+  --panel-shadow: 0 24px 70px rgba(24, 50, 46, 0.12);
+  --control-background: #ffffff;
+  --error: #ae382d;
+
+  /* Layout */
+  --gutter: 1.5rem;
+  --page-padding-block: 2rem;
+  --page-padding-inline: 1.25rem;
+  --content-max-width: 75rem;
+  --topbar-height: 4rem;
+  --sidebar-width: 16rem;
+
+  /* Components */
+  --panel-padding: 3rem;
+  --panel-radius: 0rem;
+  --button-radius: 0.375rem;
+  --input-radius: 0.375rem;
+  --control-height: 2.875rem;
+  --button-height: 2.875rem;
+  --field-gap: 1.125rem;
+  --label-gap: 0.5rem;
+  --section-gap: 2rem;
+  --header-gap: 2rem;
+  --border-width: 1px;
+
+  /* Motion and focus */
+  --transition-duration: 160ms;
+  --focus-ring-width: 3px;
+}

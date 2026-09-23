@@ -35,6 +35,10 @@ func (uc *UserUsecase) SeedUser(username, password, role string) error {
 	return err
 }
 
+func (uc *UserUsecase) FindByUsername(username string) (*repository.User, error) {
+	return uc.repo.FindByUsername(username)
+}
+
 func (uc *UserUsecase) Login(username, password, role string) (*repository.User, error) {
 	user, err := uc.repo.FindByUsername(username)
 	if err != nil || user.Role != role {

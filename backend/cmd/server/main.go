@@ -42,9 +42,10 @@ func main() {
 	serverAddress := requiredEnv("SERVER_ADDRESS")
 	tokenSecret := requiredEnv("AUTH_SECRET")
 	allowedOrigins := splitEnv(requiredEnv("CORS_ALLOWED_ORIGINS"))
+	cookieSecure := strings.EqualFold(strings.TrimSpace(os.Getenv("COOKIE_SECURE")), "true")
 
 	log.Printf("API server listening on %s", serverAddress)
-	log.Fatal(http.ListenAndServe(serverAddress, delivery.NewUserHandler(userUsecase, tokenSecret, allowedOrigins)))
+	log.Fatal(http.ListenAndServe(serverAddress, delivery.NewUserHandler(userUsecase, tokenSecret, allowedOrigins, cookieSecure)))
 }
 
 func requiredEnv(name string) string {

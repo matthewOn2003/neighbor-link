@@ -8,5 +8,6 @@
   "signingIn": "Signing in...",
   "loginFailed": "Login failed. Please check your username and password.",
   "language": "中文",
-  "required": "This field is required"
+  "required": "This field is required",
+  "signOut": "Sign out"
 }

@@ -5,12 +5,13 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useApi } from "@/lib/useApi";
 import { useLocale } from "@/lib/i18n";
+import LangSelect from "@/app/components/LangSelect";
 import { FormButton, FormError, FormGuard, FormInput, rules, FormValues } from "@matthew2003/formguard";
 
 export default function Home() {
   const router = useRouter();
   const api = useApi();
-  const { locale, locales, setLocale, localeProperties } = useLocale();
+  const { localeProperties } = useLocale();
   const text = localeProperties.messages;
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -34,13 +35,7 @@ export default function Home() {
       <section className="login-panel">
         <div className="login-header">
           <Image className="eyebrow" src="/neighbor-link-logo.svg" alt={text.eyebrow} width={1197} height={356} priority />
-          <button type="button" className="locale-switch" onClick={() => {
-            const currentIndex = locales.findIndex((item) => item.code === locale);
-            const nextLocale = locales[(currentIndex + 1) % locales.length];
-            if (nextLocale) setLocale(nextLocale.code);
-          }}>
-            {localeProperties.name_short}
-          </button>
+          <LangSelect />
         </div>
         <FormGuard
           initialValues={{ username: "tenant", password: "" }}

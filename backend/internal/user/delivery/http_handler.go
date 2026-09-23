@@ -7,16 +7,19 @@ import (
 )
 
 type UserHandler struct {
-	usecase *usecase.UserUsecase
-	secret  string
-	origins []string
+	usecase      *usecase.UserUsecase
+	secret       string
+	origins      []string
+	cookieSecure bool
 }
 
-func NewUserHandler(uc *usecase.UserUsecase, tokenSecret string, allowedOrigins []string) http.Handler {
-	h := &UserHandler{usecase: uc, secret: tokenSecret, origins: allowedOrigins}
+func NewUserHandler(uc *usecase.UserUsecase, tokenSecret string, allowedOrigins []string, cookieSecure bool) http.Handler {
+	h := &UserHandler{usecase: uc, secret: tokenSecret, origins: allowedOrigins, cookieSecure: cookieSecure}
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /health", healthHandler)
 	mux.HandleFunc("POST /api/v1/auth/login", h.login)
+	mux.HandleFunc("GET /api/v1/auth/session", h.requireAuth(h.session))
+	mux.HandleFunc("POST /api/v1/auth/logout", h.logout)
 	return withCORS(mux, allowedOrigins)
 }
 
@@ -59,12 +62,47 @@ func (h *UserHandler) login(w http.ResponseWriter, r *http.Request) {
 		Path:     "/",
 		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode,
-		Secure:   false,
+		Secure:   h.cookieSecure,
 		MaxAge:   60 * 60 * 8,
 	})
 	writeJSON(w, http.StatusOK, loginResponse{
 		User: &repositoryUser{ID: user.ID, Username: user.Username, Role: user.Role},
 	})
+}
+
+func (h *UserHandler) session(w http.ResponseWriter, r *http.Request) {
+	cookie, err := r.Cookie("auth_token")
+	if err != nil {
+		writeError(w, http.StatusUnauthorized, "authentication required")
+		return
+	}
+	username, _, ok := verifyToken(cookie.Value, h.secret)
+	if !ok {
+		writeError(w, http.StatusUnauthorized, "authentication required")
+		return
+	}
+	user, err := h.usecase.FindByUsername(username)
+	if err != nil {
+		writeError(w, http.StatusUnauthorized, "authentication required")
+		return
+	}
+	writeJSON(w, http.StatusOK, loginResponse{
+		User: &repositoryUser{ID: user.ID, Username: user.Username, Role: user.Role},
+	})
+}
+
+// logout intentionally skips requireAuth so an expired session can still be cleared.
+func (h *UserHandler) logout(w http.ResponseWriter, _ *http.Request) {
+	http.SetCookie(w, &http.Cookie{
+		Name:     "auth_token",
+		Value:    "",
+		Path:     "/",
+		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode,
+		Secure:   h.cookieSecure,
+		MaxAge:   -1,
+	})
+	w.WriteHeader(http.StatusNoContent)
 }
 
 func withCORS(next http.Handler, allowedOrigins []string) http.Handler {
