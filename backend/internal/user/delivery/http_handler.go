@@ -1,10 +1,14 @@
 package delivery
 
 import (
+	"backend/internal/pkg/response"
+	"backend/internal/user/repository"
 	"backend/internal/user/usecase"
 	"encoding/json"
 	"net/http"
 )
+
+const authCookieName = "auth_token"
 
 type UserHandler struct {
 	usecase      *usecase.UserUsecase
@@ -40,68 +44,68 @@ type repositoryUser struct {
 }
 
 func healthHandler(w http.ResponseWriter, _ *http.Request) {
-	writeJSON(w, http.StatusOK, map[string]string{"status": "ok"})
+	response.WriteSuccess(w, http.StatusOK, map[string]string{"status": "ok"})
+}
+
+func newLoginResponse(user *repository.User) loginResponse {
+	return loginResponse{User: &repositoryUser{ID: user.ID, Username: user.Username, Role: user.Role}}
+}
+
+func writeUnauthenticated(w http.ResponseWriter) {
+	response.WriteError(w, http.StatusUnauthorized, "UNAUTHENTICATED", "authentication required")
+}
+
+func setAuthCookie(w http.ResponseWriter, value string, maxAge int, secure bool) {
+	http.SetCookie(w, &http.Cookie{
+		Name:     authCookieName,
+		Value:    value,
+		Path:     "/",
+		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode,
+		Secure:   secure,
+		MaxAge:   maxAge,
+	})
 }
 
 func (h *UserHandler) login(w http.ResponseWriter, r *http.Request) {
 	var request loginRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil || request.Username == "" || request.Password == "" || request.Role == "" {
-		writeError(w, http.StatusBadRequest, "username, password and role are required")
+		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "username, password and role are required")
 		return
 	}
 
 	user, err := h.usecase.Login(request.Username, request.Password, request.Role)
 	if err != nil {
-		writeError(w, http.StatusUnauthorized, "invalid username, password or role")
+		response.WriteError(w, http.StatusUnauthorized, "INVALID_CREDENTIALS", "invalid username, password or role")
 		return
 	}
 
-	http.SetCookie(w, &http.Cookie{
-		Name:     "auth_token",
-		Value:    createToken(user.Username, user.Role, h.secret),
-		Path:     "/",
-		HttpOnly: true,
-		SameSite: http.SameSiteLaxMode,
-		Secure:   h.cookieSecure,
-		MaxAge:   60 * 60 * 8,
-	})
-	writeJSON(w, http.StatusOK, loginResponse{
-		User: &repositoryUser{ID: user.ID, Username: user.Username, Role: user.Role},
-	})
+	setAuthCookie(w, createToken(user.Username, user.Role, h.secret), 60*60*8, h.cookieSecure)
+	response.WriteSuccess(w, http.StatusOK, newLoginResponse(user))
 }
 
 func (h *UserHandler) session(w http.ResponseWriter, r *http.Request) {
-	cookie, err := r.Cookie("auth_token")
+	cookie, err := r.Cookie(authCookieName)
 	if err != nil {
-		writeError(w, http.StatusUnauthorized, "authentication required")
+		writeUnauthenticated(w)
 		return
 	}
 	username, _, ok := verifyToken(cookie.Value, h.secret)
 	if !ok {
-		writeError(w, http.StatusUnauthorized, "authentication required")
+		writeUnauthenticated(w)
 		return
 	}
 	user, err := h.usecase.FindByUsername(username)
 	if err != nil {
-		writeError(w, http.StatusUnauthorized, "authentication required")
+		writeUnauthenticated(w)
 		return
 	}
-	writeJSON(w, http.StatusOK, loginResponse{
-		User: &repositoryUser{ID: user.ID, Username: user.Username, Role: user.Role},
-	})
+	response.WriteSuccess(w, http.StatusOK, newLoginResponse(user))
 }
 
 // logout intentionally skips requireAuth so an expired session can still be cleared.
 func (h *UserHandler) logout(w http.ResponseWriter, _ *http.Request) {
-	http.SetCookie(w, &http.Cookie{
-		Name:     "auth_token",
-		Value:    "",
-		Path:     "/",
-		HttpOnly: true,
-		SameSite: http.SameSiteLaxMode,
-		Secure:   h.cookieSecure,
-		MaxAge:   -1,
-	})
+	setAuthCookie(w, "", -1, h.cookieSecure)
 	w.WriteHeader(http.StatusNoContent)
 }
 
@@ -131,12 +135,3 @@ func containsOrigin(origins []string, target string) bool {
 	return false
 }
 
-func writeJSON(w http.ResponseWriter, status int, value any) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(status)
-	_ = json.NewEncoder(w).Encode(value)
-}
-
-func writeError(w http.ResponseWriter, status int, message string) {
-	writeJSON(w, status, map[string]string{"error": message})
-}
