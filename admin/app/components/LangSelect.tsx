@@ -48,7 +48,7 @@ export default function LangSelect() {
                 setIsOpen(false);
               }}
               className="block w-full text-left px-4 py-2 text-sm transition-colors hover:opacity-70"
-              style={{ color: item.code === locale ? "var(--accent)" : "var(--foreground)" }}
+              style={{ color: item.code === locale ? "var(--primary)" : "var(--foreground)" }}
             >
               {item.name}
             </button>

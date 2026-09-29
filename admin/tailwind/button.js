@@ -21,15 +21,15 @@ export default plugin(function ({ addComponents }) {
         opacity: "0.5",
       },
       "&:focus-visible": {
-        outline: "var(--focus-ring-width) solid var(--accent)",
+        outline: "var(--focus-ring-width) solid var(--primary)",
         outlineOffset: "2px",
       },
     },
     ".btn-primary": {
-      backgroundColor: "var(--accent)",
+      backgroundColor: "var(--primary)",
       color: "var(--panel-background)",
       "&:hover:not(:disabled)": {
-        backgroundColor: "var(--accent-dark)",
+        backgroundColor: "var(--primary-dark)",
       },
     },
     ".btn-secondary": {
@@ -37,7 +37,7 @@ export default plugin(function ({ addComponents }) {
       color: "var(--foreground)",
       borderColor: "var(--line)",
       "&:hover:not(:disabled)": {
-        borderColor: "var(--accent)",
+        borderColor: "var(--primary)",
       },
     },
     ".btn-ghost": {

@@ -36,7 +36,9 @@ export function useLocale() {
   }, []);
 
   function setLocale(nextLocale: Locale) {
-    if (!configuredLocales.some((item) => item.code === nextLocale)) return;
+    if (!configuredLocales.some((item) => item.code === nextLocale)) {
+      return;
+    }
     setLocaleState(nextLocale);
     window.localStorage.setItem("locale", nextLocale);
   }

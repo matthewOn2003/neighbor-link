@@ -8,7 +8,16 @@ import (
 
 	"github.com/joho/godotenv"
 
+	dictionarydelivery "backend/internal/dictionary/delivery"
+	dictionaryrepository "backend/internal/dictionary/repository"
+	dictionaryusecase "backend/internal/dictionary/usecase"
 	"backend/internal/pkg/database"
+	propertydelivery "backend/internal/property/delivery"
+	propertyrepository "backend/internal/property/repository"
+	propertyusecase "backend/internal/property/usecase"
+	tenantdelivery "backend/internal/tenant/delivery"
+	tenantrepository "backend/internal/tenant/repository"
+	tenantusecase "backend/internal/tenant/usecase"
 	"backend/internal/user/delivery"
 	"backend/internal/user/repository"
 	"backend/internal/user/usecase"
@@ -24,9 +33,17 @@ func main() {
 		log.Fatalf("数据库初始化失败: %v", err)
 	}
 
+	migrationsDir := os.Getenv("MIGRATIONS_DIR")
+	if migrationsDir == "" {
+		migrationsDir = "migrations"
+	}
+	if err := database.RunMigrations(db, migrationsDir); err != nil {
+		log.Fatalf("数据库迁移失败: %v", err)
+	}
+
 	userRepo, err := repository.NewSQLiteRepository(db)
 	if err != nil {
-		log.Fatalf("数据库迁移失败: %v", err)
+		log.Fatalf("user 仓库初始化失败: %v", err)
 	}
 	userUsecase := usecase.NewUserUsecase(userRepo)
 
@@ -39,13 +56,44 @@ func main() {
 		log.Fatalf("初始化 tenant 账号失败: %v", err)
 	}
 
+	propertyRepo, err := propertyrepository.NewSQLiteRepository(db)
+	if err != nil {
+		log.Fatalf("property 仓库初始化失败: %v", err)
+	}
+	propertyUsecase := propertyusecase.NewPropertyUsecase(propertyRepo)
+
+	tenantRepo, err := tenantrepository.NewSQLiteRepository(db)
+	if err != nil {
+		log.Fatalf("tenant 仓库初始化失败: %v", err)
+	}
+	tenantUsecase := tenantusecase.NewTenantUsecase(tenantRepo, userUsecase)
+
+	dictionaryRepo, err := dictionaryrepository.NewSQLiteRepository(db)
+	if err != nil {
+		log.Fatalf("dictionary 仓库初始化失败: %v", err)
+	}
+	dictionaryUsecase := dictionaryusecase.NewDictionaryUsecase(dictionaryRepo)
+
 	serverAddress := requiredEnv("SERVER_ADDRESS")
 	tokenSecret := requiredEnv("AUTH_SECRET")
 	allowedOrigins := splitEnv(requiredEnv("CORS_ALLOWED_ORIGINS"))
 	cookieSecure := strings.EqualFold(strings.TrimSpace(os.Getenv("COOKIE_SECURE")), "true")
 
+	// Controllers
+	userController := delivery.NewUserController(userUsecase, tokenSecret, cookieSecure)
+	propertyController := propertydelivery.NewPropertyController(propertyUsecase)
+	tenantController := tenantdelivery.NewTenantController(tenantUsecase)
+	dictionaryController := dictionarydelivery.NewDictionaryController(dictionaryUsecase)
+
+	// Routers
+	mux := http.NewServeMux()
+	mux.Handle("/", delivery.NewUserRouter(userController, tokenSecret, allowedOrigins))
+	mux.Handle("/api/v1/property/", propertydelivery.NewPropertyRouter(propertyController, tokenSecret, allowedOrigins))
+	mux.Handle("/api/v1/tenant/", tenantdelivery.NewTenantRouter(tenantController, tokenSecret, allowedOrigins))
+	mux.Handle("/api/v1/dictionary/", dictionarydelivery.NewDictionaryRouter(dictionaryController, tokenSecret, allowedOrigins))
+
 	log.Printf("API server listening on %s", serverAddress)
-	log.Fatal(http.ListenAndServe(serverAddress, delivery.NewUserHandler(userUsecase, tokenSecret, allowedOrigins, cookieSecure)))
+	log.Fatal(http.ListenAndServe(serverAddress, mux))
 }
 
 func requiredEnv(name string) string {

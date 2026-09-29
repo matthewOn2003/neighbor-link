@@ -29,3 +29,32 @@ func writeJSON(w http.ResponseWriter, status int, value any) {
 	w.WriteHeader(status)
 	_ = json.NewEncoder(w).Encode(value)
 }
+
+type Pagination struct {
+	CurrentPage int   `json:"current_page"`
+	PerPage     int   `json:"per_page"`
+	LastPage    int   `json:"last_page"`
+	Total       int64 `json:"total"`
+}
+
+type ListData struct {
+	List       any        `json:"list"`
+	Pagination Pagination `json:"pagination"`
+}
+
+// NewListData builds the standard paginated list payload used across list endpoints.
+func NewListData(list any, currentPage, perPage int, total int64) ListData {
+	lastPage := int(total) / perPage
+	if int(total)%perPage != 0 || total == 0 {
+		lastPage++
+	}
+	return ListData{
+		List: list,
+		Pagination: Pagination{
+			CurrentPage: currentPage,
+			PerPage:     perPage,
+			LastPage:    lastPage,
+			Total:       total,
+		},
+	}
+}

@@ -1,14 +1,8 @@
 import { createSlice } from "@reduxjs/toolkit";
-import type { User } from "@/lib/types/user";
 import { authApi } from "./authApi";
 
-type AuthState = {
-  user: User | null;
-  isLoggedIn: boolean;
-};
-
-const initialState: AuthState = {
-  user: null,
+const initialState = {
+  user: null as any,
   isLoggedIn: false,
 };
 

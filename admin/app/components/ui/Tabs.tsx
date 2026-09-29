@@ -26,8 +26,8 @@ export function Tabs({ tabs, defaultTab }: { tabs: TabItem[]; defaultTab?: strin
               onClick={() => setActive(tab.key)}
               className="px-4 py-2.5 text-sm font-semibold"
               style={{
-                color: isActive ? "var(--accent)" : "var(--ink-muted)",
-                borderBottom: `2px solid ${isActive ? "var(--accent)" : "transparent"}`,
+                color: isActive ? "var(--primary)" : "var(--subtle)",
+                borderBottom: `2px solid ${isActive ? "var(--primary)" : "transparent"}`,
                 marginBottom: "-1px",
               }}
             >
@@ -36,7 +36,9 @@ export function Tabs({ tabs, defaultTab }: { tabs: TabItem[]; defaultTab?: strin
           );
         })}
       </div>
-      <div style={{ paddingTop: "var(--section-gap)" }}>{activeTab?.content}</div>
+      <div style={{ paddingTop: "var(--section-gap)" }}>
+        {activeTab?.content}
+      </div>
     </div>
   );
 }
