@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import ReduxProvider from "@/app/components/ReduxProvider";
 import AppShell from "@/app/components/AppShell";
+import { ToastProvider } from "@/app/components/ui";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -13,7 +14,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="en">
       <body>
         <ReduxProvider>
-          <AppShell>{children}</AppShell>
+          <ToastProvider>
+            <AppShell>{children}</AppShell>
+          </ToastProvider>
         </ReduxProvider>
       </body>
     </html>

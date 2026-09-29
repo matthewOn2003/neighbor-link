@@ -13,6 +13,11 @@ import (
 
 const tokenTTL = 8 * time.Hour
 
+// VerifyToken is exposed so other modules can validate the shared session cookie.
+func VerifyToken(token, secret string) (username, role string, ok bool) {
+	return verifyToken(token, secret)
+}
+
 func createToken(username, role, configuredSecret string) string {
 	issuedAt := time.Now().Unix()
 	payload := fmt.Sprintf("%s:%s:%d", username, role, issuedAt)

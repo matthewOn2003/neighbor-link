@@ -14,14 +14,16 @@ export function Breadcrumb({ items }: { items: BreadcrumbItem[] }) {
           return (
             <li key={`${item.label}-${index}`} className="flex items-center gap-2">
               {item.href && !isLast ? (
-                <Link href={item.href} style={{ color: "var(--ink-muted)" }} className="hover:underline">
+                <Link href={item.href} style={{ color: "var(--subtle)" }} className="hover:underline">
                   {item.label}
                 </Link>
               ) : (
-                <span style={{ color: "var(--foreground)", fontWeight: 600 }}>{item.label}</span>
+                <span style={{ color: "var(--foreground)", fontWeight: 600 }}>
+                  {item.label}
+                </span>
               )}
               {!isLast && (
-                <span aria-hidden="true" style={{ color: "var(--ink-muted)" }}>
+                <span aria-hidden="true" style={{ color: "var(--subtle)" }}>
                   /
                 </span>
               )}

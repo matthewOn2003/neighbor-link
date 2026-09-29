@@ -15,8 +15,8 @@ export default plugin(function ({ addComponents }) {
       transitionProperty: "background-color, border-color",
       transitionDuration: "var(--transition-duration)",
       "&:checked": {
-        backgroundColor: "var(--accent)",
-        borderColor: "var(--accent)",
+        backgroundColor: "var(--primary)",
+        borderColor: "var(--primary)",
       },
       "&:checked::after": {
         content: '""',
@@ -34,7 +34,7 @@ export default plugin(function ({ addComponents }) {
         opacity: "0.5",
       },
       "&:focus-visible": {
-        outline: "var(--focus-ring-width) solid var(--accent)",
+        outline: "var(--focus-ring-width) solid var(--primary)",
         outlineOffset: "2px",
       },
     },

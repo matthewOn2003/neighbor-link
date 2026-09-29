@@ -39,6 +39,25 @@ func (uc *UserUsecase) FindByUsername(username string) (*repository.User, error)
 	return uc.repo.FindByUsername(username)
 }
 
+var ErrUsernameTaken = errors.New("username already taken")
+
+// CreateUser hashes the password and inserts a new auth_users record with the given role.
+func (uc *UserUsecase) CreateUser(username, password, role string) (*repository.User, error) {
+	_, err := uc.repo.FindByUsername(username)
+	if err == nil {
+		return nil, ErrUsernameTaken
+	}
+	if !errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, err
+	}
+
+	passwordHash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return nil, err
+	}
+	return uc.repo.Create(username, string(passwordHash), role)
+}
+
 func (uc *UserUsecase) Login(username, password, role string) (*repository.User, error) {
 	user, err := uc.repo.FindByUsername(username)
 	if err != nil || user.Role != role {

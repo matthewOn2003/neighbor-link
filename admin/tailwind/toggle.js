@@ -26,7 +26,7 @@ export default plugin(function ({ addComponents }) {
         transitionDuration: "var(--transition-duration)",
       },
       "&:checked": {
-        backgroundColor: "var(--accent)",
+        backgroundColor: "var(--primary)",
       },
       "&:checked::after": {
         transform: "translateX(1.25rem)",
@@ -36,7 +36,7 @@ export default plugin(function ({ addComponents }) {
         opacity: "0.5",
       },
       "&:focus-visible": {
-        outline: "var(--focus-ring-width) solid var(--accent)",
+        outline: "var(--focus-ring-width) solid var(--primary)",
         outlineOffset: "2px",
       },
     },

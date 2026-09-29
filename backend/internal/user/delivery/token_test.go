@@ -31,4 +31,3 @@ func TestVerifyToken_Expired(t *testing.T) {
 		t.Fatal("expected verification to fail for expired token")
 	}
 }
-

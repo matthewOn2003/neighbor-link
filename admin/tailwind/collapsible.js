@@ -20,7 +20,7 @@ export default plugin(function ({ addComponents }) {
       fontSize: "0.9375rem",
       cursor: "pointer",
       "&:focus-visible": {
-        outline: "var(--focus-ring-width) solid var(--accent)",
+        outline: "var(--focus-ring-width) solid var(--primary)",
         outlineOffset: "-2px",
       },
     },

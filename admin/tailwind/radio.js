@@ -15,7 +15,7 @@ export default plugin(function ({ addComponents }) {
       transitionProperty: "background-color, border-color",
       transitionDuration: "var(--transition-duration)",
       "&:checked": {
-        borderColor: "var(--accent)",
+        borderColor: "var(--primary)",
       },
       "&:checked::after": {
         content: '""',
@@ -25,7 +25,7 @@ export default plugin(function ({ addComponents }) {
         width: "0.625rem",
         height: "0.625rem",
         borderRadius: "9999px",
-        backgroundColor: "var(--accent)",
+        backgroundColor: "var(--primary)",
         transform: "translate(-50%, -50%)",
       },
       "&:disabled": {
@@ -33,7 +33,7 @@ export default plugin(function ({ addComponents }) {
         opacity: "0.5",
       },
       "&:focus-visible": {
-        outline: "var(--focus-ring-width) solid var(--accent)",
+        outline: "var(--focus-ring-width) solid var(--primary)",
         outlineOffset: "2px",
       },
     },

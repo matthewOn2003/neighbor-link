@@ -96,6 +96,8 @@ From the repository root, run one command:
 
 ```powershell
 go -C backend run ./cmd/server/main.go
+cd backend
+go run /cmd/server/main.go
 ```
 
 The API is available at `http://localhost:8080`.
@@ -126,7 +128,7 @@ Next.js automatically loads each `.env.local` file. No PowerShell `$env:` comman
 Each frontend uses the backend URL through its Next.js server-side API route:
 
 ```env
-BACKEND_API_URL=http://localhost:8080
+BACKEND_API_URL=http://localhost:8080/api/v1
 ```
 
 ### 4. Start the tenant portal
@@ -134,7 +136,8 @@ BACKEND_API_URL=http://localhost:8080
 Open a separate terminal and run one command:
 
 ```powershell
-npm --prefix tenant run dev
+cd tenant
+npm run dev
 ```
 
 Run `npm --prefix tenant install` once before the first start if dependencies have not been installed.
@@ -146,7 +149,8 @@ The tenant portal runs at `http://localhost:3000`.
 Open another terminal and run one command:
 
 ```powershell
-npm --prefix admin run dev -- --port 3001
+cd admin
+npm run dev
 ```
 
 Run `npm --prefix admin install` once before the first start if dependencies have not been installed.

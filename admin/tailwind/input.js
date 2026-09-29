@@ -28,7 +28,7 @@ export default plugin(function ({ addComponents }) {
       },
       "&:focus": {
         outline: "none",
-        borderColor: "var(--accent)",
+        borderColor: "var(--primary)",
         boxShadow: "0 0 0 var(--focus-ring-width) rgba(216, 109, 67, 0.15)",
       },
       "&:disabled": {

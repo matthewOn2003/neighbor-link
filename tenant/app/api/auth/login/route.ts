@@ -5,7 +5,7 @@ export async function POST(request: NextRequest) {
   if (!backendUrl) {
     return NextResponse.json({ error: "BACKEND_API_URL is not configured" }, { status: 500 });
   }
-  const backendResponse = await fetch(`${backendUrl}/api/v1/auth/login`, {
+  const backendResponse = await fetch(`${backendUrl}/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: await request.text(),
@@ -17,6 +17,8 @@ export async function POST(request: NextRequest) {
     headers: { "Content-Type": backendResponse.headers.get("Content-Type") ?? "application/json" },
   });
   const setCookie = backendResponse.headers.get("set-cookie");
-  if (setCookie) response.headers.set("set-cookie", setCookie);
+  if (setCookie) {
+    response.headers.set("set-cookie", setCookie);
+  }
   return response;
 }

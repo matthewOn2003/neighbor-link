@@ -28,7 +28,7 @@ export function CopyableField({ label, value }: { label: string; value: string }
             padding: "0.625rem 0.875rem",
             borderRadius: "var(--input-radius)",
             border: "var(--border-width) solid var(--line)",
-            background: "var(--background)",
+            background: "var(--scene)",
             fontSize: "0.875rem",
             color: "var(--foreground)",
           }}
