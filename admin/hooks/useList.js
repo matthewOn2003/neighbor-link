@@ -13,7 +13,7 @@ export function useList(path, params) {
 
   useEffect(() => {
     const controller = new AbortController();
-    request(path, JSON.parse(paramsKey), { signal: controller.signal })
+    request(path, JSON.parse(paramsKey), { method: "POST", signal: controller.signal })
       .then((data) =>
         setResult({
           key: requestKey,
