@@ -35,7 +35,13 @@ func generatePassword() (string, error) {
 
 // CreateTenant creates the auth_users login account and the tenant record together,
 // returning the one-time plaintext password so it can be surfaced to the caller.
-func (uc *TenantUsecase) CreateTenant(username, name, phone, email string, propertyID *uint, status string) (*repository.Tenant, string, error) {
+func (uc *TenantUsecase) CreateTenant(username, name, phone, email string, propertyID, unitID *uint, status string) (*repository.Tenant, string, error) {
+	if unitID != nil {
+		if err := uc.repo.ValidateVacantUnit(*unitID); err != nil {
+			return nil, "", err
+		}
+	}
+
 	password, err := generatePassword()
 	if err != nil {
 		return nil, "", err
@@ -55,6 +61,7 @@ func (uc *TenantUsecase) CreateTenant(username, name, phone, email string, prope
 		Phone:      phone,
 		Email:      email,
 		PropertyID: propertyID,
+		UnitID:     unitID,
 		Status:     status,
 	}
 	if err := uc.repo.Create(tenant); err != nil {

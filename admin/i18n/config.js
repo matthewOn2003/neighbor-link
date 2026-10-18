@@ -1,3 +1,5 @@
+export const defaultLocale = "en";
+
 export const locales = [
   {
     code: "zh",

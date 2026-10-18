@@ -28,7 +28,6 @@ function buildPagination(current, total) {
 export function DataTable({
   api,
   params,
-  method = "GET",
   title,
   description,
   buttons,
@@ -56,7 +55,7 @@ export function DataTable({
     error,
     loading,
     reload,
-  } = useList(api, { ...params, current_page: page, per_page: perPage }, method);
+  } = useList(api, { ...params, current_page: page, per_page: perPage });
 
   const totalPages = Math.max(1, Math.ceil(total / perPage));
   const from = total === 0 ? 0 : (page - 1) * perPage + 1;
@@ -84,7 +83,7 @@ export function DataTable({
   const bodyNode = body(ctx);
 
   return (
-    <div className={`p-8 space-y-6 bg-accent rounded-xl shadow overflow-hidden ${className}`}>
+    <div className={`panel ${className}`}>
       {/* title */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="space-y-1">

@@ -1,7 +1,9 @@
 package delivery
 
 import (
+	"encoding/json"
 	"net/http"
+	"strings"
 
 	"backend/internal/dictionary/usecase"
 	"backend/internal/pkg/response"
@@ -15,16 +17,32 @@ func NewDictionaryController(uc *usecase.DictionaryUsecase) *DictionaryControlle
 	return &DictionaryController{usecase: uc}
 }
 
-func (c *DictionaryController) Options(w http.ResponseWriter, r *http.Request) {
-	slug := r.URL.Query().Get("slug")
-	if slug == "" {
-		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "slug is required")
+func (c *DictionaryController) Dropdown(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		Keys []string `json:"keys"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid request body")
 		return
 	}
-	options, err := c.usecase.ListOptions(slug)
+	keys := make([]string, 0, len(req.Keys))
+	seen := make(map[string]bool, len(req.Keys))
+	for _, k := range req.Keys {
+		k = strings.TrimSpace(k)
+		if k == "" || seen[k] {
+			continue
+		}
+		seen[k] = true
+		keys = append(keys, k)
+	}
+	if len(keys) == 0 {
+		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "keys is required")
+		return
+	}
+	dropdown, err := c.usecase.Dropdown(keys)
 	if err != nil {
-		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to load options")
+		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to load dropdown")
 		return
 	}
-	response.WriteSuccess(w, http.StatusOK, options)
+	response.WriteSuccess(w, http.StatusOK, map[string]any{"dropdown": dropdown})
 }

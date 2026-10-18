@@ -7,30 +7,24 @@ export class ApiError extends Error {
   }
 }
 
-const clean = (obj = {}) =>
-  Object.fromEntries(Object.entries(obj).filter(([, v]) => v !== undefined && v !== null && v !== ""));
-
-/** 请求后端。成功返回 res.data，失败抛 ApiError。 */
-export async function request(path, params = {}, { method = "GET", signal } = {}) {
-  const isGet = method === "GET";
-  const qs = isGet ? new URLSearchParams(clean(params)).toString() : "";
-
-  const res = await fetch(`/api${path}${qs ? `?${qs}` : ""}`, {
-    method,
+/** 请求后端（统一 POST + JSON body）。成功返回 res.data，失败抛 ApiError。 */
+export async function request(path, body = {}, { signal } = {}) {
+  const res = await fetch(`/api${path}`, {
+    method: "POST",
     credentials: "include",
     signal,
-    headers: isGet ? undefined : { "Content-Type": "application/json" },
-    body: isGet ? undefined : JSON.stringify(params),
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
   });
 
-  const body = await res.json().catch(() => null);
+  const data = await res.json().catch(() => null);
   if (!res.ok) {
     throw new ApiError({
       status: res.status,
-      code: body?.error?.code ?? body?.code ?? "UNKNOWN",
-      message: body?.error?.message ?? body?.message ?? `HTTP ${res.status}`,
-      errors: body?.errors,
+      code: data?.error?.code ?? data?.code ?? "UNKNOWN",
+      message: data?.error?.message ?? data?.message ?? `HTTP ${res.status}`,
+      errors: data?.errors,
     });
   }
-  return body?.data ?? null;
+  return data?.data ?? null;
 }

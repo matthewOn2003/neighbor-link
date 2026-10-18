@@ -33,7 +33,7 @@ export function Select({
       <select
         id={name}
         name={name}
-        className={`input ${error ? "input-error" : ""}`}
+        className={`dropdown ${error ? "input-error" : ""}`}
         value={value}
         onChange={(event) => onChange(event.target.value)}
       >

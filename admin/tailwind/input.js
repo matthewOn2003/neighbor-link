@@ -36,6 +36,9 @@ export default plugin(function ({ addComponents }) {
         opacity: "0.5",
       },
     },
+    ".input-search:focus": {
+      boxShadow: "none",
+    },
     ".input-error": {
       borderColor: "var(--error)",
       "&:focus": {

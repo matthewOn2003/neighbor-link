@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { use, useState } from "react";
 import { Icon } from "@/components/ui/Icon";
 import { getTenantDetail } from "@/mock/tenantDetail";

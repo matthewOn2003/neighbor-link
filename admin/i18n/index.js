@@ -1,48 +1,31 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { usePathname as useRawPathname, useRouter as useRawRouter } from "next/navigation";
 import { locales } from "@/i18n/config";
+import { getLocaleFromPathname, localizePath, stripLocale } from "@/i18n/routing";
 import zhMessages from "@/i18n/messages/zh.json";
 import enMessages from "@/i18n/messages/en.json";
 
 const messagesByFile = { "zh.json": zhMessages, "en.json": enMessages };
 
-const configuredLocales = getConfiguredLocales();
 const messagesByCode = Object.fromEntries(
-  configuredLocales.map((locale) => [locale.code, messagesByFile[locale.file]]),
+  locales.map((locale) => [locale.code, messagesByFile[locale.file]]),
 );
 
-/** @returns {any[]} */
-function getConfiguredLocales() {
-  try {
-    const publicLocales = process.env.NEXT_PUBLIC_LOCALES;
-    return publicLocales ? JSON.parse(publicLocales) : locales;
-  } catch {
-    return locales;
-  }
-}
-
 export function useLocale() {
-  const defaultLocale = configuredLocales[0]?.code ?? "en";
-  const [locale, setLocaleState] = useState(defaultLocale);
+  const rawPathname = useRawPathname();
+  const router = useRawRouter();
+  const locale = getLocaleFromPathname(rawPathname);
 
-  useEffect(() => {
-    const savedLocale = window.localStorage.getItem("locale");
-    if (savedLocale && configuredLocales.some((item) => item.code === savedLocale)) {
-      // The saved browser preference is applied after hydration.
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setLocaleState(savedLocale);
-    }
-  }, []);
-
+  /** Switching language navigates to the same page under the other locale's URL prefix. */
   function setLocale(nextLocale) {
-    if (!configuredLocales.some((item) => item.code === nextLocale)) return;
-    setLocaleState(nextLocale);
-    window.localStorage.setItem("locale", nextLocale);
+    if (!messagesByCode[nextLocale]) return;
+    const query = window.location.search;
+    const hash = window.location.hash;
+    router.push(`${localizePath(stripLocale(rawPathname), nextLocale)}${query}${hash}`);
   }
 
-  const currentIndex = configuredLocales.findIndex((item) => item.code === locale);
-  const currentLanguage = configuredLocales[currentIndex] ?? configuredLocales[0];
+  const currentLanguage = locales.find((item) => item.code === locale) ?? locales[0];
   const messages = messagesByCode[locale] ?? {};
   const localeProperties = {
     ...currentLanguage,
@@ -58,7 +41,7 @@ export function useLocale() {
 
   return {
     locale,
-    locales: configuredLocales,
+    locales,
     setLocale,
     localeProperties,
     t,

@@ -26,7 +26,8 @@ async function proxyRequest(request, method, path) {
     headers["Content-Type"] = request.headers.get("Content-Type") ?? "application/json";
   }
 
-  const backendResponse = await fetch(`${backendUrl}/${path.join("/")}`, init);
+  const search = new URL(request.url).search;
+  const backendResponse = await fetch(`${backendUrl}/${path.join("/")}${search}`, init);
 
   const response = new NextResponse(await backendResponse.text(), {
     status: backendResponse.status,

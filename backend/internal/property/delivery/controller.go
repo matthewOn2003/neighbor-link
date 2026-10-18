@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"backend/internal/pkg/response"
 	"backend/internal/property/repository"
@@ -12,6 +13,7 @@ import (
 
 	"gorm.io/gorm"
 )
+
 
 type PropertyController struct {
 	usecase *usecase.PropertyUsecase
@@ -21,15 +23,50 @@ func NewPropertyController(uc *usecase.PropertyUsecase) *PropertyController {
 	return &PropertyController{usecase: uc}
 }
 
-func parsePagination(r *http.Request) (currentPage, perPage int) {
-	currentPage, perPage = 1, 10
-	if v, err := strconv.Atoi(r.URL.Query().Get("current_page")); err == nil && v > 0 {
-		currentPage = v
+const maxPerPage = 100
+
+type propertyListRequest struct {
+	CurrentPage  int    `json:"current_page"`
+	PerPage      int    `json:"per_page"`
+	Keyword      string `json:"keyword"`
+	PropertyType string `json:"property_type"`
+	DeveloperID  string `json:"developer_id"`
+	Region       string `json:"region"`
+}
+
+type blockListRequest struct {
+	CurrentPage int    `json:"current_page"`
+	PerPage     int    `json:"per_page"`
+	PropertyID  string `json:"property_id"`
+}
+
+type floorListRequest struct {
+	CurrentPage int    `json:"current_page"`
+	PerPage     int    `json:"per_page"`
+	BlockID     string `json:"block_id"`
+}
+
+type unitListRequest struct {
+	CurrentPage int    `json:"current_page"`
+	PerPage     int    `json:"per_page"`
+	PropertyID  string `json:"property_id"`
+	BlockID     string `json:"block_id"`
+	FloorID     string `json:"floor_id"`
+	Status      string `json:"status"`
+	Keyword     string `json:"keyword"`
+}
+
+func normalizePagination(currentPage, perPage int) (int, int) {
+	if currentPage <= 0 {
+		currentPage = 1
 	}
-	if v, err := strconv.Atoi(r.URL.Query().Get("per_page")); err == nil && v > 0 {
-		perPage = v
+	if perPage <= 0 {
+		perPage = 10
 	}
-	return
+	if perPage > maxPerPage {
+		perPage = maxPerPage
+	}
+	return currentPage, perPage
 }
 
 func parseIDParam(r *http.Request) (uint, error) {
@@ -40,14 +77,57 @@ func parseIDParam(r *http.Request) (uint, error) {
 	return uint(id), nil
 }
 
+// parseOptionalID returns nil for empty or invalid input, meaning "no filter".
+func parseOptionalID(raw string) *uint {
+	v, err := strconv.ParseUint(strings.TrimSpace(raw), 10, 64)
+	if err != nil {
+		return nil
+	}
+	id := uint(v)
+	return &id
+}
+
+func parseRequiredID(raw string) (uint, bool) {
+	id := parseOptionalID(raw)
+	if id == nil {
+		return 0, false
+	}
+	return *id, true
+}
+
+func decodeBody(r *http.Request, dst any) bool {
+	return json.NewDecoder(r.Body).Decode(dst) == nil
+}
+
 func (c *PropertyController) List(w http.ResponseWriter, r *http.Request) {
-	currentPage, perPage := parsePagination(r)
-	properties, total, err := c.usecase.List(currentPage, perPage)
+	var req propertyListRequest
+	if !decodeBody(r, &req) {
+		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid request body")
+		return
+	}
+	currentPage, perPage := normalizePagination(req.CurrentPage, req.PerPage)
+	filter := repository.PropertyFilter{
+		Keyword:      strings.TrimSpace(req.Keyword),
+		PropertyType: strings.TrimSpace(req.PropertyType),
+		DeveloperID:  parseOptionalID(req.DeveloperID),
+		Region:       strings.TrimSpace(req.Region),
+	}
+	properties, total, err := c.usecase.List(filter, currentPage, perPage)
 	if err != nil {
 		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to list properties")
 		return
 	}
 	response.WriteSuccess(w, http.StatusOK, response.NewListData(properties, currentPage, perPage, total))
+}
+
+
+func (c *PropertyController) Facets(w http.ResponseWriter, r *http.Request) {
+	facets, err := c.usecase.Facets()
+	if err != nil {
+		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to load facets")
+		return
+	}
+	response.WriteSuccess(w, http.StatusOK, facets)
 }
 
 func (c *PropertyController) Detail(w http.ResponseWriter, r *http.Request) {
@@ -56,7 +136,7 @@ func (c *PropertyController) Detail(w http.ResponseWriter, r *http.Request) {
 		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid id")
 		return
 	}
-	property, err := c.usecase.FindByID(id)
+	property, err := c.usecase.FindDetail(id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			response.WriteError(w, http.StatusNotFound, "NOT_FOUND", "property not found")
@@ -68,13 +148,116 @@ func (c *PropertyController) Detail(w http.ResponseWriter, r *http.Request) {
 	response.WriteSuccess(w, http.StatusOK, property)
 }
 
+func (c *PropertyController) BlockDetail(w http.ResponseWriter, r *http.Request) {
+	id, err := parseIDParam(r)
+	if err != nil {
+		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid id")
+		return
+	}
+	block, err := c.usecase.FindBlockDetail(id)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			response.WriteError(w, http.StatusNotFound, "NOT_FOUND", "block not found")
+			return
+		}
+		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to load block")
+		return
+	}
+	response.WriteSuccess(w, http.StatusOK, block)
+}
+
+func (c *PropertyController) FloorDetail(w http.ResponseWriter, r *http.Request) {
+	id, err := parseIDParam(r)
+	if err != nil {
+		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid id")
+		return
+	}
+	floor, err := c.usecase.FindFloorDetail(id)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			response.WriteError(w, http.StatusNotFound, "NOT_FOUND", "floor not found")
+			return
+		}
+		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to load floor")
+		return
+	}
+	response.WriteSuccess(w, http.StatusOK, floor)
+}
+
+func (c *PropertyController) BlockList(w http.ResponseWriter, r *http.Request) {
+	var req blockListRequest
+	if !decodeBody(r, &req) {
+		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid request body")
+		return
+	}
+	propertyID, ok := parseRequiredID(req.PropertyID)
+	if !ok {
+		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "property_id is required")
+		return
+	}
+	currentPage, perPage := normalizePagination(req.CurrentPage, req.PerPage)
+	blocks, total, err := c.usecase.ListBlocks(repository.BlockFilter{PropertyID: propertyID}, currentPage, perPage)
+	if err != nil {
+		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to list blocks")
+		return
+	}
+	response.WriteSuccess(w, http.StatusOK, response.NewListData(blocks, currentPage, perPage, total))
+}
+
+func (c *PropertyController) FloorList(w http.ResponseWriter, r *http.Request) {
+	var req floorListRequest
+	if !decodeBody(r, &req) {
+		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid request body")
+		return
+	}
+	blockID, ok := parseRequiredID(req.BlockID)
+	if !ok {
+		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "block_id is required")
+		return
+	}
+	currentPage, perPage := normalizePagination(req.CurrentPage, req.PerPage)
+	floors, total, err := c.usecase.ListFloors(repository.FloorFilter{BlockID: blockID}, currentPage, perPage)
+	if err != nil {
+		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to list floors")
+		return
+	}
+	response.WriteSuccess(w, http.StatusOK, response.NewListData(floors, currentPage, perPage, total))
+}
+
+func (c *PropertyController) UnitList(w http.ResponseWriter, r *http.Request) {
+	var req unitListRequest
+	if !decodeBody(r, &req) {
+		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid request body")
+		return
+	}
+	currentPage, perPage := normalizePagination(req.CurrentPage, req.PerPage)
+	filter := repository.UnitFilter{
+		PropertyID: parseOptionalID(req.PropertyID),
+		BlockID:    parseOptionalID(req.BlockID),
+		FloorID:    parseOptionalID(req.FloorID),
+		Status:     strings.TrimSpace(req.Status),
+		Keyword:    strings.TrimSpace(req.Keyword),
+	}
+	units, total, err := c.usecase.ListUnits(filter, currentPage, perPage)
+	if err != nil {
+		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to list units")
+		return
+	}
+	response.WriteSuccess(w, http.StatusOK, response.NewListData(units, currentPage, perPage, total))
+}
+
 type propertyRequest struct {
-	Name         string `json:"name"`
-	Address      string `json:"address"`
-	WifiSSID     string `json:"wifi_ssid"`
-	WifiPassword string `json:"wifi_password"`
-	Status       string `json:"status"`
-	Notes        string `json:"notes"`
+	DeveloperID  *uint   `json:"developer_id"`
+	Name         string  `json:"name"`
+	PropertyType string  `json:"property_type"`
+	Address      string  `json:"address"`
+	City         string  `json:"city"`
+	Region       string  `json:"region"`
+	CoverImage   *string `json:"cover_image"`
+	Description  string  `json:"description"`
+	WifiSSID     string  `json:"wifi_ssid"`
+	WifiPassword string  `json:"wifi_password"`
+	Notes        string  `json:"notes"`
 }
 
 func (c *PropertyController) Create(w http.ResponseWriter, r *http.Request) {
@@ -83,16 +266,21 @@ func (c *PropertyController) Create(w http.ResponseWriter, r *http.Request) {
 		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "name and address are required")
 		return
 	}
-	status := req.Status
-	if status == "" {
-		status = "vacant"
+	propertyType := req.PropertyType
+	if propertyType == "" {
+		propertyType = "condo"
 	}
 	property := &repository.Property{
+		DeveloperID:  req.DeveloperID,
 		Name:         req.Name,
+		PropertyType: propertyType,
 		Address:      req.Address,
+		City:         req.City,
+		Region:       req.Region,
+		CoverImage:   nonEmptyPtr(req.CoverImage),
+		Description:  req.Description,
 		WifiSSID:     req.WifiSSID,
 		WifiPassword: req.WifiPassword,
-		Status:       status,
 		Notes:        req.Notes,
 	}
 	if err := c.usecase.Create(property); err != nil {
@@ -101,6 +289,16 @@ func (c *PropertyController) Create(w http.ResponseWriter, r *http.Request) {
 	}
 	response.WriteSuccess(w, http.StatusCreated, property)
 }
+
+func nonEmptyPtr(s *string) *string {
+	if s == nil || strings.TrimSpace(*s) == "" {
+		return nil
+	}
+	v := strings.TrimSpace(*s)
+	return &v
+}
+
+
 
 func (c *PropertyController) Update(w http.ResponseWriter, r *http.Request) {
 	id, err := parseIDParam(r)
@@ -128,11 +326,18 @@ func (c *PropertyController) Update(w http.ResponseWriter, r *http.Request) {
 	if req.Address != "" {
 		property.Address = req.Address
 	}
+	if req.PropertyType != "" {
+		property.PropertyType = req.PropertyType
+	}
+	if req.DeveloperID != nil {
+		property.DeveloperID = req.DeveloperID
+	}
+	property.City = req.City
+	property.Region = req.Region
+	property.CoverImage = nonEmptyPtr(req.CoverImage)
+	property.Description = req.Description
 	property.WifiSSID = req.WifiSSID
 	property.WifiPassword = req.WifiPassword
-	if req.Status != "" {
-		property.Status = req.Status
-	}
 	property.Notes = req.Notes
 	if err := c.usecase.Update(property); err != nil {
 		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to update property")

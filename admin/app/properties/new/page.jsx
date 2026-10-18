@@ -1,21 +1,38 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { useRequest } from "@/hooks/useRequest";
-import { FormPage, FormSection, Select, Textarea, Input, useToast } from "@/app/components/ui";
+import { useDropdown } from "@/hooks/useDropdown";
+import { request } from "@/services/request";
+import { useLocale } from "@/i18n";
+import { FormPage, FormSection, Select, Textarea, Input, useToast } from "@/components/ui";
 
-const EMPTY_FORM = { name: "", address: "", wifi_ssid: "", wifi_password: "", status: "", notes: "" };
+const EMPTY_FORM = {
+  name: "",
+  developer_id: "",
+  property_type: "condo",
+  region: "",
+  address: "",
+  city: "",
+  cover_image: "",
+  description: "",
+  wifi_ssid: "",
+  wifi_password: "",
+  notes: "",
+};
 
 export default function NewPropertyPage() {
+  const { t } = useLocale();
   const router = useRouter();
-  const request = useRequest();
   const toast = useToast();
-  const { data: options } = useRequest("/dictionary/options", { slug: "property_status" });
-
   const [form, setForm] = useState(EMPTY_FORM);
   const [errors, setErrors] = useState({});
   const [saving, setSaving] = useState(false);
+
+  const { data: facets } = useRequest("/property/facets");
+  const { optionsOf } = useDropdown(["property_type", "property_region"]);
+  const developers = facets?.developers ?? [];
 
   function updateField(key, value) {
     setForm((current) => ({ ...current, [key]: value }));
@@ -25,54 +42,85 @@ export default function NewPropertyPage() {
   async function handleSubmit(event) {
     event.preventDefault();
     const nextErrors = {};
-    if (!form.name || !form.name.trim()) nextErrors.name = "Name is required";
-    if (!form.address || !form.address.trim()) nextErrors.address = "Address is required";
+    if (!form.name.trim()) nextErrors.name = t("field_required");
+    if (!form.address.trim()) nextErrors.address = t("field_required");
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) return;
 
     setSaving(true);
     try {
-      const res = await request("/property/create", form);
-      toast.success("Property created");
-      router.push(`/properties/${res.data.id}`);
+      const property = await request("/property/create", {
+        name: form.name.trim(),
+        developer_id: form.developer_id ? Number(form.developer_id) : null,
+        property_type: form.property_type,
+        region: form.region,
+        address: form.address.trim(),
+        city: form.city.trim(),
+        cover_image: form.cover_image.trim() || null,
+        description: form.description.trim(),
+        wifi_ssid: form.wifi_ssid.trim(),
+        wifi_password: form.wifi_password,
+        notes: form.notes.trim(),
+      });
+      toast.success(t("property_created"));
+      router.push(`/properties/${property.id}`);
     } catch {
-      toast.error("Failed to create property");
+      toast.error(t("failed_to_create_property"));
       setSaving(false);
     }
   }
 
   return (
     <FormPage
-      title="New property"
-      subtitle="Add a new property to the portfolio."
-      backLabel="Properties"
+      title={t("new_property")}
+      subtitle={t("create_property_description")}
+      backLabel={t("properties")}
       backHref="/properties"
       onSubmit={handleSubmit}
-      actions={
+      size="md"
+      actions={(
         <div className="flex gap-3">
-          <button type="button" className="btn btn-secondary" onClick={() => router.push("/properties")} disabled={saving}>
-            Cancel
+          <button type="button" className="btn btn-outline" onClick={() => router.push("/properties")} disabled={saving}>
+            {t("cancel")}
           </button>
           <button type="submit" className="btn btn-primary" disabled={saving}>
-            {saving ? "Saving…" : "Create property"}
+            {saving ? t("saving") : t("create_property")}
           </button>
         </div>
-      }
-      size="md"
+      )}
     >
-      <FormSection title="Details">
-        <Input label="Name" name="name" value={form.name} onChange={(v) => updateField("name", v)} required error={errors.name} />
-        <Input label="Address" name="address" value={form.address} onChange={(v) => updateField("address", v)} required error={errors.address} />
+      <FormSection title={t("details")}>
+        <Input label={t("name")} name="name" value={form.name} onChange={(v) => updateField("name", v)} required error={errors.name} />
         <Select
-          label="Status"
-          name="status"
-          value={form.status}
-          onChange={(v) => updateField("status", v)}
-          options={options?.map((o) => ({ label: o.label, value: o.value }))}
+          label={t("developer")}
+          name="developer_id"
+          value={form.developer_id}
+          onChange={(v) => updateField("developer_id", v)}
+          options={developers.map((d) => ({ label: d.name, value: String(d.id) }))}
+          placeholder={t("select_developer")}
         />
-        <Input label="WiFi SSID" name="wifi_ssid" value={form.wifi_ssid} onChange={(v) => updateField("wifi_ssid", v)} />
-        <Input label="WiFi Password" name="wifi_password" value={form.wifi_password} onChange={(v) => updateField("wifi_password", v)} />
-        <Textarea label="Notes" name="notes" value={form.notes} onChange={(v) => updateField("notes", v)} />
+        <Select
+          label={t("property_type")}
+          name="property_type"
+          value={form.property_type}
+          onChange={(v) => updateField("property_type", v)}
+          options={optionsOf("property_type")}
+        />
+        <Select
+          label={t("region")}
+          name="region"
+          value={form.region}
+          onChange={(v) => updateField("region", v)}
+          options={optionsOf("property_region")}
+          placeholder={t("select_region")}
+        />
+        <Input label={t("address")} name="address" value={form.address} onChange={(v) => updateField("address", v)} required error={errors.address} />
+        <Input label={t("city")} name="city" value={form.city} onChange={(v) => updateField("city", v)} />
+        <Input label={t("cover_image_url")} name="cover_image" type="url" placeholder="https://" value={form.cover_image} onChange={(v) => updateField("cover_image", v)} />
+        <Textarea label={t("description")} name="description" value={form.description} onChange={(v) => updateField("description", v)} />
+        <Input label={t("wifi_ssid")} name="wifi_ssid" value={form.wifi_ssid} onChange={(v) => updateField("wifi_ssid", v)} />
+        <Input label={t("wifi_password")} name="wifi_password" value={form.wifi_password} onChange={(v) => updateField("wifi_password", v)} />
+        <Textarea label={t("notes")} name="notes" value={form.notes} onChange={(v) => updateField("notes", v)} />
       </FormSection>
     </FormPage>
   );

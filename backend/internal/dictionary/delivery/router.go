@@ -17,7 +17,7 @@ func NewDictionaryRouter(controller *DictionaryController, tokenSecret string, a
 
 	authMiddleware := middleware.RequireAuth(tokenSecret, userdelivery.VerifyToken)
 
-	mux.HandleFunc("GET /api/v1/dictionary/options", authMiddleware(controller.Options))
+	mux.HandleFunc("POST /api/v1/dictionary/dropdown", authMiddleware(controller.Dropdown))
 
 	return middleware.WithCORS(mux, allowedOrigins)
 }
