@@ -10,8 +10,26 @@ func NewDictionaryUsecase(repo *repository.SQLiteRepository) *DictionaryUsecase 
 	return &DictionaryUsecase{repo: repo}
 }
 
-func (uc *DictionaryUsecase) ListOptions(slug string) ([]repository.Option, error) {
-	return uc.repo.ListBySlug(slug)
+// Dropdown returns one array per requested slug. Each item is {id, <slug>_display, variant}:
+// id is the value the frontend sends back, and <slug>_display is the label to render.
+// Unknown slugs come back as empty arrays.
+func (uc *DictionaryUsecase) Dropdown(slugs []string) (map[string][]map[string]any, error) {
+	result := make(map[string][]map[string]any, len(slugs))
+	for _, slug := range slugs {
+		result[slug] = []map[string]any{}
+	}
+	options, err := uc.repo.ListBySlugs(slugs)
+	if err != nil {
+		return nil, err
+	}
+	for _, o := range options {
+		result[o.Slug] = append(result[o.Slug], map[string]any{
+			"id":                o.Value,
+			o.Slug + "_display": o.Label,
+			"variant":           o.Variant,
+		})
+	}
+	return result, nil
 }
 
 // SeedOptions inserts the given options only if the table is currently empty.

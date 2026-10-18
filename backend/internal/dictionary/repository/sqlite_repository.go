@@ -25,9 +25,12 @@ func NewSQLiteRepository(db *gorm.DB) (*SQLiteRepository, error) {
 	return &SQLiteRepository{db: db}, nil
 }
 
-func (r *SQLiteRepository) ListBySlug(slug string) ([]Option, error) {
+func (r *SQLiteRepository) ListBySlugs(slugs []string) ([]Option, error) {
 	var options []Option
-	if err := r.db.Where("slug = ?", slug).Order("sort_order asc, id asc").Find(&options).Error; err != nil {
+	if len(slugs) == 0 {
+		return options, nil
+	}
+	if err := r.db.Where("slug IN ?", slugs).Order("sort_order asc, id asc").Find(&options).Error; err != nil {
 		return nil, err
 	}
 	return options, nil

@@ -1,2 +1,2 @@
 import { defineApi } from "../defineApi";
-export const tenantList = defineApi({ method: "GET", path: "/tenant/list" });
+export const tenantList = defineApi({ path: "/tenant/list" });

@@ -105,11 +105,13 @@ type tenantCreateRequest struct {
 	Phone      string `json:"phone"`
 	Email      string `json:"email"`
 	PropertyID *uint  `json:"property_id"`
+	UnitID     *uint  `json:"unit_id"`
 	Status     string `json:"status"`
 }
 
 type tenantCreateResponse struct {
 	repository.Tenant
+	Username          string `json:"username"`
 	GeneratedPassword string `json:"generated_password"`
 }
 
@@ -119,12 +121,24 @@ func (c *TenantController) Create(w http.ResponseWriter, r *http.Request) {
 		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "username, name and phone are required")
 		return
 	}
-	tenant, generatedPassword, err := c.usecase.CreateTenant(req.Username, req.Name, req.Phone, req.Email, req.PropertyID, req.Status)
+	tenant, generatedPassword, err := c.usecase.CreateTenant(req.Username, req.Name, req.Phone, req.Email, req.PropertyID, req.UnitID, req.Status)
 	if err != nil {
-		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to create tenant")
+		writeUnitError(w, err, "failed to create tenant")
 		return
 	}
-	response.WriteSuccess(w, http.StatusCreated, tenantCreateResponse{Tenant: *tenant, GeneratedPassword: generatedPassword})
+	response.WriteSuccess(w, http.StatusCreated, tenantCreateResponse{Tenant: *tenant, Username: req.Username, GeneratedPassword: generatedPassword})
+}
+
+// writeUnitError maps unit assignment failures to client errors; anything else becomes a 500.
+func writeUnitError(w http.ResponseWriter, err error, fallback string) {
+	switch {
+	case errors.Is(err, repository.ErrUnitNotFound):
+		response.WriteError(w, http.StatusBadRequest, "UNIT_NOT_FOUND", "unit not found")
+	case errors.Is(err, repository.ErrUnitNotVacant):
+		response.WriteError(w, http.StatusConflict, "UNIT_NOT_VACANT", "unit is not vacant")
+	default:
+		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", fallback)
+	}
 }
 
 type tenantUpdateRequest struct {
@@ -132,6 +146,7 @@ type tenantUpdateRequest struct {
 	Phone      string `json:"phone"`
 	Email      string `json:"email"`
 	PropertyID *uint  `json:"property_id"`
+	UnitID     *uint  `json:"unit_id"`
 	Status     string `json:"status"`
 }
 
@@ -163,11 +178,12 @@ func (c *TenantController) Update(w http.ResponseWriter, r *http.Request) {
 	}
 	tenant.Email = req.Email
 	tenant.PropertyID = req.PropertyID
+	tenant.UnitID = req.UnitID
 	if req.Status != "" {
 		tenant.Status = req.Status
 	}
 	if err := c.usecase.Update(tenant); err != nil {
-		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to update tenant")
+		writeUnitError(w, err, "failed to update tenant")
 		return
 	}
 	response.WriteSuccess(w, http.StatusOK, tenant)

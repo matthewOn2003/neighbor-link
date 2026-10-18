@@ -18,7 +18,7 @@ func NewUserRouter(controller *UserController, tokenSecret string, allowedOrigin
 
 	mux.HandleFunc("GET /health", controller.Health)
 	mux.HandleFunc("POST /api/v1/auth/login", controller.Login)
-	mux.HandleFunc("GET /api/v1/auth/session", authMiddleware(controller.Session))
+	mux.HandleFunc("POST /api/v1/auth/session", authMiddleware(controller.Session))
 	mux.HandleFunc("POST /api/v1/auth/logout", controller.Logout)
 
 	return middleware.WithCORS(mux, allowedOrigins)

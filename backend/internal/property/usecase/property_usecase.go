@@ -28,8 +28,36 @@ func (uc *PropertyUsecase) Delete(id uint) error {
 	return uc.repo.Delete(id)
 }
 
-func (uc *PropertyUsecase) List(currentPage, perPage int) ([]repository.Property, int64, error) {
-	return uc.repo.List(currentPage, perPage)
+func (uc *PropertyUsecase) List(f repository.PropertyFilter, currentPage, perPage int) ([]repository.PropertyListItem, int64, error) {
+	return uc.repo.List(f, currentPage, perPage)
+}
+
+func (uc *PropertyUsecase) Facets() (*repository.PropertyFacets, error) {
+	return uc.repo.Facets()
+}
+
+func (uc *PropertyUsecase) FindDetail(id uint) (*repository.PropertyListItem, error) {
+	return uc.repo.FindDetail(id)
+}
+
+func (uc *PropertyUsecase) ListBlocks(f repository.BlockFilter, currentPage, perPage int) ([]repository.BlockItem, int64, error) {
+	return uc.repo.ListBlocks(f, currentPage, perPage)
+}
+
+func (uc *PropertyUsecase) FindBlockDetail(id uint) (*repository.BlockDetail, error) {
+	return uc.repo.FindBlockDetail(id)
+}
+
+func (uc *PropertyUsecase) ListFloors(f repository.FloorFilter, currentPage, perPage int) ([]repository.FloorItem, int64, error) {
+	return uc.repo.ListFloors(f, currentPage, perPage)
+}
+
+func (uc *PropertyUsecase) FindFloorDetail(id uint) (*repository.FloorDetail, error) {
+	return uc.repo.FindFloorDetail(id)
+}
+
+func (uc *PropertyUsecase) ListUnits(f repository.UnitFilter, currentPage, perPage int) ([]repository.UnitListItem, int64, error) {
+	return uc.repo.ListUnits(f, currentPage, perPage)
 }
 
 // SeedProperties inserts the given properties only if the table is currently empty.

@@ -1,7 +1,6 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { Link, usePathname } from "@/i18n/navigation";
 import { menu } from "@/config/menu";
 import { useLocale } from "@/i18n";
 import { Icon } from "@//components/ui/Icon";

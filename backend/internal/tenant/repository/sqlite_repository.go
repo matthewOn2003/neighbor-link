@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"errors"
 	"strings"
 	"time"
 
@@ -8,15 +9,21 @@ import (
 )
 
 type Tenant struct {
-	ID         uint      `gorm:"primaryKey" json:"id"`
-	UserID     uint      `gorm:"not null;index" json:"user_id"`
-	Name       string    `gorm:"not null" json:"name"`
-	Phone      string    `gorm:"not null" json:"phone"`
-	Email      string    `json:"email"`
-	PropertyID *uint     `json:"property_id"`
-	Status     string    `gorm:"not null;default:active" json:"status"`
-	CreatedAt  time.Time `json:"created_at"`
-	UpdatedAt  time.Time `json:"updated_at"`
+	ID                 uint      `gorm:"primaryKey" json:"id"`
+	UserID             uint      `gorm:"not null;index" json:"user_id"`
+	Name               string    `gorm:"not null" json:"name"`
+	Phone              string    `gorm:"not null" json:"phone"`
+	Email              string    `json:"email"`
+	PropertyID         *uint     `json:"property_id"`
+	Status             string    `gorm:"not null;default:active" json:"status"`
+	City               string    `json:"city"`
+	UnitID             *uint     `json:"unit_id"`
+	ContractEnd        *string   `json:"contract_end"`
+	MonthlyRent        *float64  `json:"monthly_rent"`
+	OutstandingBalance float64   `gorm:"not null;default:0" json:"outstanding_balance"`
+	BalanceNote        string    `json:"balance_note"`
+	CreatedAt          time.Time `json:"created_at"`
+	UpdatedAt          time.Time `json:"updated_at"`
 }
 
 // TenantFilter holds the optional list filters. Zero values mean "no filter".
@@ -38,7 +45,14 @@ func NewSQLiteRepository(db *gorm.DB) (*SQLiteRepository, error) {
 }
 
 func (r *SQLiteRepository) Create(t *Tenant) error {
-	return r.db.Create(t).Error
+	return r.db.Transaction(func(tx *gorm.DB) error {
+		if t.UnitID != nil {
+			if err := occupyUnit(tx, t); err != nil {
+				return err
+			}
+		}
+		return tx.Create(t).Error
+	})
 }
 
 func (r *SQLiteRepository) FindByID(id uint) (*Tenant, error) {
@@ -49,13 +63,95 @@ func (r *SQLiteRepository) FindByID(id uint) (*Tenant, error) {
 	return &tenant, nil
 }
 
+// Update saves the tenant and keeps unit occupancy in sync when the assigned unit changes.
 func (r *SQLiteRepository) Update(t *Tenant) error {
-	return r.db.Save(t).Error
+	return r.db.Transaction(func(tx *gorm.DB) error {
+		var previous Tenant
+		if err := tx.First(&previous, t.ID).Error; err != nil {
+			return err
+		}
+		if !sameUnit(previous.UnitID, t.UnitID) {
+			if err := vacateUnit(tx, previous.UnitID); err != nil {
+				return err
+			}
+			if t.UnitID != nil {
+				if err := occupyUnit(tx, t); err != nil {
+					return err
+				}
+			}
+		}
+		return tx.Save(t).Error
+	})
 }
 
 func (r *SQLiteRepository) Delete(id uint) error {
-	return r.db.Delete(&Tenant{}, id).Error
+	return r.db.Transaction(func(tx *gorm.DB) error {
+		var tenant Tenant
+		if err := tx.First(&tenant, id).Error; err != nil {
+			return err
+		}
+		if err := vacateUnit(tx, tenant.UnitID); err != nil {
+			return err
+		}
+		return tx.Delete(&Tenant{}, id).Error
+	})
 }
+
+var (
+	ErrUnitNotFound  = errors.New("unit not found")
+	ErrUnitNotVacant = errors.New("unit is not vacant")
+)
+
+// occupyUnit checks the tenant's unit is vacant, marks it occupied, and sets the tenant's property from the unit.
+func occupyUnit(tx *gorm.DB, t *Tenant) error {
+	propertyID, err := lookupVacantUnit(tx, *t.UnitID)
+	if err != nil {
+		return err
+	}
+	t.PropertyID = &propertyID
+	return tx.Exec(`UPDATE units SET status = 'occupied' WHERE id = ?`, *t.UnitID).Error
+}
+
+// ValidateVacantUnit returns an error when the unit does not exist or is already occupied.
+func (r *SQLiteRepository) ValidateVacantUnit(unitID uint) error {
+	_, err := lookupVacantUnit(r.db, unitID)
+	return err
+}
+
+func lookupVacantUnit(db *gorm.DB, unitID uint) (uint, error) {
+	var unit struct {
+		Status     string
+		PropertyID uint
+	}
+	err := db.Raw(`SELECT units.status, blocks.property_id FROM units
+		JOIN blocks ON blocks.id = units.block_id WHERE units.id = ?`, unitID).Scan(&unit).Error
+	if err != nil {
+		return 0, err
+	}
+	if unit.PropertyID == 0 {
+		return 0, ErrUnitNotFound
+	}
+	if unit.Status != "vacant" {
+		return 0, ErrUnitNotVacant
+	}
+	return unit.PropertyID, nil
+}
+
+// vacateUnit marks a previously occupied unit vacant again. A nil unit is a no-op.
+func vacateUnit(tx *gorm.DB, unitID *uint) error {
+	if unitID == nil {
+		return nil
+	}
+	return tx.Exec(`UPDATE units SET status = 'vacant' WHERE id = ? AND status = 'occupied'`, *unitID).Error
+}
+
+func sameUnit(a, b *uint) bool {
+	if a == nil || b == nil {
+		return a == b
+	}
+	return *a == *b
+}
+
 
 // filtered returns a fresh query chain each call, so Count and Find never share state.
 // func (r *SQLiteRepository) filtered(f TenantFilter) *gorm.DB {
@@ -98,6 +194,7 @@ type TenantListItem struct {
 	Tenant
 	PropertyName    *string `json:"property_name"`
 	PropertyAddress *string `json:"property_address"`
+	Unit            *string `json:"unit"`
 }
 
 func (r *SQLiteRepository) filtered(f TenantFilter) *gorm.DB {
@@ -124,8 +221,9 @@ func (r *SQLiteRepository) List(f TenantFilter, currentPage, perPage int) ([]Ten
 	items := make([]TenantListItem, 0)
 	offset := (currentPage - 1) * perPage
 	err := r.filtered(f).
-		Select("tenants.*, properties.name AS property_name, properties.address AS property_address").
+		Select("tenants.*, properties.name AS property_name, properties.address AS property_address, units.code AS unit").
 		Joins("LEFT JOIN properties ON properties.id = tenants.property_id").
+		Joins("LEFT JOIN units ON units.id = tenants.unit_id").
 		Order("tenants.id asc").
 		Offset(offset).Limit(perPage).
 		Scan(&items).Error
