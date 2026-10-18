@@ -1,16 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link } from "@/i18n/navigation";
 import { Icon } from "@/components/ui/Icon";
 import { SearchBar } from "@/components/ui/SearchBar";
 import { OccupancyBar, PropertyCover, StatBlock } from "@/components/property/parts";
 import { useDragScroll } from "@/hooks/useDragScroll";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useRequest } from "@/hooks/useRequest";
 import { useDropdown } from "@/hooks/useDropdown";
 import { useLocale } from "@/i18n";
 
-const EMPTY_FILTERS = { keyword: "", property_type: "", region: "", developer_id: "" };
+const EMPTY_FILTERS = { property_type: "", region: "", developer_id: "" };
 
 function PropertyCard({ property, typeLabel, t }) {
   const location = [property.address, property.city].filter(Boolean).join(", ");
@@ -55,11 +56,7 @@ export default function PropertiesPage() {
   const [keywordInput, setKeywordInput] = useState("");
   const [filters, setFilters] = useState(EMPTY_FILTERS);
 
-  // 输入停止 300ms 后才更新查询条件，避免每个字符都发请求
-  useEffect(() => {
-    const timer = setTimeout(() => setFilters((f) => ({ ...f, keyword: keywordInput.trim() })), 300);
-    return () => clearTimeout(timer);
-  }, [keywordInput]);
+  const debouncedKeyword = useDebouncedValue(keywordInput.trim(), 300);
 
   const hasActiveFilters = keywordInput.trim() !== "" || filters.region !== "" || filters.developer_id !== "";
   const resetFilters = () => {
@@ -69,7 +66,7 @@ export default function PropertiesPage() {
 
   const { labelOf, optionsOf } = useDropdown(["property_type", "property_region"]);
   const { data: facets } = useRequest("/property/facets");
-  const { data: listData, loading, error } = useRequest("/property/list", { ...filters, per_page: 100 });
+  const { data: listData, loading, error } = useRequest("/property/list", { ...filters, keyword: debouncedKeyword, per_page: 100 });
 
   const typeCounts = Object.fromEntries((facets?.types ?? []).map((f) => [f.value, f.count]));
   const totalCount = (facets?.types ?? []).reduce((sum, f) => sum + f.count, 0);
