@@ -28,6 +28,7 @@ function buildPagination(current, total) {
 export function DataTable({
   api,
   params,
+  method = "GET",
   title,
   description,
   buttons,
@@ -55,7 +56,7 @@ export function DataTable({
     error,
     loading,
     reload,
-  } = useList(api, { ...params, current_page: page, per_page: perPage });
+  } = useList(api, { ...params, current_page: page, per_page: perPage }, method);
 
   const totalPages = Math.max(1, Math.ceil(total / perPage));
   const from = total === 0 ? 0 : (page - 1) * perPage + 1;

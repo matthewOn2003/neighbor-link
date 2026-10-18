@@ -5,7 +5,7 @@ import { request } from "@/services/request";
 
 const EMPTY = { key: null, list: [], total: 0, summary: null, error: null };
 
-export function useList(path, params) {
+export function useList(path, params, method = "GET") {
   const paramsKey = JSON.stringify(params ?? {});
   const [reloadToken, setReloadToken] = useState(0);
   const requestKey = `${paramsKey}|${reloadToken}`;
@@ -13,7 +13,7 @@ export function useList(path, params) {
 
   useEffect(() => {
     const controller = new AbortController();
-    request(path, JSON.parse(paramsKey), { signal: controller.signal })
+    request(path, JSON.parse(paramsKey), { method, signal: controller.signal })
       .then((data) =>
         setResult({
           key: requestKey,
@@ -28,7 +28,7 @@ export function useList(path, params) {
         setResult({ ...EMPTY, key: requestKey, error: err.message });
       });
     return () => controller.abort();
-  }, [path, paramsKey, requestKey]);
+  }, [path, paramsKey, requestKey, method]);
 
   const reload = useCallback(() => setReloadToken((n) => n + 1), []);
   return { ...result, loading: result.key !== requestKey, paramsKey, reload };

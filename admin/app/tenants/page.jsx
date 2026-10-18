@@ -39,6 +39,7 @@ export default function TenantsPage() {
       <div className="p-8 space-y-6">
         <DataTable
           api="/tenant/list"
+          method="POST"
           params={params}
           title={t("tenants")}
           description={t("manage_tenants_description")}
