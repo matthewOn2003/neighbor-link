@@ -24,13 +24,21 @@ func NewTenantController(uc *usecase.TenantUsecase) *TenantController {
 	return &TenantController{usecase: uc}
 }
 
-func parsePagination(r *http.Request) (currentPage, perPage int) {
-	currentPage, perPage = 1, 10
-	if v, err := strconv.Atoi(r.URL.Query().Get("current_page")); err == nil && v > 0 {
-		currentPage = v
+type tenantListRequest struct {
+	CurrentPage int    `json:"current_page"`
+	PerPage     int    `json:"per_page"`
+	Keyword     string `json:"keyword"`
+	Status      string `json:"status"`
+	PropertyID  string `json:"property_id"`
+}
+
+func parsePagination(req tenantListRequest) (currentPage, perPage int) {
+	currentPage, perPage = req.CurrentPage, req.PerPage
+	if currentPage <= 0 {
+		currentPage = 1
 	}
-	if v, err := strconv.Atoi(r.URL.Query().Get("per_page")); err == nil && v > 0 {
-		perPage = v
+	if perPage <= 0 {
+		perPage = 10
 	}
 	if perPage > maxPerPage {
 		perPage = maxPerPage
@@ -38,13 +46,12 @@ func parsePagination(r *http.Request) (currentPage, perPage int) {
 	return
 }
 
-func parseTenantFilter(r *http.Request) repository.TenantFilter {
-	q := r.URL.Query()
+func parseTenantFilter(req tenantListRequest) repository.TenantFilter {
 	f := repository.TenantFilter{
-		Keyword: strings.TrimSpace(q.Get("keyword")),
-		Status:  strings.TrimSpace(q.Get("status")),
+		Keyword: strings.TrimSpace(req.Keyword),
+		Status:  strings.TrimSpace(req.Status),
 	}
-	if v, err := strconv.ParseUint(q.Get("property_id"), 10, 64); err == nil {
+	if v, err := strconv.ParseUint(strings.TrimSpace(req.PropertyID), 10, 64); err == nil {
 		id := uint(v)
 		f.PropertyID = &id
 	}
@@ -60,8 +67,13 @@ func parseIDParam(r *http.Request) (uint, error) {
 }
 
 func (c *TenantController) List(w http.ResponseWriter, r *http.Request) {
-	currentPage, perPage := parsePagination(r)
-	tenants, total, err := c.usecase.List(parseTenantFilter(r), currentPage, perPage)
+	var req tenantListRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid request body")
+		return
+	}
+	currentPage, perPage := parsePagination(req)
+	tenants, total, err := c.usecase.List(parseTenantFilter(req), currentPage, perPage)
 	if err != nil {
 		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to list tenants")
 		return

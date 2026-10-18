@@ -17,7 +17,7 @@ func NewTenantRouter(controller *TenantController, tokenSecret string, allowedOr
 
 	authMiddleware := middleware.RequireAuth(tokenSecret, userdelivery.VerifyToken)
 
-	mux.HandleFunc("GET /api/v1/tenant/list", authMiddleware(controller.List))
+	mux.HandleFunc("POST /api/v1/tenant/list", authMiddleware(controller.List))
 	mux.HandleFunc("GET /api/v1/tenant/detail/{id}", authMiddleware(controller.Detail))
 	mux.HandleFunc("POST /api/v1/tenant/create", authMiddleware(controller.Create))
 	mux.HandleFunc("POST /api/v1/tenant/update/{id}", authMiddleware(controller.Update))
