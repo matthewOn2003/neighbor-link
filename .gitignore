@@ -10,6 +10,12 @@
 **/build/
 **/dist/
 
+# Environment variables (TODO: open back when need publish to real environment)
+# .env
+# .env.*
+# !.env.example
+# !.env.*.example
+
 # Local databases and runtime data
 *.db
 *.db-shm
@@ -39,7 +45,6 @@ pnpm-debug.log*
 
 # TypeScript and tooling caches
 *.tsbuildinfo
-.next/
 
 # Generated Next.js type files
 **/next-env.d.ts
@@ -49,6 +54,9 @@ pnpm-debug.log*
 .idea/
 .DS_Store
 Thumbs.db
+
+# Claude Code local settings
+.claude/settings.local.json
 
 # Certificates and private keys
 *.pem
