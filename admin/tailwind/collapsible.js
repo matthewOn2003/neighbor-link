@@ -45,7 +45,7 @@ export default plugin(function ({ addComponents }) {
     ".collapsible-content-inner": {
       overflow: "hidden",
       padding: "0 1rem 1rem",
-      color: "var(--ink-muted)",
+      color: "var(--subtle)",
       fontSize: "0.875rem",
     },
   });

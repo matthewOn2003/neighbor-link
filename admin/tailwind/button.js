@@ -2,67 +2,78 @@ import plugin from "tailwindcss/plugin";
 
 export default plugin(function ({ addComponents }) {
   addComponents({
+    /* ---------- 基础 ---------- */
     ".btn": {
       display: "inline-flex",
       alignItems: "center",
       justifyContent: "center",
       gap: "0.5rem",
-      height: "var(--button-height)",
-      padding: "0 1.25rem",
+      padding: "0.625rem 1rem",
       borderRadius: "var(--button-radius)",
       fontWeight: "600",
-      fontSize: "0.9375rem",
+      fontSize: "14px",
+      lineHeight: "1",
       border: "var(--border-width) solid transparent",
-      transitionProperty: "background-color, border-color, color, opacity",
+      boxShadow: "var(--shadow-sm, 0 1px 2px 0 rgb(0 0 0 / 0.05))",
+      transitionProperty: "background-color, border-color, color, opacity, box-shadow",
       transitionDuration: "var(--transition-duration)",
       cursor: "pointer",
-      "&:disabled": {
+      "&:disabled, &[aria-disabled='true']": {
         cursor: "not-allowed",
         opacity: "0.5",
+        pointerEvents: "none",
       },
       "&:focus-visible": {
         outline: "var(--focus-ring-width) solid var(--primary)",
         outlineOffset: "2px",
       },
     },
+
+    /* ---------- 变体 ---------- */
     ".btn-primary": {
       backgroundColor: "var(--primary)",
-      color: "var(--panel-background)",
+      color: "var(--primary-content)",
       "&:hover:not(:disabled)": {
         backgroundColor: "var(--primary-dark)",
       },
     },
-    ".btn-secondary": {
-      backgroundColor: "var(--panel-background)",
-      color: "var(--foreground)",
-      borderColor: "var(--line)",
+    ".btn-outline": {
+      backgroundColor: "var(--accent)",
+      color: "var(--scene-content)",
+      borderColor: "var(--subtle)",
       "&:hover:not(:disabled)": {
-        borderColor: "var(--primary)",
+        backgroundColor: "color-mix(in srgb, var(--primary) 8%, var(--accent))",
+        borderColor: "color-mix(in srgb, var(--primary) 50%, var(--line))",
+        color: "var(--primary)",
+      },
+      "&:active:not(:disabled)": {
+        backgroundColor: "color-mix(in srgb, var(--primary) 14%, var(--accent))",
       },
     },
     ".btn-ghost": {
       backgroundColor: "transparent",
-      color: "var(--foreground)",
+      color: "var(--scene-content)",
+      boxShadow: "none",
       "&:hover:not(:disabled)": {
         backgroundColor: "var(--line)",
       },
     },
     ".btn-danger": {
       backgroundColor: "var(--error)",
-      color: "var(--panel-background)",
+      color: "var(--primary-content)",
       "&:hover:not(:disabled)": {
         opacity: "0.9",
       },
     },
+
+    /* ---------- 尺寸 ---------- */
     ".btn-sm": {
-      height: "2.25rem",
-      padding: "0 0.875rem",
-      fontSize: "0.8125rem",
+      padding: "0.375rem 0.75rem",
+      fontSize: "0.75rem",
     },
     ".btn-lg": {
-      height: "3.25rem",
-      padding: "0 1.75rem",
-      fontSize: "1rem",
+      padding: "0.875rem 1.5rem",
+      fontSize: "0.9375rem",
     },
   });
 });

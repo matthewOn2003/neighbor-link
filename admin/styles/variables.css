@@ -1,0 +1,42 @@
+:root {
+  --scene: #f8fafc;
+  --scene-content: #0f172a;
+  --subtle: #64748b;
+  --primary: #4f46e5;
+  --primary-dark: #3525cd;
+  --primary-content: #ffffff;
+  --accent: #ffffff;
+  --accent-content: #0f172a;
+  --highlight: #b45309;
+  --line: #cbd5e1;
+  --success: #28a745;
+  --danger: #be123c;
+  --warning: #b45309;
+  --info: #2563eb;
+  --error: #be123c;
+
+  /* Layout */
+  --gutter: 1.5rem;
+  --page-padding-block: 2rem;
+  --page-padding-inline: 1.25rem;
+  --content-max-width: 75rem;
+  --topbar-height: 4rem;
+  --sidebar-width: 16rem;
+
+  /* Components */
+  --panel-padding: 3rem;
+  --panel-radius: 0rem;
+  --button-radius: 0.75rem;
+  --input-radius: 0.75rem;
+  --control-height: 2.875rem;
+  --button-height: 48px;
+  --field-gap: 1.125rem;
+  --label-gap: 0.5rem;
+  --section-gap: 2rem;
+  --header-gap: 2rem;
+  --border-width: 1px;
+
+  /* Motion and focus */
+  --transition-duration: 160ms;
+  --focus-ring-width: 3px;
+}

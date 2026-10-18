@@ -40,6 +40,14 @@ type Pagination struct {
 type ListData struct {
 	List       any        `json:"list"`
 	Pagination Pagination `json:"pagination"`
+	// Summary is optional: only set it when a page needs summary cards.
+	Summary any `json:"summary,omitempty"`
+}
+
+// WithSummary attaches summary data to a list payload.
+func (l ListData) WithSummary(summary any) ListData {
+	l.Summary = summary
+	return l
 }
 
 // NewListData builds the standard paginated list payload used across list endpoints.

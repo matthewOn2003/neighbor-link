@@ -75,8 +75,8 @@ func (uc *TenantUsecase) Delete(id uint) error {
 	return uc.repo.Delete(id)
 }
 
-func (uc *TenantUsecase) List(currentPage, perPage int) ([]repository.Tenant, int64, error) {
-	return uc.repo.List(currentPage, perPage)
+func (uc *TenantUsecase) List(f repository.TenantFilter, currentPage, perPage int) ([]repository.TenantListItem, int64, error) {
+	return uc.repo.List(f, currentPage, perPage)
 }
 
 type SeedTenant struct {

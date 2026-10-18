@@ -35,7 +35,7 @@ export default plugin(function ({ addComponents }) {
     },
     ".modal-body": {
       padding: "0 1.5rem 1.5rem",
-      color: "var(--ink-muted)",
+      color: "var(--subtle)",
       fontSize: "0.9375rem",
     },
     ".modal-footer": {

@@ -1,4 +1,4 @@
-import { locales } from "./locales.config.js";
+import { locales } from "./i18n/config.js";
 
 const nextConfig = {
 	env: {
