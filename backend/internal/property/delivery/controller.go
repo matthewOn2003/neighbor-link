@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	"backend/internal/pkg/httpx"
 	"backend/internal/pkg/response"
 	"backend/internal/property/repository"
 	"backend/internal/property/usecase"
@@ -23,7 +24,6 @@ func NewPropertyController(uc *usecase.PropertyUsecase) *PropertyController {
 	return &PropertyController{usecase: uc}
 }
 
-const maxPerPage = 100
 
 type propertyListRequest struct {
 	CurrentPage  int    `json:"current_page"`
@@ -56,27 +56,6 @@ type unitListRequest struct {
 	Keyword     string `json:"keyword"`
 }
 
-func normalizePagination(currentPage, perPage int) (int, int) {
-	if currentPage <= 0 {
-		currentPage = 1
-	}
-	if perPage <= 0 {
-		perPage = 10
-	}
-	if perPage > maxPerPage {
-		perPage = maxPerPage
-	}
-	return currentPage, perPage
-}
-
-func parseIDParam(r *http.Request) (uint, error) {
-	id, err := strconv.ParseUint(r.PathValue("id"), 10, 64)
-	if err != nil {
-		return 0, err
-	}
-	return uint(id), nil
-}
-
 // parseOptionalID returns nil for empty or invalid input, meaning "no filter".
 func parseOptionalID(raw string) *uint {
 	v, err := strconv.ParseUint(strings.TrimSpace(raw), 10, 64)
@@ -105,7 +84,7 @@ func (c *PropertyController) List(w http.ResponseWriter, r *http.Request) {
 		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid request body")
 		return
 	}
-	currentPage, perPage := normalizePagination(req.CurrentPage, req.PerPage)
+	currentPage, perPage := httpx.NormalizePagination(req.CurrentPage, req.PerPage)
 	filter := repository.PropertyFilter{
 		Keyword:      strings.TrimSpace(req.Keyword),
 		PropertyType: strings.TrimSpace(req.PropertyType),
@@ -131,7 +110,7 @@ func (c *PropertyController) Facets(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c *PropertyController) Detail(w http.ResponseWriter, r *http.Request) {
-	id, err := parseIDParam(r)
+	id, err := httpx.ParseIDParam(r)
 	if err != nil {
 		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid id")
 		return
@@ -149,7 +128,7 @@ func (c *PropertyController) Detail(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c *PropertyController) BlockDetail(w http.ResponseWriter, r *http.Request) {
-	id, err := parseIDParam(r)
+	id, err := httpx.ParseIDParam(r)
 	if err != nil {
 		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid id")
 		return
@@ -167,7 +146,7 @@ func (c *PropertyController) BlockDetail(w http.ResponseWriter, r *http.Request)
 }
 
 func (c *PropertyController) FloorDetail(w http.ResponseWriter, r *http.Request) {
-	id, err := parseIDParam(r)
+	id, err := httpx.ParseIDParam(r)
 	if err != nil {
 		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid id")
 		return
@@ -195,7 +174,7 @@ func (c *PropertyController) BlockList(w http.ResponseWriter, r *http.Request) {
 		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "property_id is required")
 		return
 	}
-	currentPage, perPage := normalizePagination(req.CurrentPage, req.PerPage)
+	currentPage, perPage := httpx.NormalizePagination(req.CurrentPage, req.PerPage)
 	blocks, total, err := c.usecase.ListBlocks(repository.BlockFilter{PropertyID: propertyID}, currentPage, perPage)
 	if err != nil {
 		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to list blocks")
@@ -215,7 +194,7 @@ func (c *PropertyController) FloorList(w http.ResponseWriter, r *http.Request) {
 		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "block_id is required")
 		return
 	}
-	currentPage, perPage := normalizePagination(req.CurrentPage, req.PerPage)
+	currentPage, perPage := httpx.NormalizePagination(req.CurrentPage, req.PerPage)
 	floors, total, err := c.usecase.ListFloors(repository.FloorFilter{BlockID: blockID}, currentPage, perPage)
 	if err != nil {
 		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to list floors")
@@ -230,7 +209,7 @@ func (c *PropertyController) UnitList(w http.ResponseWriter, r *http.Request) {
 		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid request body")
 		return
 	}
-	currentPage, perPage := normalizePagination(req.CurrentPage, req.PerPage)
+	currentPage, perPage := httpx.NormalizePagination(req.CurrentPage, req.PerPage)
 	filter := repository.UnitFilter{
 		PropertyID: parseOptionalID(req.PropertyID),
 		BlockID:    parseOptionalID(req.BlockID),
@@ -301,7 +280,7 @@ func nonEmptyPtr(s *string) *string {
 
 
 func (c *PropertyController) Update(w http.ResponseWriter, r *http.Request) {
-	id, err := parseIDParam(r)
+	id, err := httpx.ParseIDParam(r)
 	if err != nil {
 		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid id")
 		return
@@ -347,7 +326,7 @@ func (c *PropertyController) Update(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c *PropertyController) Delete(w http.ResponseWriter, r *http.Request) {
-	id, err := parseIDParam(r)
+	id, err := httpx.ParseIDParam(r)
 	if err != nil {
 		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid id")
 		return

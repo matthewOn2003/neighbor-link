@@ -10,8 +10,8 @@ func NewDictionaryUsecase(repo *repository.SQLiteRepository) *DictionaryUsecase 
 	return &DictionaryUsecase{repo: repo}
 }
 
-// Dropdown returns one array per requested slug. Each item is {id, <slug>_display, variant}:
-// id is the value the frontend sends back, and <slug>_display is the label to render.
+// Dropdown returns one array per requested slug. Each item uses {value, label, variant}.
+// The id and <slug>_display aliases remain for compatibility with older consumers.
 // Unknown slugs come back as empty arrays.
 func (uc *DictionaryUsecase) Dropdown(slugs []string) (map[string][]map[string]any, error) {
 	result := make(map[string][]map[string]any, len(slugs))
@@ -24,9 +24,11 @@ func (uc *DictionaryUsecase) Dropdown(slugs []string) (map[string][]map[string]a
 	}
 	for _, o := range options {
 		result[o.Slug] = append(result[o.Slug], map[string]any{
+			"value":             o.Value,
+			"label":             o.Label,
+			"variant":           o.Variant,
 			"id":                o.Value,
 			o.Slug + "_display": o.Label,
-			"variant":           o.Variant,
 		})
 	}
 	return result, nil
