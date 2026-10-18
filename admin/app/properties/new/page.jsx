@@ -2,17 +2,16 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useApi } from "@/lib/useApi";
-import { useDictionary } from "@/lib/useDictionary";
+import { useRequest } from "@/hooks/useRequest";
 import { FormPage, FormSection, Select, Textarea, Input, useToast } from "@/app/components/ui";
 
 const EMPTY_FORM = { name: "", address: "", wifi_ssid: "", wifi_password: "", status: "", notes: "" };
 
 export default function NewPropertyPage() {
   const router = useRouter();
-  const request = useApi();
+  const request = useRequest();
   const toast = useToast();
-  const { options: statusOptions } = useDictionary("property_status");
+  const { data: options } = useRequest("/dictionary/options", { slug: "property_status" });
 
   const [form, setForm] = useState(EMPTY_FORM);
   const [errors, setErrors] = useState({});
@@ -69,7 +68,7 @@ export default function NewPropertyPage() {
           name="status"
           value={form.status}
           onChange={(v) => updateField("status", v)}
-          options={statusOptions.map((o) => ({ label: o.label, value: o.value }))}
+          options={options?.map((o) => ({ label: o.label, value: o.value }))}
         />
         <Input label="WiFi SSID" name="wifi_ssid" value={form.wifi_ssid} onChange={(v) => updateField("wifi_ssid", v)} />
         <Input label="WiFi Password" name="wifi_password" value={form.wifi_password} onChange={(v) => updateField("wifi_password", v)} />

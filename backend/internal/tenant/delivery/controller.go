@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"backend/internal/pkg/response"
 	"backend/internal/tenant/repository"
@@ -12,6 +13,8 @@ import (
 
 	"gorm.io/gorm"
 )
+
+const maxPerPage = 100
 
 type TenantController struct {
 	usecase *usecase.TenantUsecase
@@ -29,7 +32,23 @@ func parsePagination(r *http.Request) (currentPage, perPage int) {
 	if v, err := strconv.Atoi(r.URL.Query().Get("per_page")); err == nil && v > 0 {
 		perPage = v
 	}
+	if perPage > maxPerPage {
+		perPage = maxPerPage
+	}
 	return
+}
+
+func parseTenantFilter(r *http.Request) repository.TenantFilter {
+	q := r.URL.Query()
+	f := repository.TenantFilter{
+		Keyword: strings.TrimSpace(q.Get("keyword")),
+		Status:  strings.TrimSpace(q.Get("status")),
+	}
+	if v, err := strconv.ParseUint(q.Get("property_id"), 10, 64); err == nil {
+		id := uint(v)
+		f.PropertyID = &id
+	}
+	return f
 }
 
 func parseIDParam(r *http.Request) (uint, error) {
@@ -42,7 +61,7 @@ func parseIDParam(r *http.Request) (uint, error) {
 
 func (c *TenantController) List(w http.ResponseWriter, r *http.Request) {
 	currentPage, perPage := parsePagination(r)
-	tenants, total, err := c.usecase.List(currentPage, perPage)
+	tenants, total, err := c.usecase.List(parseTenantFilter(r), currentPage, perPage)
 	if err != nil {
 		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to list tenants")
 		return

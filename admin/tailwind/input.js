@@ -24,7 +24,7 @@ export default plugin(function ({ addComponents }) {
       transitionProperty: "border-color, box-shadow",
       transitionDuration: "var(--transition-duration)",
       "&::placeholder": {
-        color: "var(--ink-muted)",
+        color: "var(--subtle)",
       },
       "&:focus": {
         outline: "none",
@@ -49,7 +49,7 @@ export default plugin(function ({ addComponents }) {
     },
     ".field-hint": {
       fontSize: "0.8125rem",
-      color: "var(--ink-muted)",
+      color: "var(--subtle)",
     },
   });
 });

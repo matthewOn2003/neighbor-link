@@ -5,57 +5,39 @@ export default plugin(function ({ addComponents }) {
     ".table-wrap": {
       width: "100%",
       overflowX: "auto",
-      overscrollBehaviorX: "contain",
-      border: "var(--border-width) solid var(--line)",
-      borderRadius: "4px",
     },
     ".table": {
       width: "100%",
-      borderCollapse: "collapse",
       fontSize: "0.875rem",
-    },
-    ".table-head": {
-      backgroundColor: "var(--primary)",
-      borderBottom: "var(--border-width) solid var(--line)",
-    },
-    ".table-head-cell": {
       textAlign: "left",
-      padding: "0.75rem 1rem",
-      fontWeight: "600",
-      color: "var(--primary-content)",
-      whiteSpace: "nowrap",
-    },
-    ".table-row": {
-      borderBottom: "var(--border-width) solid var(--line)",
-      transitionProperty: "background-color",
-      transitionDuration: "var(--transition-duration)",
-      backgroundColor: "var(--panel-background)",
-      "&:nth-child(even)": {
-        backgroundColor: "color-mix(in srgb, var(--foreground) 4%, var(--panel-background))",
+      borderCollapse: "separate",
+      borderSpacing: "0",
+      "& thead th": {
+        borderBottom: "var(--border-width) solid var(--line)",
       },
-      "&:last-child": {
-        borderBottom: "none",
+      "& td, & th": {
+        padding: "0.75rem 1.25rem",
+        whiteSpace: "nowrap",
       },
-      "&:hover": {
-        backgroundColor: "color-mix(in srgb, var(--primary) 10%, var(--panel-background))",
+      "& tbody tr": {
+        "--row-bg": "var(--accent)",
+        backgroundColor: "var(--row-bg)",
+        transitionProperty: "background-color",
+        transitionDuration: "var(--transition-duration)",
       },
-    },
-    ".table-cell": {
-      padding: "0.75rem 1rem",
-      color: "var(--foreground)",
-      verticalAlign: "middle",
-      whiteSpace: "nowrap",
-    },
-    // Opt-in: allow long text columns (notes, address...) to wrap.
-    ".table-cell-wrap": {
-      whiteSpace: "normal",
-      minWidth: "12rem",
-      maxWidth: "24rem",
-    },
-    ".table-empty": {
-      padding: "2.5rem 1rem",
-      textAlign: "center",
-      color: "var(--ink-muted)",
+      "& tbody tr:hover": {
+        "--row-bg": "color-mix(in srgb, var(--primary) 5%, var(--accent))",
+      },
+      "& .sticky-left, & .sticky-right": {
+        position: "sticky",
+        zIndex: "1",
+        backgroundColor: "var(--row-bg, var(--accent))",
+        transitionProperty: "background-color",
+        transitionDuration: "var(--transition-duration)",
+      },
+      "& .sticky-left": { left: "0" },
+      "& .sticky-right": { right: "0" },
+      "& thead .sticky-left, & thead .sticky-right": { zIndex: "2" },
     },
   });
 });

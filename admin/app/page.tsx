@@ -3,9 +3,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { useLocale } from "@/lib/i18n";
-import { useLoginMutation } from "@/lib/store/authApi";
-import LangSelect from "@/app/components/LangSelect";
+import { useLocale } from "@/i18n";
+import { useLoginMutation } from "@/store/authApi";
+import LangSelect from "@/components/LangSelect";
 import { FormButton, FormError, FormGuard, FormInput, rules, FormValues } from "@matthew2003/formguard";
 
 function getErrorMessage(error: unknown): string | undefined {
@@ -21,8 +21,7 @@ function getErrorMessage(error: unknown): string | undefined {
 export default function Home() {
   const router = useRouter();
   const [login] = useLoginMutation();
-  const { localeProperties } = useLocale();
-  const text = localeProperties.messages;
+  const { t } = useLocale();
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -34,7 +33,7 @@ export default function Home() {
       await login({ username: values.username as string, password: values.password as string, role: "admin" }).unwrap();
       router.push("/dashboard");
     } catch (submitError) {
-      setError(getErrorMessage(submitError) ?? text.loginFailed);
+      setError(getErrorMessage(submitError) ?? t("login_failed"));
     } finally {
       setIsLoading(false);
     }
@@ -44,7 +43,7 @@ export default function Home() {
     <main className="login-shell">
       <section className="login-panel">
         <div className="login-header">
-          <Image className="eyebrow" src="/neighbor-link-logo.svg" alt={text.eyebrow} width={1197} height={356} priority />
+          <Image className="eyebrow" src="/neighbor-link-logo.svg" alt={t("brand_name")} width={1197} height={356} priority />
           <LangSelect />
         </div>
         <FormGuard
@@ -53,10 +52,10 @@ export default function Home() {
           className="login-form"
           tokens={{ radius: "6px", focusColor: "#315b57", buttonBackground: "#315b57" }}
         >
-          <FormInput name="username" label={text.username} autoComplete="username" validators={[rules.required(text.required)]} />
-          <FormInput name="password" label={text.password} type="password" autoComplete="current-password" validators={[rules.required(text.required)]} />
+          <FormInput name="username" label={t("username")} autoComplete="username" validators={[rules.required(t("field_required"))]} />
+          <FormInput name="password" label={t("password")} type="password" autoComplete="current-password" validators={[rules.required(t("field_required"))]} />
           <FormError>{error}</FormError>
-          <FormButton loading={isLoading}>{isLoading ? text.signingIn : text.signIn}</FormButton>
+          <FormButton loading={isLoading}>{isLoading ? t("signing_in") : t("sign_in")}</FormButton>
         </FormGuard>
       </section>
     </main>

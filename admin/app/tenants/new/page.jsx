@@ -3,18 +3,17 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useApi } from "@/lib/useApi";
-import { useProperties } from "@/lib/useProperties";
-import { useDictionary } from "@/lib/useDictionary";
+import { useRequest } from "@/hooks/useRequest";
+import { useDictionary } from "@/hooks/useDictionary";
 import { FormPage, FormSection, Select, Input, CopyableField, useToast } from "@/app/components/ui";
 
 const EMPTY_FORM = { username: "", name: "", phone: "", email: "", property_id: "", status: "" };
 
 export default function NewTenantPage() {
   const router = useRouter();
-  const request = useApi();
+  const request = useRequest();
   const toast = useToast();
-  const { properties } = useProperties();
+  const { properties } = useRequest();
   const { options: statusOptions } = useDictionary("tenant_status");
 
   const [form, setForm] = useState(EMPTY_FORM);
