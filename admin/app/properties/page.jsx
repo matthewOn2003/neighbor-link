@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Link } from "@/i18n/navigation";
 import { Icon } from "@/components/ui/Icon";
+import { Spinner } from "@/components/ui/Spinner";
 import { SearchBar } from "@/components/ui/SearchBar";
 import { OccupancyBar, PropertyCover, StatBlock } from "@/components/property/parts";
 import { useDragScroll } from "@/hooks/useDragScroll";
@@ -76,7 +77,8 @@ export default function PropertiesPage() {
   ];
 
   const items = listData?.list ?? [];
-  const message = loading && items.length === 0 ? t("loading") : error ? error : items.length === 0 ? t("no_properties_match_current_filters") : null;
+  const isInitialLoading = loading && items.length === 0;
+  const message = error ? error : items.length === 0 ? t("no_properties_match_current_filters") : null;
 
   return (
     <main className="flex flex-col w-full">
@@ -156,7 +158,7 @@ export default function PropertiesPage() {
 
           <div>
             {message ? (
-              <div className="px-6 py-10 text-center text-sm text-subtle">{message}</div>
+              <div className="flex justify-center px-6 py-10 text-sm text-subtle">{isInitialLoading ? <Spinner size="lg" label={t("loading")} /> : message}</div>
             ) : (
               <div
                 {...drag}

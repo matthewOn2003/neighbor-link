@@ -3,6 +3,7 @@
 import { use } from "react";
 import { Link } from "@/i18n/navigation";
 import { Icon } from "@/components/ui/Icon";
+import { Spinner } from "@/components/ui/Spinner";
 import { OccupancyBar, PropertyCover, StatBlock } from "@/components/property/parts";
 import { useRequest } from "@/hooks/useRequest";
 import { useDropdown } from "@/hooks/useDropdown";
@@ -20,7 +21,7 @@ export default function PropertyDetailPage({ params }) {
     return <main className="p-8 text-error">{error}</main>;
   }
   if (loading || !property) {
-    return <main className="p-8 text-subtle">{t("loading")}</main>;
+    return <main className="flex justify-center p-8 text-subtle"><Spinner size="lg" label={t("loading")} /></main>;
   }
 
   const typeLabel = labelOf("property_type", property.property_type);

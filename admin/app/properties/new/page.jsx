@@ -7,6 +7,7 @@ import { useDropdown } from "@/hooks/useDropdown";
 import { request } from "@/services/request";
 import { useLocale } from "@/i18n";
 import { FormPage, FormSection, Select, Textarea, Input, useToast } from "@/components/ui";
+import { Spinner } from "@/components/ui/Spinner";
 
 const EMPTY_FORM = {
   name: "",
@@ -84,7 +85,7 @@ export default function NewPropertyPage() {
             {t("cancel")}
           </button>
           <button type="submit" className="btn btn-primary" disabled={saving}>
-            {saving ? t("saving") : t("create_property")}
+            {saving ? <><Spinner size="sm" label={t("saving")} /> {t("saving")}</> : t("create_property")}
           </button>
         </div>
       )}
