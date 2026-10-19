@@ -135,8 +135,8 @@ export default function BillsPage() {
           ) : rows.length === 0 ? (
             <div className="p-12 text-center text-sm text-subtle">{t("no_bills")}</div>
           ) : (
-            <div className="mt-4 overflow-x-auto">
-              <table className="w-full text-left text-sm">
+            <div className="mt-4 overflow-x-auto rounded-xl border border-scene">
+              <table className="w-full min-w-[900px] text-left text-sm">
                 <thead className="bg-accent text-xs uppercase text-subtle">
                   <tr>{["bill_number", "tenant", "billing_period", "due_date", "bill_amount", "bill_paid", "status", "action"].map((key) => <th key={key} className="px-4 py-3 font-semibold">{t(key)}</th>)}</tr>
                 </thead>

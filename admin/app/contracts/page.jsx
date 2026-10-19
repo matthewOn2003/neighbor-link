@@ -111,8 +111,8 @@ export default function ContractsPage() {
           ) : rows.length === 0 ? (
             <div className="p-12 text-center text-sm text-subtle">{t("no_contracts")}</div>
           ) : (
-            <div className="mt-4 overflow-x-auto">
-              <table className="w-full text-left text-sm">
+            <div className="mt-4 overflow-x-auto rounded-xl border border-scene">
+              <table className="w-full min-w-[900px] text-left text-sm">
                 <thead className="bg-accent text-xs uppercase text-subtle">
                   <tr>{["contract_number", "tenant", "property_and_unit", "contract_term", "monthly_rent", "status", "action"].map((key) => <th key={key} className="px-4 py-3 font-semibold">{t(key)}</th>)}</tr>
                 </thead>

@@ -18,7 +18,7 @@ services:
       - key: COOKIE_SECURE
         value: "true"
       - key: CORS_ALLOWED_ORIGINS
-        value: https://neighbor-link-admin.onrender.com
+        value: https://neighbor-link-admin.onrender.com,https://neighbor-link-tenant.onrender.com
       - key: AUTH_SECRET
         generateValue: true
       - key: ADMIN_PASSWORD
@@ -30,6 +30,19 @@ services:
     name: neighbor-link-admin
     runtime: node
     rootDir: admin
+    plan: free
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: BACKEND_API_URL
+        value: https://neighbor-link-backend.onrender.com/api/v1
+
+  - type: web
+    name: neighbor-link-tenant
+    runtime: node
+    rootDir: tenant
     plan: free
     buildCommand: npm ci && npm run build
     startCommand: npm start
