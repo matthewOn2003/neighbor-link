@@ -26,7 +26,7 @@ The project is designed to provide one shared foundation for rental operations w
 
 ## Current Status
 
-The current version is an authentication base. It includes:
+The project currently has an authentication foundation, an Admin management portal, and an initial Tenant portal dashboard. It includes:
 
 - Separate tenant and admin Next.js applications
 - A shared Go backend service
@@ -40,7 +40,7 @@ The current version is an authentication base. It includes:
 - Tailwind CSS 3
 - Environment-based configuration
 
-The post-login dashboards are intentionally empty placeholders. Rental, contract, billing, payment, complaint, and feedback features will be added in later iterations.
+The Admin portal includes tenant, property, contract, and bill management screens. The Tenant portal now has a responsive dashboard shell with English/Chinese copy and sign-out handling; its rental, lease, billing, payment, Wi-Fi, complaint, and feedback data workflows still need to be connected and validated.
 
 ## Repository Structure
 
@@ -200,7 +200,7 @@ messages/en.json
 messages/zh.json
 ```
 
-The current login base supports English and Chinese. Additional language keys can be added to these files as new screens are introduced.
+Both portals support English and Chinese. Add translation keys to the relevant message files as new screens are introduced.
 
 ## Validation
 
@@ -217,7 +217,7 @@ npm --prefix admin run build
 
 ## Roadmap
 
-- Add authenticated dashboard layouts
+- Connect tenant dashboard modules to authenticated rental and billing APIs
 - Add tenant, property, and lease data models
 - Add recurring and one-time billing
 - Integrate a payment provider
