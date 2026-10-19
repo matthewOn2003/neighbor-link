@@ -196,5 +196,9 @@
   "view_details": "查看详情",
   "pagination_summary": "第 {current}/{last} 页，共 {total} 条",
   "previous": "上一页",
-  "next": "下一页"
+  "next": "下一页",
+  "generate_monthly_bills": "生成月度账单",
+  "generating_bills": "生成中...",
+  "bills_generated": "已生成 {count} 张新账单。",
+  "bill_generate_failed": "生成月度账单失败。"
 }

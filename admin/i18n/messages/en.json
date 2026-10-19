@@ -196,5 +196,9 @@
   "view_details": "View details",
   "pagination_summary": "Page {current} of {last} · {total} records",
   "previous": "Previous",
-  "next": "Next"
+  "next": "Next",
+  "generate_monthly_bills": "Generate monthly bills",
+  "generating_bills": "Generating...",
+  "bills_generated": "Generated {count} new bills.",
+  "bill_generate_failed": "Could not generate monthly bills."
 }

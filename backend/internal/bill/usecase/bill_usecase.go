@@ -30,3 +30,8 @@ func (u *BillUsecase) RecordPayment(id uint,amount float64,method,reference,paid
  return u.repo.RecordPayment(id,amount,method,strings.TrimSpace(reference),paidAt)
 }
 func (u *BillUsecase) Void(id uint)error{return u.repo.Void(id)}
+
+func (u *BillUsecase) Generate(period string) (int64, error) {
+ if !periodPattern.MatchString(period) { return 0, repository.ErrInvalidBill }
+ return u.repo.Generate(period)
+}
