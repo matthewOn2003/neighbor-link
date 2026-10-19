@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
-	"strconv"
 	"strings"
 
 	"backend/internal/pkg/httpx"
@@ -56,24 +55,6 @@ type unitListRequest struct {
 	Keyword     string `json:"keyword"`
 }
 
-// parseOptionalID returns nil for empty or invalid input, meaning "no filter".
-func parseOptionalID(raw string) *uint {
-	v, err := strconv.ParseUint(strings.TrimSpace(raw), 10, 64)
-	if err != nil {
-		return nil
-	}
-	id := uint(v)
-	return &id
-}
-
-func parseRequiredID(raw string) (uint, bool) {
-	id := parseOptionalID(raw)
-	if id == nil {
-		return 0, false
-	}
-	return *id, true
-}
-
 func decodeBody(r *http.Request, dst any) bool {
 	return json.NewDecoder(r.Body).Decode(dst) == nil
 }
@@ -85,11 +66,16 @@ func (c *PropertyController) List(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	currentPage, perPage := httpx.NormalizePagination(req.CurrentPage, req.PerPage)
+	developerID, err := httpx.ParseOptionalID(req.DeveloperID)
+	if err != nil {
+		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid developer_id")
+		return
+	}
 	filter := repository.PropertyFilter{
-		Keyword:      strings.TrimSpace(req.Keyword),
+		Keyword: strings.TrimSpace(req.Keyword),
 		PropertyType: strings.TrimSpace(req.PropertyType),
-		DeveloperID:  parseOptionalID(req.DeveloperID),
-		Region:       strings.TrimSpace(req.Region),
+		DeveloperID: developerID,
+		Region: strings.TrimSpace(req.Region),
 	}
 	properties, total, err := c.usecase.List(filter, currentPage, perPage)
 	if err != nil {
@@ -169,13 +155,13 @@ func (c *PropertyController) BlockList(w http.ResponseWriter, r *http.Request) {
 		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid request body")
 		return
 	}
-	propertyID, ok := parseRequiredID(req.PropertyID)
-	if !ok {
-		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "property_id is required")
+	propertyID, err := httpx.ParseOptionalID(req.PropertyID)
+	if err != nil || propertyID == nil {
+		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "valid property_id is required")
 		return
 	}
 	currentPage, perPage := httpx.NormalizePagination(req.CurrentPage, req.PerPage)
-	blocks, total, err := c.usecase.ListBlocks(repository.BlockFilter{PropertyID: propertyID}, currentPage, perPage)
+	blocks, total, err := c.usecase.ListBlocks(repository.BlockFilter{PropertyID: *propertyID}, currentPage, perPage)
 	if err != nil {
 		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to list blocks")
 		return
@@ -189,13 +175,13 @@ func (c *PropertyController) FloorList(w http.ResponseWriter, r *http.Request) {
 		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid request body")
 		return
 	}
-	blockID, ok := parseRequiredID(req.BlockID)
-	if !ok {
-		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "block_id is required")
+	blockID, err := httpx.ParseOptionalID(req.BlockID)
+	if err != nil || blockID == nil {
+		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "valid block_id is required")
 		return
 	}
 	currentPage, perPage := httpx.NormalizePagination(req.CurrentPage, req.PerPage)
-	floors, total, err := c.usecase.ListFloors(repository.FloorFilter{BlockID: blockID}, currentPage, perPage)
+	floors, total, err := c.usecase.ListFloors(repository.FloorFilter{BlockID: *blockID}, currentPage, perPage)
 	if err != nil {
 		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to list floors")
 		return
@@ -210,12 +196,24 @@ func (c *PropertyController) UnitList(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	currentPage, perPage := httpx.NormalizePagination(req.CurrentPage, req.PerPage)
+	propertyID, err := httpx.ParseOptionalID(req.PropertyID)
+	if err != nil {
+		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid property_id")
+		return
+	}
+	blockID, err := httpx.ParseOptionalID(req.BlockID)
+	if err != nil {
+		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid block_id")
+		return
+	}
+	floorID, err := httpx.ParseOptionalID(req.FloorID)
+	if err != nil {
+		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid floor_id")
+		return
+	}
 	filter := repository.UnitFilter{
-		PropertyID: parseOptionalID(req.PropertyID),
-		BlockID:    parseOptionalID(req.BlockID),
-		FloorID:    parseOptionalID(req.FloorID),
-		Status:     strings.TrimSpace(req.Status),
-		Keyword:    strings.TrimSpace(req.Keyword),
+		PropertyID: propertyID, BlockID: blockID, FloorID: floorID,
+		Status: strings.TrimSpace(req.Status), Keyword: strings.TrimSpace(req.Keyword),
 	}
 	units, total, err := c.usecase.ListUnits(filter, currentPage, perPage)
 	if err != nil {
