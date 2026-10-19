@@ -2,6 +2,8 @@ package main
 
 import (
 	"log"
+
+	staffdelivery "backend/internal/staff/delivery"
 	"net/http"
 	"os"
 	"strings"
@@ -107,6 +109,7 @@ func main() {
 	propertyController := propertydelivery.NewPropertyController(propertyUsecase)
 	tenantController := tenantdelivery.NewTenantController(tenantUsecase)
 	dictionaryController := dictionarydelivery.NewDictionaryController(dictionaryUsecase)
+	staffController := staffdelivery.NewController(db)
 	contractController := contractdelivery.NewContractController(contractUsecase)
 	billController := billdelivery.NewBillController(billUsecase)
 
@@ -118,6 +121,9 @@ func main() {
 	mux.Handle("/api/v1/contract/", contractdelivery.NewContractRouter(contractController, tokenSecret, allowedOrigins))
 	mux.Handle("/api/v1/bill/", billdelivery.NewBillRouter(billController, tokenSecret, allowedOrigins))
 	mux.Handle("/api/v1/dictionary/", dictionarydelivery.NewDictionaryRouter(dictionaryController, tokenSecret, allowedOrigins))
+	mux.Handle("/api/v1/staff-account/", staffdelivery.NewRouter(staffController, tokenSecret, allowedOrigins))
+	mux.Handle("/api/v1/staff-department/", staffdelivery.NewRouter(staffController, tokenSecret, allowedOrigins))
+	mux.Handle("/api/v1/staff-position/", staffdelivery.NewRouter(staffController, tokenSecret, allowedOrigins))
 
 	log.Printf("API server listening on %s", serverAddress)
 	log.Fatal(http.ListenAndServe(serverAddress, mux))
