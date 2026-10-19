@@ -1,59 +1,38 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { locales, LocaleConfig } from "@/locales.config";
+import { usePathname as useRawPathname, useRouter as useRawRouter } from "next/navigation";
+import { defaultLocale, locales, type LocaleConfig } from "@/locales.config";
+import { getLocaleFromPathname, localizePath, stripLocale } from "@/i18n/routing";
+import zhMessages from "@/messages/zh.json";
+import enMessages from "@/messages/en.json";
 
 export type Locale = string;
 export type Messages = Record<string, string>;
 export type LocaleProperties = LocaleConfig & { messages: Messages };
 
-const configuredLocales = getConfiguredLocales();
-const messagesByCode = Object.fromEntries(
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  configuredLocales.map((locale) => [locale.code, require(`../messages/${locale.file}`) as Messages]),
-) as Record<string, Messages>;
-
-function getConfiguredLocales(): LocaleConfig[] {
-  try {
-    const publicLocales = process.env.NEXT_PUBLIC_LOCALES;
-    return publicLocales ? (JSON.parse(publicLocales) as LocaleConfig[]) : locales;
-  } catch {
-    return locales;
-  }
-}
+const messagesByCode: Record<string, Messages> = { zh: zhMessages, en: enMessages };
 
 export function useLocale() {
-  const defaultLocale = configuredLocales[0]?.code ?? "en";
-  const [locale, setLocaleState] = useState<Locale>(defaultLocale);
-
-  useEffect(() => {
-    const savedLocale = window.localStorage.getItem("locale");
-    if (savedLocale && configuredLocales.some((item) => item.code === savedLocale)) {
-      // The saved browser preference is applied after hydration.
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setLocaleState(savedLocale);
-    }
-  }, []);
+  const pathname = useRawPathname();
+  const router = useRawRouter();
+  const locale = getLocaleFromPathname(pathname);
 
   function setLocale(nextLocale: Locale) {
-    if (!configuredLocales.some((item) => item.code === nextLocale)) {
-      return;
-    }
-    setLocaleState(nextLocale);
-    window.localStorage.setItem("locale", nextLocale);
+    if (!messagesByCode[nextLocale]) return;
+    const query = typeof window === "undefined" ? "" : window.location.search;
+    const hash = typeof window === "undefined" ? "" : window.location.hash;
+    router.push(`${localizePath(stripLocale(pathname), nextLocale)}${query}${hash}`);
   }
 
-  const currentIndex = configuredLocales.findIndex((item) => item.code === locale);
-  const currentLanguage = configuredLocales[currentIndex] ?? configuredLocales[0];
-  const localeProperties: LocaleProperties = {
-    ...currentLanguage,
-    messages: messagesByCode[locale] ?? {},
-  };
+  const currentLanguage = locales.find((item) => item.code === locale) ?? locales.find((item) => item.code === defaultLocale)!;
+  const messages = messagesByCode[locale] ?? messagesByCode[defaultLocale];
+  const localeProperties: LocaleProperties = { ...currentLanguage, messages };
 
-  return {
-    locale,
-    locales: configuredLocales,
-    setLocale,
-    localeProperties,
-  };
+  function t(key: string, params?: Record<string, string | number>) {
+    const message = messages[key] ?? key;
+    if (!params) return message;
+    return message.replace(/\{(\w+)\}/g, (match, name) => name in params ? String(params[name]) : match);
+  }
+
+  return { locale, locales, setLocale, localeProperties, t };
 }
