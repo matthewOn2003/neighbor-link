@@ -77,6 +77,9 @@ func main() {
 	contractRepo := contractrepository.NewSQLiteRepository(db)
 	contractUsecase := contractusecase.NewContractUsecase(contractRepo)
 
+	billRepo := billrepository.NewSQLiteRepository(db)
+	billUsecase := billusecase.NewBillUsecase(billRepo)
+
 	dictionaryRepo, err := dictionaryrepository.NewSQLiteRepository(db)
 	if err != nil {
 		log.Fatalf("dictionary 仓库初始化失败: %v", err)
@@ -94,6 +97,7 @@ func main() {
 	tenantController := tenantdelivery.NewTenantController(tenantUsecase)
 	dictionaryController := dictionarydelivery.NewDictionaryController(dictionaryUsecase)
 	contractController := contractdelivery.NewContractController(contractUsecase)
+	billController := billdelivery.NewBillController(billUsecase)
 
 	// Routers
 	mux := http.NewServeMux()
@@ -101,6 +105,7 @@ func main() {
 	mux.Handle("/api/v1/property/", propertydelivery.NewPropertyRouter(propertyController, tokenSecret, allowedOrigins))
 	mux.Handle("/api/v1/tenant/", tenantdelivery.NewTenantRouter(tenantController, tokenSecret, allowedOrigins))
 	mux.Handle("/api/v1/contract/", contractdelivery.NewContractRouter(contractController, tokenSecret, allowedOrigins))
+	mux.Handle("/api/v1/bill/", billdelivery.NewBillRouter(billController, tokenSecret, allowedOrigins))
 	mux.Handle("/api/v1/dictionary/", dictionarydelivery.NewDictionaryRouter(dictionaryController, tokenSecret, allowedOrigins))
 
 	log.Printf("API server listening on %s", serverAddress)
