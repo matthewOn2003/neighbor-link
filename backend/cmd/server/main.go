@@ -47,6 +47,17 @@ func main() {
 		log.Fatalf("数据库迁移失败: %v", err)
 	}
 
+	// Demo contracts and bills are only seeded in explicitly configured development environments.
+	if strings.EqualFold(strings.TrimSpace(os.Getenv("APP_ENV")), "development") {
+		seedPath := strings.TrimSpace(os.Getenv("DEMO_SEED_PATH"))
+		if seedPath == "" {
+			seedPath = "seeds/demo_contracts_bills.sql"
+		}
+		if err := database.RunSQLFile(db, seedPath); err != nil {
+			log.Fatalf("开发环境 demo 数据初始化失败: %v", err)
+		}
+	}
+
 	userRepo, err := repository.NewSQLiteRepository(db)
 	if err != nil {
 		log.Fatalf("user 仓库初始化失败: %v", err)

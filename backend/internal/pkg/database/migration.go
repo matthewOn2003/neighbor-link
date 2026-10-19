@@ -121,3 +121,24 @@ func splitSQLStatements(script string) []string {
 
 	return statements
 }
+
+ 
+// RunSQLFile executes an SQL script without recording it as a schema migration.
+// It is intended for repeatable development seed scripts.
+func RunSQLFile(db *gorm.DB, filePath string) error {
+	content, err := os.ReadFile(filePath)
+	if err != nil {
+		return fmt.Errorf("failed to read SQL file %q: %w", filePath, err)
+	}
+	return db.Transaction(func(tx *gorm.DB) error {
+		for _, query := range splitSQLStatements(string(content)) {
+			if strings.TrimSpace(query) == "" {
+				continue
+			}
+			if err := tx.Exec(query).Error; err != nil {
+				return fmt.Errorf("failed to execute SQL in %s: %w", filePath, err)
+			}
+		}
+		return nil
+	})
+}
