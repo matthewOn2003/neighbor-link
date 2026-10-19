@@ -191,5 +191,10 @@
   "confirm_void_bill": "确定作废此账单吗？此操作无法撤销。",
   "bill_voided": "账单已作废",
   "bill_cannot_void": "账单已付款或部分付款，无法作废。",
-  "bill_voided_notice": "此账单已作废，不能再登记付款。"
+  "bill_voided_notice": "此账单已作废，不能再登记付款。",
+  "bills": "账单",
+  "view_details": "查看详情",
+  "pagination_summary": "第 {current}/{last} 页，共 {total} 条",
+  "previous": "上一页",
+  "next": "下一页"
 }
