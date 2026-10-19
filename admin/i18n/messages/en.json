@@ -191,5 +191,10 @@
   "confirm_void_bill": "Void this bill? This cannot be undone.",
   "bill_voided": "Bill voided",
   "bill_cannot_void": "This bill cannot be voided once paid or partially paid.",
-  "bill_voided_notice": "This bill has been voided and cannot receive payments."
+  "bill_voided_notice": "This bill has been voided and cannot receive payments.",
+  "bills": "Bills",
+  "view_details": "View details",
+  "pagination_summary": "Page {current} of {last} · {total} records",
+  "previous": "Previous",
+  "next": "Next"
 }
