@@ -1,3 +1,5 @@
+import { Spinner } from "./Spinner";
+
 export function FormActions({
   onCancel,
   submitLabel = "Save",
@@ -13,7 +15,7 @@ export function FormActions({
         Cancel
       </button>
       <button type="submit" className="btn btn-primary" disabled={loading}>
-        {loading ? "Saving…" : submitLabel}
+        {loading ? <span className="inline-flex items-center gap-2"><Spinner size="sm" label="Saving" /> Saving…</span> : submitLabel}
       </button>
     </div>
   );

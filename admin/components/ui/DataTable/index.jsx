@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useList } from "@/hooks/useList";
 import { useDragScroll } from "@/hooks/useDragScroll";
 import { Icon } from "../Icon";
+import { Spinner } from "../Spinner";
 
 export { SummaryCard } from "./SummaryCard";
 
@@ -68,7 +69,7 @@ export function DataTable({
   const message =
     status === "loading" ? (
       <span className="inline-flex items-center gap-2">
-        <Icon name="progress_activity" className="animate-spin" />
+        <Spinner size="sm" label="Loading" />
         Loading...
       </span>
     ) : status === "error" ? (

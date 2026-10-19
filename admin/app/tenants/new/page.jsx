@@ -7,6 +7,7 @@ import { useDropdown } from "@/hooks/useDropdown";
 import { request } from "@/services/request";
 import { useLocale } from "@/i18n";
 import { FormPage, FormSection, Select, Input, CopyableField, useToast } from "@/components/ui";
+import { Spinner } from "@/components/ui/Spinner";
 
 const EMPTY_FORM = { username: "", name: "", phone: "", email: "", property_id: "", unit_id: "", status: "active" };
 
@@ -106,7 +107,7 @@ export default function NewTenantPage() {
             {t("cancel")}
           </button>
           <button type="submit" className="btn btn-primary" disabled={saving}>
-            {saving ? t("saving") : t("create_tenant")}
+            {saving ? <><Spinner size="sm" label={t("saving")} /> {t("saving")}</> : t("create_tenant")}
           </button>
         </div>
       )}

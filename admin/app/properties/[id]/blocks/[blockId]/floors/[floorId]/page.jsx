@@ -3,6 +3,7 @@
 import { use } from "react";
 import { Link } from "@/i18n/navigation";
 import { Icon } from "@/components/ui/Icon";
+import { Spinner } from "@/components/ui/Spinner";
 import { DataTable } from "@/components/ui/DataTable";
 import { UnitStatusBadge } from "@/components/property/parts";
 import { useRequest } from "@/hooks/useRequest";
@@ -19,7 +20,7 @@ export default function FloorDetailPage({ params }) {
     return <main className="p-8 text-error">{error}</main>;
   }
   if (loading || !floor) {
-    return <main className="p-8 text-subtle">{t("loading")}</main>;
+    return <main className="flex justify-center p-8 text-subtle"><Spinner size="lg" label={t("loading")} /></main>;
   }
 
   return (
