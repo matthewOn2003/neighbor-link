@@ -27,6 +27,7 @@ import (
 	"backend/internal/user/delivery"
 	"backend/internal/user/repository"
 	"backend/internal/user/usecase"
+)
 
 func main() {
 	if err := godotenv.Load(); err != nil {
