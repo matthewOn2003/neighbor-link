@@ -8,13 +8,16 @@ import (
 
 	"github.com/joho/godotenv"
 
+	billdelivery "backend/internal/bill/delivery"
+	billrepository "backend/internal/bill/repository"
+	billusecase "backend/internal/bill/usecase"
+	contractdelivery "backend/internal/contract/delivery"
+	contractrepository "backend/internal/contract/repository"
+	contractusecase "backend/internal/contract/usecase"
 	dictionarydelivery "backend/internal/dictionary/delivery"
 	dictionaryrepository "backend/internal/dictionary/repository"
 	dictionaryusecase "backend/internal/dictionary/usecase"
 	"backend/internal/pkg/database"
-	contractdelivery "backend/internal/contract/delivery"
-	contractrepository "backend/internal/contract/repository"
-	contractusecase "backend/internal/contract/usecase"
 	propertydelivery "backend/internal/property/delivery"
 	propertyrepository "backend/internal/property/repository"
 	propertyusecase "backend/internal/property/usecase"
@@ -24,7 +27,6 @@ import (
 	"backend/internal/user/delivery"
 	"backend/internal/user/repository"
 	"backend/internal/user/usecase"
-)
 
 func main() {
 	if err := godotenv.Load(); err != nil {
