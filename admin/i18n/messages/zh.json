@@ -251,5 +251,7 @@
   "perm-users-add": "用户与权限 · 新增",
   "perm-users-update": "用户与权限 · 编辑",
   "perm-users-delete": "用户与权限 · 删除",
-  "perm-dashboard-list": "仪表盘 · 查看"
+  "perm-dashboard-list": "仪表盘 · 查看",
+  "contract_detail_description": "查看并更新此合同的租约条款。",
+  "bill_detail_description": "查看费用明细，并登记付款或作废账单。"
 }
