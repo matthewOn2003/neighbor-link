@@ -251,5 +251,7 @@
   "perm-users-add": "Users · Create",
   "perm-users-update": "Users · Update",
   "perm-users-delete": "Users · Delete",
-  "perm-dashboard-list": "Dashboard · View"
+  "perm-dashboard-list": "Dashboard · View",
+  "contract_detail_description": "Review and update the lease terms for this contract.",
+  "bill_detail_description": "Review the charge breakdown and record a payment or void the bill."
 }
