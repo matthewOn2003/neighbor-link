@@ -82,7 +82,7 @@ export default function PropertiesPage() {
 
   return (
     <main className="flex flex-col w-full">
-      <div className="p-8 space-y-6">
+      <div className="p-4 md:p-8 space-y-6">
         <div className="panel">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="space-y-1">

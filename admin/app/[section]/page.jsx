@@ -8,7 +8,7 @@ export default async function SectionPlaceholderPage({ params }) {
   if (!item) notFound();
 
   return (
-    <div className="p-8">
+    <div className="p-4 md:p-8">
       <div className="bg-accent rounded-xl p-8 shadow flex flex-col items-center text-center gap-2">
         <div className="w-12 h-12 rounded-xl bg-[#e5eeff] flex items-center justify-center text-primary-dark">
           <Icon name={item.icon} className="text-2xl" />

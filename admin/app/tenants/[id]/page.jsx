@@ -23,12 +23,12 @@ export default function TenantDetailPage({ params }) {
   const { data: tenant, loading, error } = useRequest(`/tenant/detail/${id}`);
 
   if (loading) {
-    return <main className="p-8"><div className="flex min-h-48 items-center justify-center"><Spinner size="lg" /></div></main>;
+    return <main className="p-4 md:p-8"><div className="flex min-h-48 items-center justify-center"><Spinner size="lg" /></div></main>;
   }
 
   if (error || !tenant) {
     return (
-      <main className="p-8">
+      <main className="p-4 md:p-8">
         <div role="alert" className="rounded-xl border border-error/30 bg-error/5 p-5">
           <h1 className="font-semibold text-scene-content">Unable to load tenant</h1>
           <p className="mt-1 text-sm text-subtle">{error || "Tenant not found."}</p>

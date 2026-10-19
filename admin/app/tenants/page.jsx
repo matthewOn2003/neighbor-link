@@ -57,7 +57,7 @@ export default function TenantsPage() {
 
   return (
     <main className="flex flex-col w-full">
-      <div className="p-8 space-y-6">
+      <div className="p-4 md:p-8 space-y-6">
         <DataTable
           api="/tenant/list"
           params={params}
