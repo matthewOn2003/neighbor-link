@@ -91,7 +91,7 @@ export function DataTable({
           <h1 className="text-3xl font-semibold text-scene-content">{title}</h1>
           <p className="text-sm font-normal text-subtle">{description}</p>
         </div>
-        <div className="flex items-center gap-3">{buttons}</div>
+        <div className="flex flex-wrap items-center gap-3">{buttons}</div>
       </div>
 
       {/* summary */}

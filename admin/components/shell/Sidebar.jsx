@@ -10,14 +10,19 @@ const ACTIVE =
 const IDLE =
   "text-sm text-subtle hover:bg-primary/10 hover:text-[#0b1c30]";
 
-export default function Sidebar() {
+export default function Sidebar({ open = false, onClose }) {
   const pathname = usePathname();
   const { t } = useLocale();
 
+  // Hidden off-canvas below md; a drawer toggled from the header.
+  const visibility = open ? "translate-x-0" : "-translate-x-full";
+
   return (
-    <aside className="fixed left-0 top-0 h-full w-64 bg-accent z-50 flex flex-col justify-between shadow">
+    <aside
+      className={`fixed left-0 top-0 h-full w-64 bg-accent z-50 flex flex-col justify-between shadow overflow-hidden transition-transform duration-200 ${visibility} md:translate-x-0`}
+    >
       <div className="flex flex-col">
-        <Link href="/dashboard" className="flex items-center gap-2 h-16 px-6">
+        <Link href="/dashboard" onClick={onClose} className="flex items-center gap-2 h-16 px-6">
           <img alt="NeighborLink Logo" className="h-8 w-auto object-contain" src="/stitch/logo.png" />
           <div className="flex flex-col">
             <span className="text-lg text-scene-content font-bold">NeighborLink</span>
@@ -32,6 +37,7 @@ export default function Sidebar() {
                 key={item.key}
                 href={item.href}
                 aria-current={active ? "page" : undefined}
+                onClick={onClose}
                 className={`flex items-center gap-3 px-5 py-3 transition-all rounded-lg font-semibold ${active ? ACTIVE : IDLE}`}
               >
                 <Icon name={item.icon} className="text-[20px]" />

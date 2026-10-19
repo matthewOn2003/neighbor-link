@@ -16,7 +16,7 @@ export default function BlockDetailPage({ params }) {
   const floors = floorData?.list ?? [];
 
   if (error) {
-    return <main className="p-8 text-error">{error}</main>;
+    return <main className="p-4 md:p-8 text-error">{error}</main>;
   }
   if (loading || !block) {
     return <main className="flex justify-center p-8 text-subtle"><Spinner size="lg" label={t("loading")} /></main>;
@@ -24,7 +24,7 @@ export default function BlockDetailPage({ params }) {
 
   return (
     <main className="flex flex-col w-full">
-      <div className="p-8 space-y-6">
+      <div className="p-4 md:p-8 space-y-6">
         <nav className="flex items-center gap-1 text-sm text-subtle">
           <Link className="hover:text-primary-dark" href="/properties">{t("properties")}</Link>
           <Icon name="chevron_right" className="text-base" />

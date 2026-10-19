@@ -10,8 +10,8 @@ const money=v=>"RM "+Number(v||0).toLocaleString(undefined,{minimumFractionDigit
 const statusKeys={unpaid:"bill_status_unpaid",partial:"bill_status_partial",paid:"bill_status_paid",overdue:"bill_status_overdue",void:"bill_status_void"};
 export default function BillDetailPage({params}){
  const {id}=use(params);const {t}=useLocale();const toast=useToast();const {data,loading,error,reload}=useRequest("/bill/detail/"+id);const [amount,setAmount]=useState("");const [method,setMethod]=useState("bank_transfer");const [reference,setReference]=useState("");const [paidAt,setPaidAt]=useState(new Date().toISOString().slice(0,10));const [saving,setSaving]=useState(false);
- if(loading)return <main className="p-8"><div className="flex min-h-48 items-center justify-center"><Spinner size="lg"/></div></main>;
- if(error||!data)return <main className="p-8"><p role="alert" className="text-error">{error||t("bill_not_found")}</p><Link href="/bills" className="mt-4 inline-block text-primary-dark">{t("back_to_bills")}</Link></main>;
+ if(loading)return <main className="p-4 md:p-8"><div className="flex min-h-48 items-center justify-center"><Spinner size="lg"/></div></main>;
+ if(error||!data)return <main className="p-4 md:p-8"><p role="alert" className="text-error">{error||t("bill_not_found")}</p><Link href="/bills" className="mt-4 inline-block text-primary-dark">{t("back_to_bills")}</Link></main>;
  const total=Number(data.amount)+Number(data.late_fee),outstanding=Math.max(0,total-Number(data.amount_paid));
  async function pay(e){e.preventDefault();setSaving(true);try{await request("/bill/payment/"+id,{amount:Number(amount),method,reference:reference.trim(),paid_at:paidAt});toast.success(t("payment_recorded"));setAmount("");setReference("");reload()}catch(e){toast.error(e.code==="INVALID_PAYMENT"?t("invalid_payment"):t("payment_failed"))}finally{setSaving(false)}}
  async function voidBill(){if(!window.confirm(t("confirm_void_bill")))return;setSaving(true);try{await request("/bill/void/"+id,{});toast.success(t("bill_voided"));reload()}catch(e){toast.error(t("bill_cannot_void"))}finally{setSaving(false)}}

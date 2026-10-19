@@ -18,7 +18,7 @@ export default function PropertyDetailPage({ params }) {
   const { labelOf } = useDropdown(["property_type"]);
 
   if (error) {
-    return <main className="p-8 text-error">{error}</main>;
+    return <main className="p-4 md:p-8 text-error">{error}</main>;
   }
   if (loading || !property) {
     return <main className="flex justify-center p-8 text-subtle"><Spinner size="lg" label={t("loading")} /></main>;
@@ -29,7 +29,7 @@ export default function PropertyDetailPage({ params }) {
 
   return (
     <main className="flex flex-col w-full">
-      <div className="p-8 space-y-6">
+      <div className="p-4 md:p-8 space-y-6">
         <Link className="inline-flex items-center gap-1 text-sm text-subtle hover:text-primary-dark" href="/properties">
           <Icon name="arrow_back" className="text-lg" />
           <span>{t("back_to_properties")}</span>
