@@ -50,3 +50,15 @@ func(c *BillController)Void(w http.ResponseWriter,r *http.Request){
 func(c *BillController)ActiveContracts(w http.ResponseWriter,r *http.Request){
  rows,err:=c.uc.ActiveContracts();if err!=nil{response.WriteError(w,500,"INTERNAL_ERROR","failed to load active contracts");return};response.WriteSuccess(w,200,rows)
 }
+
+type generateRequest struct { BillingPeriod string `json:"billing_period"` }
+func (c *BillController) Generate(w http.ResponseWriter, r *http.Request) {
+ var q generateRequest
+ if json.NewDecoder(r.Body).Decode(&q) != nil { response.WriteError(w, 400, "INVALID_INPUT", "invalid request body"); return }
+ count, err := c.uc.Generate(strings.TrimSpace(q.BillingPeriod))
+ if err != nil {
+  if errors.Is(err, repository.ErrInvalidBill) { response.WriteError(w, 400, "INVALID_PERIOD", "invalid billing period") } else { response.WriteError(w, 500, "INTERNAL_ERROR", "failed to generate bills") }
+  return
+ }
+ response.WriteSuccess(w, 200, map[string]int64{"generated_count": count})
+}

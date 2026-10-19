@@ -132,3 +132,16 @@ func (r *SQLiteRepository) Void(id uint)error {
  result:=r.db.Model(&Bill{}).Where("id = ? AND status <> 'void' AND amount_paid = 0",id).Update("status","void")
  if result.Error!=nil{return result.Error};if result.RowsAffected==0{var b Bill;if err:=r.db.First(&b,id).Error;err!=nil{return ErrNotFound};return ErrAlreadyVoided};return nil
 }
+
+func (r *SQLiteRepository) Generate(period string) (int64, error) {
+ firstDay := period + "-01"
+ result := r.db.Exec(`INSERT OR IGNORE INTO bills
+  (contract_id, tenant_id, billing_period, due_date, amount, late_fee, amount_paid, status, issued_at, notes, created_at, updated_at)
+  SELECT c.id, c.tenant_id, ?, date(?, printf('+%d days', c.billing_day - 1)),
+   c.monthly_rent, 0, 0,
+   CASE WHEN date(?, printf('+%d days', c.billing_day - 1)) < date('now') THEN 'overdue' ELSE 'unpaid' END,
+   date('now'), 'Generated monthly bill', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+  FROM contracts c WHERE c.status = 'active'`,
+  period, firstDay, firstDay, 0)
+ return result.RowsAffected, result.Error
+}
