@@ -15,13 +15,13 @@ type TenantRouter struct {
 func NewTenantRouter(controller *TenantController, tokenSecret string, allowedOrigins []string) http.Handler {
 	mux := http.NewServeMux()
 
-	authMiddleware := middleware.RequireAuth(tokenSecret, userdelivery.VerifyToken)
+	adminMiddleware := middleware.RequireRole(tokenSecret, userdelivery.VerifyToken, "admin")
 
-	mux.HandleFunc("POST /api/v1/tenant/list", authMiddleware(controller.List))
-	mux.HandleFunc("POST /api/v1/tenant/detail/{id}", authMiddleware(controller.Detail))
-	mux.HandleFunc("POST /api/v1/tenant/create", authMiddleware(controller.Create))
-	mux.HandleFunc("POST /api/v1/tenant/update/{id}", authMiddleware(controller.Update))
-	mux.HandleFunc("POST /api/v1/tenant/delete/{id}", authMiddleware(controller.Delete))
+	mux.HandleFunc("POST /api/v1/tenant/list", adminMiddleware(controller.List))
+	mux.HandleFunc("POST /api/v1/tenant/detail/{id}", adminMiddleware(controller.Detail))
+	mux.HandleFunc("POST /api/v1/tenant/create", adminMiddleware(controller.Create))
+	mux.HandleFunc("POST /api/v1/tenant/update/{id}", adminMiddleware(controller.Update))
+	mux.HandleFunc("POST /api/v1/tenant/delete/{id}", adminMiddleware(controller.Delete))
 
 	return middleware.WithCORS(mux, allowedOrigins)
 }
