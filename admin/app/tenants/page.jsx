@@ -128,7 +128,7 @@ export default function TenantsPage() {
               <th>{t("monthly_rent")}</th>
               <th>{t("outstanding_balance")}</th>
               <th>{t("status")}</th>
-              <th className="sticky-right">{t("action")}</th>
+              <th>{t("action")}</th>
             </tr>
           )}
           body={({ rows }) =>
@@ -225,7 +225,7 @@ export default function TenantsPage() {
                       {status?.label ?? tenant.status}
                     </span>
                   </td>
-                  <td className="sticky-right">
+                  <td>
                     <div className="inline-flex items-center gap-2">
                       <Link
                         className="p-2 text-subtle hover:text-primary-dark"
