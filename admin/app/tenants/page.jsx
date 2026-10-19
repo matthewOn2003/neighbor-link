@@ -7,6 +7,7 @@ import { Icon } from "@/components/ui/Icon";
 import { DataTable } from "@/components/ui/DataTable";
 import { SearchBar } from "@/components/ui/SearchBar";
 import { Checkbox } from "@/components/ui/Checkbox";
+import { Select } from "@/components/ui/Select";
 import { useRequest } from "@/hooks/useRequest";
 import { useDropdown } from "@/hooks/useDropdown";
 import { useSelection } from "@/hooks/useSelection";
@@ -78,29 +79,25 @@ export default function TenantsPage() {
                 placeholder={t("search_tenants")}
               />
 
-              <select
-                className="dropdown w-auto min-w-[160px]"
-                aria-label={t("status")}
-                value={filters.status}
-                onChange={(event) => setFilters({ ...filters, status: event.target.value })}
-              >
-                <option value="">{t("all_statuses")}</option>
-                {statusOptions.map((o) => (
-                  <option key={o.value} value={o.value}>{o.label}</option>
-                ))}
-              </select>
+              <div className="min-w-[160px]">
+                <Select
+                  label={t("status")}
+                  name="tenant-status-filter"
+                  value={filters.status}
+                  onChange={(status) => setFilters((current) => ({ ...current, status }))}
+                  options={[{ value: "", label: t("all_statuses") }, ...statusOptions]}
+                />
+              </div>
 
-              <select
-                className="dropdown w-auto min-w-[180px]"
-                aria-label={t("property_and_unit")}
-                value={filters.property_id}
-                onChange={(event) => setFilters({ ...filters, property_id: event.target.value })}
-              >
-                <option value="">{t("all_properties")}</option>
-                {propertyOptions.map((p) => (
-                  <option key={p.id} value={String(p.id)}>{p.name}</option>
-                ))}
-              </select>
+              <div className="min-w-[180px]">
+                <Select
+                  label={t("property_and_unit")}
+                  name="tenant-property-filter"
+                  value={filters.property_id}
+                  onChange={(property_id) => setFilters((current) => ({ ...current, property_id }))}
+                  options={[{ value: "", label: t("all_properties") }, ...propertyOptions.map((property) => ({ value: String(property.id), label: property.name }))]}
+                />
+              </div>
 
               {hasActiveFilters ? (
                 <button className="btn btn-outline" type="button" onClick={resetFilters}>
