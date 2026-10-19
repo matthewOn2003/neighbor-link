@@ -3,13 +3,9 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Neighbor Link | Tenant Portal",
-  description: "Access your rental information and tenant services with Neighbor Link.",
+  description: "Tenant portal for rental information, billing, and resident services.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
-  return (
-    <html lang="en">
-      <body>{children}</body>
-    </html>
-  );
+  return <html lang="en"><body>{children}</body></html>;
 }
