@@ -64,6 +64,9 @@ func main() {
 	if err := userUsecase.SeedUser("tenant", tenantPassword, "tenant"); err != nil {
 		log.Fatalf("初始化 tenant 账号失败: %v", err)
 	}
+	if err := staffdelivery.SeedRootAdmin(db, "admin"); err != nil {
+		log.Fatalf("初始化 admin 员工账号失败: %v", err)
+	}
 
 	// Demo contracts and bills are only seeded in explicitly configured development environments.
 	// This runs after the accounts exist so the demo seed can link the "tenant" login to a tenant profile.
