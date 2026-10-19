@@ -2,6 +2,7 @@
 
 import { Link } from "@/i18n/navigation";
 import { useEffect, useState } from "react";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { Icon } from "@/components/ui/Icon";
 import { DataTable } from "@/components/ui/DataTable";
 import { SearchBar } from "@/components/ui/SearchBar";
@@ -44,10 +45,8 @@ export default function TenantsPage() {
   const hasActiveFilters = keywordInput.trim() !== "" || filters.status !== "" || filters.property_id !== "";
 
   // 输入停止 300ms 后才更新查询条件，避免每个字符都发请求
-  useEffect(() => {
-    const timer = setTimeout(() => setFilters((f) => ({ ...f, keyword: keywordInput })), 300);
-    return () => clearTimeout(timer);
-  }, [keywordInput]);
+  const debouncedKeyword = useDebouncedValue(keywordInput, 300);
+  useEffect(() => setFilters((f) => ({ ...f, keyword: debouncedKeyword })), [debouncedKeyword]);
 
   const resetFilters = () => {
     setKeywordInput("");
