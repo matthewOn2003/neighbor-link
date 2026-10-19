@@ -25,6 +25,7 @@ import (
 	propertyusecase "backend/internal/property/usecase"
 	tenantdelivery "backend/internal/tenant/delivery"
 	tenantrepository "backend/internal/tenant/repository"
+	"backend/internal/tenantportal"
 	tenantusecase "backend/internal/tenant/usecase"
 	"backend/internal/user/delivery"
 	"backend/internal/user/repository"
@@ -49,17 +50,6 @@ func main() {
 		log.Fatalf("数据库迁移失败: %v", err)
 	}
 
-	// Demo contracts and bills are only seeded in explicitly configured development environments.
-	if strings.EqualFold(strings.TrimSpace(os.Getenv("APP_ENV")), "development") {
-		seedPath := strings.TrimSpace(os.Getenv("DEMO_SEED_PATH"))
-		if seedPath == "" {
-			seedPath = "seeds/demo_contracts_bills.sql"
-		}
-		if err := database.RunSQLFile(db, seedPath); err != nil {
-			log.Fatalf("开发环境 demo 数据初始化失败: %v", err)
-		}
-	}
-
 	userRepo, err := repository.NewSQLiteRepository(db)
 	if err != nil {
 		log.Fatalf("user 仓库初始化失败: %v", err)
@@ -73,6 +63,18 @@ func main() {
 	}
 	if err := userUsecase.SeedUser("tenant", tenantPassword, "tenant"); err != nil {
 		log.Fatalf("初始化 tenant 账号失败: %v", err)
+	}
+
+	// Demo contracts and bills are only seeded in explicitly configured development environments.
+	// This runs after the accounts exist so the demo seed can link the "tenant" login to a tenant profile.
+	if strings.EqualFold(strings.TrimSpace(os.Getenv("APP_ENV")), "development") {
+		seedPath := strings.TrimSpace(os.Getenv("DEMO_SEED_PATH"))
+		if seedPath == "" {
+			seedPath = "seeds/demo_contracts_bills.sql"
+		}
+		if err := database.RunSQLFile(db, seedPath); err != nil {
+			log.Fatalf("开发环境 demo 数据初始化失败: %v", err)
+		}
 	}
 
 	propertyRepo, err := propertyrepository.NewSQLiteRepository(db)
@@ -110,6 +112,7 @@ func main() {
 	tenantController := tenantdelivery.NewTenantController(tenantUsecase)
 	dictionaryController := dictionarydelivery.NewDictionaryController(dictionaryUsecase)
 	staffController := staffdelivery.NewController(db)
+	tenantPortalController := tenantportal.NewController(db, tokenSecret)
 	contractController := contractdelivery.NewContractController(contractUsecase)
 	billController := billdelivery.NewBillController(billUsecase)
 
@@ -124,6 +127,7 @@ func main() {
 	mux.Handle("/api/v1/staff-account/", staffdelivery.NewRouter(staffController, tokenSecret, allowedOrigins))
 	mux.Handle("/api/v1/staff-department/", staffdelivery.NewRouter(staffController, tokenSecret, allowedOrigins))
 	mux.Handle("/api/v1/staff-position/", staffdelivery.NewRouter(staffController, tokenSecret, allowedOrigins))
+	mux.Handle("/api/v1/tenant-portal/", tenantportal.NewRouter(tenantPortalController, tokenSecret, allowedOrigins))
 
 	log.Printf("API server listening on %s", serverAddress)
 	log.Fatal(http.ListenAndServe(serverAddress, mux))

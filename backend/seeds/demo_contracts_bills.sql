@@ -1,3 +1,12 @@
+-- Demo tenant profile for the development "tenant" login, so the tenant portal has data.
+INSERT INTO tenants (user_id, name, phone, email, property_id, status, city, monthly_rent, outstanding_balance, balance_note, created_at, updated_at)
+SELECT u.id, 'Demo Tenant', '+60 12-000 0000', 'tenant@example.com',
+       (SELECT id FROM properties ORDER BY id LIMIT 1), 'active', 'Kuala Lumpur, MY', 1800, 0, '',
+       CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+FROM auth_users u
+WHERE u.username = 'tenant' AND u.role = 'tenant'
+  AND NOT EXISTS (SELECT 1 FROM tenants t WHERE t.user_id = u.id);
+
 -- Demo lease records: only populate tenants that do not already have a contract.
 INSERT INTO contracts (tenant_id, property_id, unit_id, start_date, end_date, monthly_rent, security_deposit, billing_day, status, notes, created_at, updated_at)
 SELECT t.id, t.property_id, t.unit_id,
