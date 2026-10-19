@@ -44,15 +44,24 @@ func NewSQLiteRepository(db *gorm.DB) (*SQLiteRepository, error) {
 	return &SQLiteRepository{db: db}, nil
 }
 
+func (r *SQLiteRepository) Transaction(fn func(*gorm.DB) error) error {
+	return r.db.Transaction(fn)
+}
+
 func (r *SQLiteRepository) Create(t *Tenant) error {
-	return r.db.Transaction(func(tx *gorm.DB) error {
-		if t.UnitID != nil {
-			if err := occupyUnit(tx, t); err != nil {
-				return err
-			}
-		}
-		return tx.Create(t).Error
+	return r.Transaction(func(tx *gorm.DB) error {
+		return r.CreateInTx(tx, t)
 	})
+}
+
+// CreateInTx creates a tenant and updates unit occupancy within the caller's transaction.
+func (r *SQLiteRepository) CreateInTx(tx *gorm.DB, t *Tenant) error {
+	if t.UnitID != nil {
+		if err := occupyUnit(tx, t); err != nil {
+			return err
+		}
+	}
+	return tx.Create(t).Error
 }
 
 func (r *SQLiteRepository) FindByID(id uint) (*Tenant, error) {
