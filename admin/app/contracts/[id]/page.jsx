@@ -1,5 +1,5 @@
 "use client";
-import{use,useEffect,useState}from"react";import{Link}from"@/i18n/navigation";import{useRequest}from"@/hooks/useRequest";import{request}from"@/services/request";import{useLocale}from"@/i18n";import{Spinner}from"@/components/ui/Spinner";import{useToast}from"@/components/ui";
+import{use,useState}from"react";import{Link}from"@/i18n/navigation";import{useRequest}from"@/hooks/useRequest";import{request}from"@/services/request";import{useLocale}from"@/i18n";import{Spinner}from"@/components/ui/Spinner";import{useToast}from"@/components/ui";
 const keys={draft:"contract_status_draft",active:"contract_status_active",expired:"contract_status_expired",terminated:"contract_status_terminated"};
 export default function ContractDetailPage({params}){const{id}=use(params),{t}=useLocale(),toast=useToast(),{data,loading,error,reload}=useRequest("/contract/detail/"+id),[f,S]=useState(null),[saving,ss]=useState(false);
 useEffect(()=>{if(data)S({tenant_id:String(data.tenant_id),start_date:data.start_date,end_date:data.end_date,monthly_rent:String(data.monthly_rent),security_deposit:String(data.security_deposit),billing_day:String(data.billing_day),status:data.status,notes:data.notes||""})},[data]);
