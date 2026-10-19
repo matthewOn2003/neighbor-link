@@ -6,6 +6,8 @@ import (
 
 	"backend/internal/tenant/repository"
 	userusecase "backend/internal/user/usecase"
+
+	"gorm.io/gorm"
 )
 
 const generatedPasswordLength = 12
@@ -36,35 +38,26 @@ func generatePassword() (string, error) {
 // CreateTenant creates the auth_users login account and the tenant record together,
 // returning the one-time plaintext password so it can be surfaced to the caller.
 func (uc *TenantUsecase) CreateTenant(username, name, phone, email string, propertyID, unitID *uint, status string) (*repository.Tenant, string, error) {
-	if unitID != nil {
-		if err := uc.repo.ValidateVacantUnit(*unitID); err != nil {
-			return nil, "", err
-		}
-	}
-
 	password, err := generatePassword()
 	if err != nil {
 		return nil, "", err
 	}
-
-	user, err := uc.userUC.CreateUser(username, password, "tenant")
-	if err != nil {
-		return nil, "", err
-	}
-
 	if status == "" {
 		status = "active"
 	}
 	tenant := &repository.Tenant{
-		UserID:     user.ID,
-		Name:       name,
-		Phone:      phone,
-		Email:      email,
-		PropertyID: propertyID,
-		UnitID:     unitID,
-		Status:     status,
+		Name: name, Phone: phone, Email: email, PropertyID: propertyID,
+		UnitID: unitID, Status: status,
 	}
-	if err := uc.repo.Create(tenant); err != nil {
+	err = uc.repo.Transaction(func(tx *gorm.DB) error {
+		user, err := uc.userUC.CreateUserInTx(tx, username, password, "tenant")
+		if err != nil {
+			return err
+		}
+		tenant.UserID = user.ID
+		return uc.repo.CreateInTx(tx, tenant)
+	})
+	if err != nil {
 		return nil, "", err
 	}
 	return tenant, password, nil
@@ -105,26 +98,24 @@ func (uc *TenantUsecase) SeedTenants(tenants []SeedTenant) error {
 	if total > 0 {
 		return nil
 	}
-	for _, seed := range tenants {
-		user, err := uc.userUC.CreateUser(seed.Username, seed.Password, "tenant")
-		if err != nil {
-			return err
+	return uc.repo.Transaction(func(tx *gorm.DB) error {
+		for _, seed := range tenants {
+			status := seed.Status
+			if status == "" {
+				status = "active"
+			}
+			user, err := uc.userUC.CreateUserInTx(tx, seed.Username, seed.Password, "tenant")
+			if err != nil {
+				return err
+			}
+			tenant := &repository.Tenant{
+				UserID: user.ID, Name: seed.Name, Phone: seed.Phone,
+				Email: seed.Email, PropertyID: seed.PropertyID, Status: status,
+			}
+			if err := uc.repo.CreateInTx(tx, tenant); err != nil {
+				return err
+			}
 		}
-		status := seed.Status
-		if status == "" {
-			status = "active"
-		}
-		tenant := &repository.Tenant{
-			UserID:     user.ID,
-			Name:       seed.Name,
-			Phone:      seed.Phone,
-			Email:      seed.Email,
-			PropertyID: seed.PropertyID,
-			Status:     status,
-		}
-		if err := uc.repo.Create(tenant); err != nil {
-			return err
-		}
-	}
-	return nil
+		return nil
+	})
 }

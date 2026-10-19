@@ -41,6 +41,27 @@ func (uc *UserUsecase) FindByUsername(username string) (*repository.User, error)
 
 var ErrUsernameTaken = errors.New("username already taken")
 
+// CreateUserInTx hashes the password and inserts the auth account in the caller's transaction.
+func (uc *UserUsecase) CreateUserInTx(tx *gorm.DB, username, password, role string) (*repository.User, error) {
+	var existing repository.User
+	err := tx.Where("username = ?", username).First(&existing).Error
+	if err == nil {
+		return nil, ErrUsernameTaken
+	}
+	if !errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, err
+	}
+	passwordHash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return nil, err
+	}
+	user := &repository.User{Username: username, PasswordHash: string(passwordHash), Role: role}
+	if err := tx.Create(user).Error; err != nil {
+		return nil, err
+	}
+	return user, nil
+}
+
 // CreateUser hashes the password and inserts a new auth_users record with the given role.
 func (uc *UserUsecase) CreateUser(username, password, role string) (*repository.User, error) {
 	_, err := uc.repo.FindByUsername(username)
