@@ -12,6 +12,9 @@ import (
 	dictionaryrepository "backend/internal/dictionary/repository"
 	dictionaryusecase "backend/internal/dictionary/usecase"
 	"backend/internal/pkg/database"
+	contractdelivery "backend/internal/contract/delivery"
+	contractrepository "backend/internal/contract/repository"
+	contractusecase "backend/internal/contract/usecase"
 	propertydelivery "backend/internal/property/delivery"
 	propertyrepository "backend/internal/property/repository"
 	propertyusecase "backend/internal/property/usecase"
@@ -68,6 +71,9 @@ func main() {
 	}
 	tenantUsecase := tenantusecase.NewTenantUsecase(tenantRepo, userUsecase)
 
+	contractRepo := contractrepository.NewSQLiteRepository(db)
+	contractUsecase := contractusecase.NewContractUsecase(contractRepo)
+
 	dictionaryRepo, err := dictionaryrepository.NewSQLiteRepository(db)
 	if err != nil {
 		log.Fatalf("dictionary 仓库初始化失败: %v", err)
@@ -84,12 +90,14 @@ func main() {
 	propertyController := propertydelivery.NewPropertyController(propertyUsecase)
 	tenantController := tenantdelivery.NewTenantController(tenantUsecase)
 	dictionaryController := dictionarydelivery.NewDictionaryController(dictionaryUsecase)
+	contractController := contractdelivery.NewContractController(contractUsecase)
 
 	// Routers
 	mux := http.NewServeMux()
 	mux.Handle("/", delivery.NewUserRouter(userController, tokenSecret, allowedOrigins))
 	mux.Handle("/api/v1/property/", propertydelivery.NewPropertyRouter(propertyController, tokenSecret, allowedOrigins))
 	mux.Handle("/api/v1/tenant/", tenantdelivery.NewTenantRouter(tenantController, tokenSecret, allowedOrigins))
+	mux.Handle("/api/v1/contract/", contractdelivery.NewContractRouter(contractController, tokenSecret, allowedOrigins))
 	mux.Handle("/api/v1/dictionary/", dictionarydelivery.NewDictionaryRouter(dictionaryController, tokenSecret, allowedOrigins))
 
 	log.Printf("API server listening on %s", serverAddress)
