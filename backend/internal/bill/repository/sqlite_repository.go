@@ -107,6 +107,7 @@ func (r *SQLiteRepository) Create(b *Bill)error {
   now:=time.Now().Format("2006-01-02")
   b.IssuedAt=&now
   b.Status="unpaid"
+  if b.DueDate < time.Now().Format("2006-01-02") { b.Status="overdue" }
   if err:=tx.Create(b).Error;err!=nil{
    if strings.Contains(strings.ToLower(err.Error()),"unique constraint"){return ErrDuplicatePeriod};return err
   }
