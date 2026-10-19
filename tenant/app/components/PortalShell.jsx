@@ -1,13 +1,22 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useApi } from "@/lib/useApi";
 import { useLocale } from "@/lib/i18n";
 import LangSelect from "@/app/components/LangSelect";
 
+const navItems = [
+  { href: "/dashboard", key: "dashboard", icon: "▦" },
+  { href: "/property", key: "navProperty", icon: "⌂" },
+  { href: "/lease", key: "navLease", icon: "▤" },
+  { href: "/billing", key: "navBilling", icon: "＄" },
+  { href: "/support", key: "navSupport", icon: "♡" },
+];
+
 export default function PortalShell({ children }) {
   const router = useRouter();
+  const pathname = usePathname();
   const api = useApi();
   const { localeProperties } = useLocale();
   const text = localeProperties.messages;
@@ -25,6 +34,12 @@ export default function PortalShell({ children }) {
     } finally {
       setLoggingOut(false);
     }
+  }
+
+  function navClass(href) {
+    const active = pathname === href || (href !== "/dashboard" && pathname.startsWith(href + "/"));
+    return "flex shrink-0 items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold transition " +
+      (active ? "bg-[#edf4f0] text-[#18322e]" : "text-[#71827c] hover:bg-[#f4f7f5] hover:text-[#18322e]");
   }
 
   return (
@@ -47,13 +62,17 @@ export default function PortalShell({ children }) {
         </div>
       </header>
 
+      <div className="mx-auto max-w-7xl px-4 pt-4 sm:px-6 lg:hidden">
+        <nav aria-label={text.workspace} className="flex gap-1 overflow-x-auto rounded-2xl border border-[#e0e8e4] bg-white p-2 shadow-sm">
+          {navItems.map((item) => <a key={item.href} href={item.href} aria-current={pathname === item.href ? "page" : undefined} className={navClass(item.href)}><span aria-hidden="true">{item.icon}</span>{text[item.key]}</a>)}
+        </nav>
+      </div>
+
       <div className="mx-auto grid max-w-7xl gap-6 px-4 py-6 sm:px-6 sm:py-8 lg:grid-cols-[220px_minmax(0,1fr)] lg:px-8">
         <aside className="hidden lg:block">
           <nav aria-label={text.workspace} className="sticky top-24 rounded-2xl border border-[#e0e8e4] bg-white p-3 shadow-sm">
             <p className="px-3 pb-3 pt-2 text-xs font-bold uppercase tracking-wider text-[#83918c]">{text.workspace}</p>
-            <a href="/dashboard" aria-current="page" className="flex items-center gap-3 rounded-xl bg-[#edf4f0] px-3 py-3 text-sm font-semibold text-[#18322e]">
-              <span aria-hidden="true">▦</span>{text.dashboard}
-            </a>
+            {navItems.map((item) => <a key={item.href} href={item.href} aria-current={pathname === item.href ? "page" : undefined} className={navClass(item.href)}><span className="w-5 text-center" aria-hidden="true">{item.icon}</span>{text[item.key]}</a>)}
             <p className="px-3 pb-1 pt-6 text-xs font-bold uppercase tracking-wider text-[#83918c]">{text.yourHome}</p>
             <p className="px-3 py-2 text-sm leading-6 text-[#71827c]">{text.dashboardNavDescription}</p>
           </nav>
