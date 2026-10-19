@@ -20,7 +20,7 @@ func NormalizePagination(currentPage, perPage int) (int, int) {
 	return currentPage, perPage
 }
 
-// ParseIDParam parses the standard path parameter named "id".
+// ParseID parses a numeric ID from a string.
 func ParseID(raw string) (uint, error) {
 	id, err := strconv.ParseUint(raw, 10, 64)
 	if err != nil {

@@ -4,9 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
-		"strings"
+	"strings"
 
-	"backend/internal/pkg/httpx"
 	"backend/internal/pkg/httpx"
 	"backend/internal/pkg/response"
 	"backend/internal/tenant/repository"
@@ -14,7 +13,6 @@ import (
 
 	"gorm.io/gorm"
 )
-
 
 type TenantController struct {
 	usecase *usecase.TenantUsecase
@@ -134,7 +132,7 @@ type tenantUpdateRequest struct {
 }
 
 func (c *TenantController) Update(w http.ResponseWriter, r *http.Request) {
-	id, err := parseIDParam(r)
+	id, err := httpx.ParseIDParam(r)
 	if err != nil {
 		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid id")
 		return
@@ -173,7 +171,7 @@ func (c *TenantController) Update(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c *TenantController) Delete(w http.ResponseWriter, r *http.Request) {
-	id, err := parseIDParam(r)
+	id, err := httpx.ParseIDParam(r)
 	if err != nil {
 		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid id")
 		return

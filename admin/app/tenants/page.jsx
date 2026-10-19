@@ -1,7 +1,7 @@
 "use client";
 
 import { Link } from "@/i18n/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { Icon } from "@/components/ui/Icon";
 import { DataTable } from "@/components/ui/DataTable";
@@ -36,22 +36,15 @@ async function copyToClipboard(value) {
 export default function TenantsPage() {
   const sel = useSelection();
   const { t, locale } = useLocale();
-  const [filters, setFilters] = useState({
-    keyword: "",
-    status: "",
-    property_id: "",
-  });
+  const [filters, setFilters] = useState({ status: "", property_id: "" });
   const [keywordInput, setKeywordInput] = useState("");
-  const params = { ...filters, keyword: filters.keyword.trim() };
-  const hasActiveFilters = keywordInput.trim() !== "" || filters.status !== "" || filters.property_id !== "";
-
-  // 输入停止 300ms 后才更新查询条件，避免每个字符都发请求
   const debouncedKeyword = useDebouncedValue(keywordInput, 300);
-  useEffect(() => setFilters((f) => ({ ...f, keyword: debouncedKeyword })), [debouncedKeyword]);
+  const params = { ...filters, keyword: debouncedKeyword.trim() };
+  const hasActiveFilters = keywordInput.trim() !== "" || filters.status !== "" || filters.property_id !== "";
 
   const resetFilters = () => {
     setKeywordInput("");
-    setFilters({ keyword: "", status: "", property_id: "" });
+    setFilters({ status: "", property_id: "" });
   };
 
   // 状态的文字和颜色来自后端 dropdown：[{ id, tenant_status_display, variant }]

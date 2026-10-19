@@ -162,36 +162,6 @@ func sameUnit(a, b *uint) bool {
 }
 
 
-// filtered returns a fresh query chain each call, so Count and Find never share state.
-// func (r *SQLiteRepository) filtered(f TenantFilter) *gorm.DB {
-// 	q := r.db.Model(&Tenant{})
-// 	if f.Keyword != "" {
-// 		like := "%" + strings.ToLower(f.Keyword) + "%"
-// 		q = q.Where("LOWER(name) LIKE ? OR LOWER(email) LIKE ? OR phone LIKE ?", like, like, like)
-// 	}
-// 	if f.Status != "" {
-// 		q = q.Where("status = ?", f.Status)
-// 	}
-// 	if f.PropertyID != nil {
-// 		q = q.Where("property_id = ?", *f.PropertyID)
-// 	}
-// 	return q
-// }
-
-// func (r *SQLiteRepository) List(f TenantFilter, currentPage, perPage int) ([]Tenant, int64, error) {
-// 	var total int64
-// 	if err := r.filtered(f).Count(&total).Error; err != nil {
-// 		return nil, 0, err
-// 	}
-
-// 	tenants := make([]Tenant, 0) // empty result serializes as [], not null
-// 	offset := (currentPage - 1) * perPage
-// 	if err := r.filtered(f).Order("id asc").Offset(offset).Limit(perPage).Find(&tenants).Error; err != nil {
-// 		return nil, 0, err
-// 	}
-// 	return tenants, total, nil
-// }
-
 func (r *SQLiteRepository) Count() (int64, error) {
 	var total int64
 	err := r.db.Model(&Tenant{}).Count(&total).Error
