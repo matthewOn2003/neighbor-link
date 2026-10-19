@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
-	"strconv"
-	"strings"
+		"strings"
 
+	"backend/internal/pkg/httpx"
 	"backend/internal/pkg/httpx"
 	"backend/internal/pkg/response"
 	"backend/internal/tenant/repository"
@@ -32,16 +32,16 @@ type tenantListRequest struct {
 	PropertyID  string `json:"property_id"`
 }
 
-func parseTenantFilter(req tenantListRequest) repository.TenantFilter {
-	f := repository.TenantFilter{
+func parseTenantFilter(req tenantListRequest) (repository.TenantFilter, error) {
+	propertyID, err := httpx.ParseOptionalID(req.PropertyID)
+	if err != nil {
+		return repository.TenantFilter{}, err
+	}
+	return repository.TenantFilter{
 		Keyword: strings.TrimSpace(req.Keyword),
-		Status:  strings.TrimSpace(req.Status),
-	}
-	if v, err := strconv.ParseUint(strings.TrimSpace(req.PropertyID), 10, 64); err == nil {
-		id := uint(v)
-		f.PropertyID = &id
-	}
-	return f
+		Status: strings.TrimSpace(req.Status),
+		PropertyID: propertyID,
+	}, nil
 }
 
 func (c *TenantController) List(w http.ResponseWriter, r *http.Request) {
@@ -51,7 +51,12 @@ func (c *TenantController) List(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	currentPage, perPage := httpx.NormalizePagination(req.CurrentPage, req.PerPage)
-	tenants, total, err := c.usecase.List(parseTenantFilter(req), currentPage, perPage)
+	filter, err := parseTenantFilter(req)
+	if err != nil {
+		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid property_id")
+		return
+	}
+	tenants, total, err := c.usecase.List(filter, currentPage, perPage)
 	if err != nil {
 		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to list tenants")
 		return

@@ -3,6 +3,7 @@ package httpx
 import (
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 // NormalizePagination applies the standard list endpoint pagination limits.
@@ -31,4 +32,20 @@ func ParseID(raw string) (uint, error) {
 // ParseIDParam parses the standard path parameter named "id".
 func ParseIDParam(r *http.Request) (uint, error) {
 	return ParseID(r.PathValue("id"))
+}
+
+
+// ParseOptionalID parses an optional numeric ID. Empty input means no filter;
+// malformed input is an error so invalid filters are not silently ignored.
+func ParseOptionalID(raw string) (*uint, error) {
+	raw = strings.TrimSpace(raw)
+	if raw == "" {
+		return nil, nil
+	}
+	id, err := strconv.ParseUint(raw, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+	value := uint(id)
+	return &value, nil
 }
