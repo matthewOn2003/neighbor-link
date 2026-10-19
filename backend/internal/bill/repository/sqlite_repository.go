@@ -142,6 +142,6 @@ func (r *SQLiteRepository) Generate(period string) (int64, error) {
    CASE WHEN date(?, printf('+%d days', c.billing_day - 1)) < date('now') THEN 'overdue' ELSE 'unpaid' END,
    date('now'), 'Generated monthly bill', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
   FROM contracts c WHERE c.status = 'active'`,
-  period, firstDay, firstDay, 0)
+  period, firstDay, firstDay)
  return result.RowsAffected, result.Error
 }
