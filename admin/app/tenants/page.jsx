@@ -54,11 +54,9 @@ export default function TenantsPage() {
   };
 
   // 状态的文字和颜色来自后端 dropdown：[{ id, tenant_status_display, variant }]
-  const { dropdown, labelOf, optionsOf } = useDropdown(["tenant_status"]);
+  const { optionsOf } = useDropdown(["tenant_status"]);
   const statusOptions = optionsOf("tenant_status");
-  const statusMap = Object.fromEntries(
-    (dropdown.tenant_status ?? []).map((o) => [o.id, { label: labelOf("tenant_status", o.id), variant: o.variant }]),
-  );
+  const statusMap = Object.fromEntries(statusOptions.map((option) => [option.value, option]));
 
   const { data: propertyData } = useRequest("/property/list", { per_page: 100 });
   const propertyOptions = propertyData?.list ?? [];
