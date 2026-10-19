@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	"backend/internal/pkg/httpx"
 	"backend/internal/pkg/response"
 	"backend/internal/tenant/repository"
 	"backend/internal/tenant/usecase"
@@ -14,7 +15,6 @@ import (
 	"gorm.io/gorm"
 )
 
-const maxPerPage = 100
 
 type TenantController struct {
 	usecase *usecase.TenantUsecase
@@ -32,20 +32,6 @@ type tenantListRequest struct {
 	PropertyID  string `json:"property_id"`
 }
 
-func parsePagination(req tenantListRequest) (currentPage, perPage int) {
-	currentPage, perPage = req.CurrentPage, req.PerPage
-	if currentPage <= 0 {
-		currentPage = 1
-	}
-	if perPage <= 0 {
-		perPage = 10
-	}
-	if perPage > maxPerPage {
-		perPage = maxPerPage
-	}
-	return
-}
-
 func parseTenantFilter(req tenantListRequest) repository.TenantFilter {
 	f := repository.TenantFilter{
 		Keyword: strings.TrimSpace(req.Keyword),
@@ -58,21 +44,13 @@ func parseTenantFilter(req tenantListRequest) repository.TenantFilter {
 	return f
 }
 
-func parseIDParam(r *http.Request) (uint, error) {
-	id, err := strconv.ParseUint(r.PathValue("id"), 10, 64)
-	if err != nil {
-		return 0, err
-	}
-	return uint(id), nil
-}
-
 func (c *TenantController) List(w http.ResponseWriter, r *http.Request) {
 	var req tenantListRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid request body")
 		return
 	}
-	currentPage, perPage := parsePagination(req)
+	currentPage, perPage := httpx.NormalizePagination(req.CurrentPage, req.PerPage)
 	tenants, total, err := c.usecase.List(parseTenantFilter(req), currentPage, perPage)
 	if err != nil {
 		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to list tenants")
@@ -82,7 +60,7 @@ func (c *TenantController) List(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c *TenantController) Detail(w http.ResponseWriter, r *http.Request) {
-	id, err := parseIDParam(r)
+	id, err := httpx.ParseIDParam(r)
 	if err != nil {
 		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid id")
 		return
