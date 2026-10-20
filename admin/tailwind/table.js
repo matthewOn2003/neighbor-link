@@ -16,8 +16,9 @@ export default plugin(function ({ addComponents }) {
         borderBottom: "var(--border-width) solid var(--line)",
       },
       "& td, & th": {
-        padding: "0.75rem 1.25rem",
+        padding: "1rem 1.5rem",
         whiteSpace: "nowrap",
+        alignContent: "start",
       },
       "& tbody tr": {
         "--row-bg": "var(--accent)",

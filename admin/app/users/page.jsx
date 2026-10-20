@@ -1,8 +1,106 @@
 "use client";
-import{useEffect,useMemo,useState}from"react";import{Icon}from"@/components/ui/Icon";import{Spinner}from"@/components/ui/Spinner";import{useLocale}from"@/i18n";import{request}from"@/services/request";import{useToast}from"@/components/ui";
-const mods=[["dashboard","menu_dashboard",["list"]],["properties","menu_properties",["list","add","update","delete"]],["tenant","menu_tenants",["list","add","update","delete"]],["contracts","menu_contracts",["list","add","update","delete"]],["bills","menu_bills",["list","add","update","delete"]],["users","menu_users",["list","add","update","delete"]]];
-const tree=[{id:"root",label:"permission_all",children:mods.map(([id,label,actions])=>({id,label,children:actions.map(a=>({id:`perm-${id}-${a}`,label:`perm-${id}-${a}`}))}))}];const desc=n=>[n.id,...(n.children||[]).flatMap(desc)];const empty={users:{username:"",password:"",name:"",phone:"",email:"",position_id:"",status:"active"},departments:{name:"",code:"",description:"",status:"active"},positions:{department_id:"",name:"",code:"",description:"",permission_ids:[],status:"active"}};const parse=v=>{try{return Array.isArray(v)?v:JSON.parse(v||"[]")}catch{return []}};
-export default function UsersPage(){const{t}=useLocale(),toast=useToast();const[tab,T]=useState("users"),[users,U]=useState([]),[departments,D]=useState([]),[positions,P]=useState([]),[loading,L]=useState(true),[saving,S]=useState(false),[editor,E]=useState(null),[form,F]=useState(empty.users),[expanded,X]=useState(["root",...mods.map(m=>m[0])]),[keyword,K]=useState("");async function refresh(){try{const[a,b,c]=await Promise.all([request("/staff-account/list"),request("/staff-department/list"),request("/staff-position/list")]);U(a||[]);D(b||[]);P(c||[])}catch(e){toast.error(e.message||t("load_failed"))}finally{L(false)}}useEffect(()=>{void Promise.resolve().then(refresh)},[]);const filtered = useMemo(() => users.filter((u) => { return [u.username, u.name, u.email, u.phone, u.position_name].some((v) => { return (v || "").toLowerCase().includes(keyword.toLowerCase()); }); }), [users, keyword]);const titles={users:t("users"),departments:t("departments"),positions:t("positions")};function create(type){E({type,id:null});F({...empty[type]})}function edit(type,r){E({type,id:r.id});F(type==="users"?{...r,password:"",position_id:String(r.position_id)}:type==="departments"?{...r}:{...r,department_id:String(r.department_id),permission_ids:parse(r.permission_ids)})}function toggle(node,on){const ids=desc(node);F(f=>({...f,permission_ids:on?[...new Set([...(f.permission_ids||[]),...ids])]:(f.permission_ids||[]).filter(x=>!ids.includes(x))}))}const checked=n=>desc(n).every(id=>(form.permission_ids||[]).includes(id));function field(k,label,required=false,type="text"){return <label key={k} className="block text-sm">{label}<input className="input mt-1 w-full" type={type} required={required} value={form[k]??""} onChange={e=>F(f=>({...f,[k]:e.target.value}))} autoComplete={k==="password"?"new-password":"off"}/></label>}async function save(e){e.preventDefault();S(true);try{const base=editor.type==="users"?"/staff-account":editor.type==="departments"?"/staff-department":"/staff-position",body={...form};if(editor.type==="users"){body.position_id=Number(body.position_id);if(!body.password)delete body.password}if(editor.type==="positions"){body.department_id=Number(body.department_id);body.permission_ids=body.permission_ids||[]}await request(editor.id?`${base}/update/${editor.id}`:`${base}/create`,body);toast.success(t("record_saved"));E(null);await refresh()}catch(e){toast.error(e.message||t("save_failed"))}finally{S(false)}}async function remove(type,r){if(!window.confirm(t("confirm_delete")))return;const base=type==="users"?"/staff-account":type==="departments"?"/staff-department":"/staff-position";try{await request(`${base}/delete/${r.id}`);toast.success(t("record_deleted"));await refresh()}catch(e){toast.error(e.message||t("delete_failed"))}}const rows=tab==="users"?filtered:tab==="departments"?departments:positions;
-return <main className="flex w-full flex-col gap-6 p-8"><header className="flex flex-wrap items-start justify-between gap-4"><div><h1 className="text-2xl font-semibold text-scene-content">{t("users")}</h1><p className="mt-1 text-sm text-subtle">{t("users_description")}</p></div><button className="btn btn-primary" onClick={()=>create(tab)}><Icon name="add" className="text-lg"/>{t("create_record",{record:titles[tab]})}</button></header><section className="rounded-xl bg-accent p-4 shadow"><div className="mb-4 flex flex-wrap gap-2">{["users","departments","positions"].map(k=><button key={k} onClick={()=>{T(k);E(null)}} className={`rounded-lg px-4 py-2 text-sm font-semibold ${tab===k?"bg-primary text-white":"bg-scene text-subtle"}`}>{titles[k]} ({k==="users"?users.length:k==="departments"?departments.length:positions.length})</button>)}</div>{tab==="users"?<input className="input mb-4 w-full max-w-sm" value={keyword} onChange={e=>K(e.target.value)} placeholder={t("search_staff_accounts")}/>:null}{loading?<div className="flex min-h-48 items-center justify-center"><Spinner size="lg"/></div>:!rows.length?<div className="p-12 text-center text-sm text-subtle">{t("no_records")}</div>:<div className="overflow-x-auto"><table className="w-full text-left text-sm"><thead className="text-xs uppercase text-subtle"><tr>{(tab==="users"?["username","name","phone","email","position","department","status"]:tab==="departments"?["name","code","description","status"]:["name","code","department","description","status"]).map(k=><th key={k} className="px-3 py-3">{t(k)}</th>)}<th className="px-3 py-3">{t("action")}</th></tr></thead><tbody className="divide-y divide-scene">{rows.map(r=><tr key={r.id}>{(tab==="users"?[r.username,r.name,r.phone||"—",r.email||"—",r.position_name||"—",r.department_name||"—",r.status]:tab==="departments"?[r.name,r.code,r.description||"—",r.status]:[r.name,r.code,r.department_name||"—",r.description||"—",r.status]).map((v,i)=><td key={i} className="px-3 py-4">{v}</td>)}<td className="whitespace-nowrap px-3 py-4"><button className="mr-3 text-primary-dark" onClick={()=>edit(tab,r)}>{t("edit")}</button><button className="text-error" onClick={()=>remove(tab,r)}>{t("delete")}</button></td></tr>)}</tbody></table></div>}</section>{editor?<div className="fixed inset-0 z-[100] flex items-start justify-center overflow-y-auto bg-black/40 p-4 md:p-8"><form onSubmit={save} className="my-auto w-full max-w-3xl space-y-5 rounded-2xl bg-scene p-6 shadow-xl"><div className="flex items-center justify-between"><h2 className="text-xl font-semibold">{t(editor.id?"edit_record":"create_record",{record:titles[editor.type]})}</h2><button type="button" onClick={()=>E(null)}>✕</button></div>{editor.type==="users"?<div className="grid gap-4 md:grid-cols-2">{field("username",t("account"),true)}{field("password",t(editor.id?"new_password_optional":"password"),!editor.id,"password")}{field("name",t("name"),true)}{field("phone",t("phone"))}{field("email",t("email"),false,"email")}<label className="block text-sm">{t("position")}<select className="input mt-1 w-full" required value={form.position_id} onChange={e=>F(f=>({...f,position_id:e.target.value}))}><option value="">{t("select_position")}</option>{positions.map(p=><option key={p.id} value={p.id}>{p.department_name} / {p.name}</option>)}</select></label><Status form={form} set={F} t={t}/></div>:editor.type==="departments"?<div className="grid gap-4 md:grid-cols-2">{field("name",t("department_name"),true)}{field("code",t("code"),true)}{field("description",t("description"))}<Status form={form} set={F} t={t}/></div>:<div className="space-y-4"><div className="grid gap-4 md:grid-cols-2"><label className="block text-sm">{t("department")}<select required className="input mt-1 w-full" value={form.department_id} onChange={e=>F(f=>({...f,department_id:e.target.value}))}><option value="">{t("select_department")}</option>{departments.map(d=><option key={d.id} value={d.id}>{d.name}</option>)}</select></label>{field("name",t("position_name"),true)}{field("code",t("code"),true)}{field("description",t("description"))}<Status form={form} set={F} t={t}/></div><div className="rounded-xl border border-scene p-4"><h3 className="font-semibold">{t("permission_tree")}</h3><p className="mb-3 text-xs text-subtle">{t("permission_tree_hint")}</p>{tree.map(n=><Node key={n.id} node={n} depth={0} expanded={expanded} setExpanded={X} checked={checked(n)} toggle={toggle} isChecked={checked} t={t}/>)}</div></div>}<div className="flex justify-end gap-3 border-t border-scene pt-4"><button type="button" className="btn btn-outline" onClick={()=>E(null)}>{t("cancel")}</button><button disabled={saving} className="btn btn-primary" type="submit">{saving?t("saving"):t("save_changes")}</button></div></form></div>:null}</main>}
-function Status({form,set,t}){return <label className="block text-sm">{t("status")}<select className="input mt-1 w-full" value={form.status||"active"} onChange={e=>set(f=>({...f,status:e.target.value}))}><option value="active">{t("active")}</option><option value="inactive">{t("inactive")}</option></select></label>}
-function Node({node,depth,expanded,setExpanded,checked,toggle,isChecked,t}){const has=!!node.children?.length,open=expanded.includes(node.id);return <div><div className="flex items-center gap-2 rounded-md py-2 hover:bg-accent" style={{paddingLeft:depth*22}}>{has?<button type="button" className="w-5 text-subtle" onClick={()=>setExpanded(a=>a.includes(node.id)?a.filter(x=>x!==node.id):[...a,node.id])}>{open?"▾":"▸"}</button>:<span className="w-5"/>}<input type="checkbox" checked={checked} onChange={e=>toggle(node,e.target.checked)} aria-label={t(node.label)}/><span className={depth===0?"font-semibold":""}>{t(node.label)}</span>{depth===2?<code className="ml-auto text-xs text-subtle">{node.id}</code>:null}</div>{has&&open?node.children.map(c=><Node key={c.id} node={c} depth={depth+1} expanded={expanded} setExpanded={setExpanded} checked={isChecked(c)} toggle={toggle} isChecked={isChecked} t={t}/>):null}</div>}
+
+import { useState } from "react";
+import { Link } from "@/i18n/navigation";
+import { useDraftFilters } from "@/hooks/useDraftFilters";
+import { useLocale } from "@/i18n";
+import { Icon } from "@/components/ui/Icon";
+import { DataTable } from "@/components/ui/DataTable";
+import { Input } from "@/components/ui/Input";
+import { ConfirmDialog, useToast } from "@/components/ui";
+import { accountDelete } from "@/services/staff/account";
+import { RowActions, StatusPill, saveErrorMessage } from "@/components/staff/common";
+
+export default function UsersPage() {
+  const { t } = useLocale();
+  const toast = useToast();
+  const { draft, setDraft, applied, apply, reset, clear } = useDraftFilters({ keyword: "" });
+  const [pending, setPending] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+
+  async function confirmDelete() {
+    setDeleting(true);
+    try {
+      await accountDelete(pending.id);
+      toast.success(t("record_deleted"));
+      pending.reload();
+    } catch (err) {
+      toast.error(saveErrorMessage(err, t, "delete_failed"));
+    } finally {
+      setDeleting(false);
+      setPending(null);
+    }
+  }
+
+  return (
+    <main className="flex flex-col w-full">
+      <div className="p-4 md:p-8 space-y-6">
+        <DataTable
+          api="/staff-account/list"
+          params={{ keyword: applied.keyword.trim() }}
+          title={t("users")}
+          description={t("users_description")}
+          emptyText={t("no_records")}
+          filters={(
+            <Input variant="filter" name="keyword" label={t("search_keyword")} value={draft.keyword} onChange={(keyword) => setDraft((current) => ({ ...current, keyword }))} placeholder={t("search_staff_accounts")} />
+          )}
+          resetFilters={reset}
+          applyFilters={apply}
+          filterValues={draft}
+          filterBadges={[{ key: "keyword", label: t("search_keyword") }]}
+          onClearFilter={clear}
+          buttons={(
+            <Link className="btn btn-primary" href="/users/new">
+              <Icon name="add" className="text-lg" />
+              <span>{t("add_user")}</span>
+            </Link>
+          )}
+          header={() => (
+            <tr className="bg-accent text-subtle font-semibold">
+              <th>{t("account")}</th>
+              <th>{t("name")}</th>
+              <th>{t("phone")}</th>
+              <th>{t("email")}</th>
+              <th>{t("position")}</th>
+              <th>{t("department")}</th>
+              <th>{t("status")}</th>
+              <th>{t("action")}</th>
+            </tr>
+          )}
+          body={({ rows, reload }) =>
+            rows.map((user) => (
+              <tr key={user.id}>
+                <td className="font-semibold text-scene-content">{user.username}</td>
+                <td className="text-scene-content">{user.name}</td>
+                <td className="text-subtle">{user.phone || "-"}</td>
+                <td className="text-subtle">{user.email || "-"}</td>
+                <td className="text-scene-content">{user.position_name || "-"}</td>
+                <td className="text-scene-content">{user.department_name || "-"}</td>
+                <td>
+                  <StatusPill status={user.status} />
+                </td>
+                <td>
+                  <RowActions
+                    editHref={`/users/${user.id}`}
+                    editLabel={t("edit_user")}
+                    onDelete={() => setPending({ id: user.id, name: user.name, reload })}
+                  />
+                </td>
+              </tr>
+            ))
+          }
+        />
+      </div>
+
+      <ConfirmDialog
+        open={Boolean(pending)}
+        title={t("delete")}
+        message={t("confirm_delete")}
+        danger
+        loading={deleting}
+        onConfirm={confirmDelete}
+        onCancel={() => setPending(null)}
+      />
+    </main>
+  );
+}

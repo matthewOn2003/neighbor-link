@@ -7,4 +7,6 @@ export const menu = [
   { key: "bills", labelKey: "menu_bills", href: "/bills", icon: "receipt_long" },
   { key: "payments", labelKey: "menu_payments", href: "/payments", icon: "paid" },
   { key: "users", labelKey: "menu_users", href: "/users", icon: "manage_accounts" },
+  { key: "departments", labelKey: "menu_departments", href: "/departments", icon: "corporate_fare" },
+  { key: "positions", labelKey: "menu_positions", href: "/positions", icon: "work" },
 ];

@@ -7,7 +7,7 @@ export function SummaryCard({ label, value, trend, icon }) {
         <span className="text-xs font-semibold text-subtle">{label}</span>
         <p className="text-2xl font-semibold text-scene-content">{value}</p>
         {trend && (
-          <span className="text-xs text-success inline-flex items-center gap-0.5 font-medium">
+          <span className="text-xs text-success inline-flex items-center gap-0.5 font-semibold">
             <Icon name="trending_up" className="text-sm" />
             {trend}
           </span>

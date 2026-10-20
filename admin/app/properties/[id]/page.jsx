@@ -44,7 +44,7 @@ export default function PropertyDetailPage({ params }) {
                 <span className="px-2.5 py-1 rounded-full bg-scene text-primary text-xs font-semibold">{typeLabel}</span>
               </div>
               <p className="text-sm text-subtle">
-                {t("developer")}: <span className="font-medium text-scene-content">{property.developer_name ?? "-"}</span>
+                {t("developer")}: <span className="font-semibold text-scene-content">{property.developer_name ?? "-"}</span>
               </p>
               <p className="text-sm text-subtle">
                 {t("address")}: <span className="text-scene-content">{location || "-"}</span>

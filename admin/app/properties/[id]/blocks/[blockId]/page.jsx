@@ -30,7 +30,7 @@ export default function BlockDetailPage({ params }) {
           <Icon name="chevron_right" className="text-base" />
           <Link className="hover:text-primary-dark" href={`/properties/${id}`}>{block.property_name}</Link>
           <Icon name="chevron_right" className="text-base" />
-          <span className="text-scene-content font-medium">{block.name || block.code}</span>
+          <span className="text-scene-content font-semibold">{block.name || block.code}</span>
         </nav>
 
         <div className="rounded-xl bg-accent shadow p-6 space-y-4">

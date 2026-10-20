@@ -35,7 +35,7 @@ export default function FloorDetailPage({ params }) {
             {floor.block_name || floor.block_code}
           </Link>
           <Icon name="chevron_right" className="text-base" />
-          <span className="text-scene-content font-medium">{t("floor_level", { level: floor.level })}</span>
+          <span className="text-scene-content font-semibold">{t("floor_level", { level: floor.level })}</span>
         </nav>
 
         <DataTable

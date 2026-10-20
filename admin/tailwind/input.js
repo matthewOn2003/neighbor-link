@@ -6,9 +6,9 @@ export default plugin(function ({ addComponents }) {
       display: "flex",
       flexDirection: "column",
       gap: "var(--label-gap)",
+      fontSize: "0.875rem !important",
     },
     ".field-label": {
-      fontSize: "0.8125rem",
       fontWeight: "600",
       color: "var(--foreground)",
     },
@@ -20,7 +20,7 @@ export default plugin(function ({ addComponents }) {
       border: "var(--border-width) solid var(--line)",
       backgroundColor: "var(--control-background)",
       color: "var(--foreground)",
-      fontSize: "0.9375rem",
+      // fontSize: "0.875rem",
       transitionProperty: "border-color, box-shadow",
       transitionDuration: "var(--transition-duration)",
       "&::placeholder": {
@@ -47,11 +47,11 @@ export default plugin(function ({ addComponents }) {
       },
     },
     ".field-error": {
-      fontSize: "0.8125rem",
+      fontSize: "0.875rem",
       color: "var(--error)",
     },
     ".field-hint": {
-      fontSize: "0.8125rem",
+      fontSize: "0.875rem",
       color: "var(--subtle)",
     },
   });

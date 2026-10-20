@@ -23,23 +23,29 @@ func NewTenantController(uc *usecase.TenantUsecase) *TenantController {
 }
 
 type tenantListRequest struct {
-	CurrentPage int    `json:"current_page"`
-	PerPage     int    `json:"per_page"`
-	Keyword     string `json:"keyword"`
-	Status      string `json:"status"`
-	PropertyID  string `json:"property_id"`
+	CurrentPage     int    `json:"current_page"`
+	PerPage         int    `json:"per_page"`
+	Keyword         string `json:"keyword"`
+	Status          string `json:"status"`
+	TenantName      string `json:"tenant_name"`
+	PropertyUnit    string `json:"property_unit"`
+	Email           string `json:"email"`
+	Phone           string `json:"phone"`
+	ContractEndFrom string `json:"contract_end_from"`
+	ContractEndTo   string `json:"contract_end_to"`
 }
 
-func parseTenantFilter(req tenantListRequest) (repository.TenantFilter, error) {
-	propertyID, err := httpx.ParseOptionalID(req.PropertyID)
-	if err != nil {
-		return repository.TenantFilter{}, err
-	}
+func parseTenantFilter(req tenantListRequest) repository.TenantFilter {
 	return repository.TenantFilter{
-		Keyword: strings.TrimSpace(req.Keyword),
-		Status: strings.TrimSpace(req.Status),
-		PropertyID: propertyID,
-	}, nil
+		Keyword:         strings.TrimSpace(req.Keyword),
+		Status:          strings.TrimSpace(req.Status),
+		TenantName:      strings.TrimSpace(req.TenantName),
+		PropertyUnit:    strings.TrimSpace(req.PropertyUnit),
+		Email:           strings.TrimSpace(req.Email),
+		Phone:           strings.TrimSpace(req.Phone),
+		ContractEndFrom: strings.TrimSpace(req.ContractEndFrom),
+		ContractEndTo:   strings.TrimSpace(req.ContractEndTo),
+	}
 }
 
 func (c *TenantController) List(w http.ResponseWriter, r *http.Request) {
@@ -49,12 +55,7 @@ func (c *TenantController) List(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	currentPage, perPage := httpx.NormalizePagination(req.CurrentPage, req.PerPage)
-	filter, err := parseTenantFilter(req)
-	if err != nil {
-		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid property_id")
-		return
-	}
-	tenants, total, err := c.usecase.List(filter, currentPage, perPage)
+	tenants, total, err := c.usecase.List(parseTenantFilter(req), currentPage, perPage)
 	if err != nil {
 		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to list tenants")
 		return

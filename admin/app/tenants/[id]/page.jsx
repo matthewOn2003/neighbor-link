@@ -13,7 +13,7 @@ function DetailField({ label, value }) {
   return (
     <div className="rounded-lg bg-primary/5 p-4">
       <dt className="text-xs font-semibold uppercase text-subtle">{label}</dt>
-      <dd className="mt-1 break-words text-sm font-medium text-scene-content">{value || "—"}</dd>
+      <dd className="mt-1 break-words text-sm font-semibold text-scene-content">{value || "—"}</dd>
     </div>
   );
 }

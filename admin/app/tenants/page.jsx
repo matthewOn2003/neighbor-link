@@ -1,14 +1,13 @@
 "use client";
 
 import { Link } from "@/i18n/navigation";
-import { useState } from "react";
-import { useDebouncedValue } from "@/hooks/useDebouncedValue";
+import { useDraftFilters } from "@/hooks/useDraftFilters";
 import { Icon } from "@/components/ui/Icon";
-import { DataTable } from "@/components/ui/DataTable";
-import { SearchBar } from "@/components/ui/SearchBar";
+import { DataTable, SummaryCard } from "@/components/ui/DataTable";
+import { Input } from "@/components/ui/Input";
+import { DatePicker } from "@/components/ui/DatePicker";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { Select } from "@/components/ui/Select";
-import { useRequest } from "@/hooks/useRequest";
 import { useDropdown } from "@/hooks/useDropdown";
 import { useSelection } from "@/hooks/useSelection";
 import { useLocale } from "@/i18n";
@@ -36,70 +35,108 @@ async function copyToClipboard(value) {
 export default function TenantsPage() {
   const sel = useSelection();
   const { t, locale } = useLocale();
-  const [filters, setFilters] = useState({ status: "", property_id: "" });
-  const [keywordInput, setKeywordInput] = useState("");
-  const debouncedKeyword = useDebouncedValue(keywordInput, 300);
-  const params = { ...filters, keyword: debouncedKeyword.trim() };
-  const hasActiveFilters = keywordInput.trim() !== "" || filters.status !== "" || filters.property_id !== "";
-
-  const resetFilters = () => {
-    setKeywordInput("");
-    setFilters({ status: "", property_id: "" });
-  };
+  const { draft, setDraft, applied, apply, reset, clear } = useDraftFilters({
+    status: "",
+    tenant_name: "",
+    property_unit: "",
+    phone: "",
+    email: "",
+    contract_end_from: "",
+    contract_end_to: "",
+  });
 
   // 状态的文字和颜色来自后端 dropdown：[{ id, tenant_status_display, variant }]
   const { optionsOf } = useDropdown(["tenant_status"]);
-  const statusOptions = optionsOf("tenant_status");
+  const statusOptions = [{ value: "", label: t("all_statuses") }, ...optionsOf("tenant_status")];
   const statusMap = Object.fromEntries(statusOptions.map((option) => [option.value, option]));
-
-  const { data: propertyData } = useRequest("/property/list", { per_page: 100 });
-  const propertyOptions = propertyData?.list ?? [];
 
   return (
     <main className="flex flex-col w-full">
       <div className="p-4 md:p-8 space-y-6">
         <DataTable
           api="/tenant/list"
-          params={params}
+          params={applied}
+          filterValues={draft}
+          filterBadges={[
+            { key: "status", label: t("status"), display: (value) => statusMap[value]?.label ?? value },
+            { key: "property_unit", label: t("property_and_unit") },
+            { key: "tenant_name", label: t("tenant_name") },
+            { key: "phone", label: t("phone") },
+            { key: "email", label: t("email") },
+            { key: "contract_end_from", label: t("contract_end_from") },
+            { key: "contract_end_to", label: t("contract_end_to") },
+          ]}
+          onClearFilter={clear}
           title={t("tenants")}
           description={t("manage_tenants_description")}
+          summary={({ total }) => (
+            <SummaryCard label={t("total_tenants")} value={total} icon="group" />
+          )}
           emptyText={t("no_tenants_match_current_filters")}
           filters={(
             <>
-              <SearchBar
-                value={keywordInput}
-                onChange={setKeywordInput}
-                placeholder={t("search_tenants")}
+              <Select
+                variant="filter"
+                name="status"
+                label={t("status")}
+                value={draft.status}
+                onChange={(status) => setDraft((current) => ({ ...current, status }))}
+                options={statusOptions}
               />
 
-              <div className="min-w-[160px]">
-                <Select
-                  label={t("status")}
-                  name="tenant-status-filter"
-                  value={filters.status}
-                  onChange={(status) => setFilters((current) => ({ ...current, status }))}
-                  options={[{ value: "", label: t("all_statuses") }, ...statusOptions]}
-                />
-              </div>
+              <Input
+                variant="filter"
+                name="property_unit"
+                label={t("property_and_unit")}
+                value={draft.property_unit}
+                onChange={(property_unit) => setDraft((current) => ({ ...current, property_unit }))}
+              />
 
-              <div className="min-w-[180px]">
-                <Select
-                  label={t("property_and_unit")}
-                  name="tenant-property-filter"
-                  value={filters.property_id}
-                  onChange={(property_id) => setFilters((current) => ({ ...current, property_id }))}
-                  options={[{ value: "", label: t("all_properties") }, ...propertyOptions.map((property) => ({ value: String(property.id), label: property.name }))]}
-                />
-              </div>
+              <Input
+                variant="filter"
+                name="tenant_name"
+                label={t("tenant_name")}
+                value={draft.tenant_name}
+                onChange={(tenant_name) => setDraft((current) => ({ ...current, tenant_name }))}
+              />
 
-              {hasActiveFilters ? (
-                <button className="btn btn-outline" type="button" onClick={resetFilters}>
-                  <Icon name="restart_alt" className="text-lg" />
-                  <span>{t("reset_filters")}</span>
-                </button>
-              ) : null}
+              <Input
+                variant="filter"
+                name="phone"
+                label={t("phone")}
+                value={draft.phone}
+                onChange={(phone) => setDraft((current) => ({ ...current, phone }))}
+              />
+
+              <Input
+                variant="filter"
+                name="email"
+                label={t("email")}
+                value={draft.email}
+                onChange={(email) => setDraft((current) => ({ ...current, email }))}
+              />
+
+              <DatePicker
+                variant="filter"
+                name="contract_end_from"
+                label={t("contract_end_from")}
+                value={draft.contract_end_from}
+                max={draft.contract_end_to || undefined}
+                onChange={(contract_end_from) => setDraft((current) => ({ ...current, contract_end_from }))}
+              />
+
+              <DatePicker
+                variant="filter"
+                name="contract_end_to"
+                label={t("contract_end_to")}
+                value={draft.contract_end_to}
+                min={draft.contract_end_from || undefined}
+                onChange={(contract_end_to) => setDraft((current) => ({ ...current, contract_end_to }))}
+              />
             </>
           )}
+          resetFilters={reset}
+          applyFilters={apply}
           buttons={(
             <>
               <button className="btn btn-outline" type="button">
@@ -162,7 +199,7 @@ export default function TenantsPage() {
                     <div className="flex flex-col">
                       <div className="flex items-center gap-2">
                         <span className="text-scene-content">{tenant.email || "-"}</span>
-                        {tenant.email ? (
+                        {/* {tenant.email ? (
                           <button
                             type="button"
                             className="text-subtle hover:text-primary-dark p-0.5 rounded transition-colors"
@@ -171,7 +208,7 @@ export default function TenantsPage() {
                           >
                             <Icon name="content_copy" />
                           </button>
-                        ) : null}
+                        ) : null} */}
                       </div>
                       <span className="text-subtle">{tenant.phone}</span>
                     </div>
@@ -196,18 +233,7 @@ export default function TenantsPage() {
                     )}
                   </td>
                   <td>
-                    {tenant.contract_end ? (
-                      <div className="flex items-center gap-2 text-scene-content">
-                        <span>{tenant.contract_end}</span>
-                        {tenant.status === "pending_renewal" ? (
-                          <span title={t("renewal_pending")} className="text-error inline-flex">
-                            <Icon name="warning" className="text-lg" />
-                          </span>
-                        ) : null}
-                      </div>
-                    ) : (
-                      <span className="text-subtle">-</span>
-                    )}
+                    <span>{tenant.contract_end}</span>
                   </td>
                   <td className="text-scene-content">{formatRent(tenant.monthly_rent, locale)}</td>
                   <td>
@@ -226,13 +252,9 @@ export default function TenantsPage() {
                     </span>
                   </td>
                   <td>
-                    <div className="inline-flex items-center gap-2">
-                      <Link
-                        className="p-2 text-subtle hover:text-primary-dark"
-                        href={`/tenants/${tenant.id}`}
-                        aria-label={t("edit_tenant")}
-                      >
-                        <Icon name="edit" className="!text-2xl" />
+                    <div className="flex justify-center items-center gap-2">
+                      <Link className="btn btn-primary !p-0 size-10 grid place-items-center" href={`/tenants/${tenant.id}`} aria-label={t("edit_tenant")}>
+                        <Icon name="andrsrxn:list-edit" className="text-scene !text-2xl" />
                       </Link>
                     </div>
                   </td>

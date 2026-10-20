@@ -123,7 +123,7 @@ export default function ContractsPage() {
                         <Link href={"/contracts/" + contract.id} className="text-primary-dark hover:underline">CT-{String(contract.id).padStart(5, "0")}</Link>
                       </td>
                       <td className="px-4 py-4">
-                        <div className="font-medium text-scene-content">{contract.tenant_name}</div>
+                        <div className="font-semibold text-scene-content">{contract.tenant_name}</div>
                         <div className="text-xs text-subtle">{contract.tenant_phone || "—"}</div>
                       </td>
                       <td className="px-4 py-4">
@@ -131,7 +131,7 @@ export default function ContractsPage() {
                         <div className="text-xs text-subtle">{contract.unit_code || "—"}</div>
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap">{contract.start_date} – {contract.end_date}</td>
-                      <td className="px-4 py-4 whitespace-nowrap font-medium">{money(contract.monthly_rent, locale)}</td>
+                      <td className="px-4 py-4 whitespace-nowrap font-semibold">{money(contract.monthly_rent, locale)}</td>
                       <td className="px-4 py-4"><span className={"status-pill " + (contract.status === "active" ? "success" : contract.status === "expired" ? "warning" : "neutral")}>{t(statusKeys[contract.status] || statusKeys.draft)}</span></td>
                       <td className="px-4 py-4 whitespace-nowrap">
                         <Link href={"/contracts/" + contract.id} className="text-primary-dark hover:underline">{t("view_details")}</Link>

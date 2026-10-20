@@ -8,11 +8,12 @@ export default plugin(function ({ addComponents }) {
       alignItems: "center",
       justifyContent: "center",
       gap: "0.5rem",
-      padding: "0.625rem 1rem",
+      height: "3rem",
+      padding: "0 1rem",
       borderRadius: "var(--button-radius)",
       fontWeight: "600",
       fontSize: "14px",
-      lineHeight: "1",
+      // lineHeight: "1",
       border: "var(--border-width) solid transparent",
       boxShadow: "var(--shadow-sm, 0 1px 2px 0 rgb(0 0 0 / 0.05))",
       transitionProperty: "background-color, border-color, color, opacity, box-shadow",
@@ -64,16 +65,6 @@ export default plugin(function ({ addComponents }) {
       "&:hover:not(:disabled)": {
         opacity: "0.9",
       },
-    },
-
-    /* ---------- 尺寸 ---------- */
-    ".btn-sm": {
-      padding: "0.375rem 0.75rem",
-      fontSize: "0.75rem",
-    },
-    ".btn-lg": {
-      padding: "0.875rem 1.5rem",
-      fontSize: "0.9375rem",
     },
   });
 });

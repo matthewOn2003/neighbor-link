@@ -16,7 +16,7 @@
   --error: #be123c;
 
   /* Layout */
-  --gutter: 1.5rem;
+  --gutter: 1rem;
   --page-padding-block: 2rem;
   --page-padding-inline: 1.25rem;
   --content-max-width: 75rem;
@@ -26,10 +26,10 @@
   /* Components */
   --panel-padding: 3rem;
   --panel-radius: 0rem;
-  --button-radius: 0.75rem;
-  --input-radius: 0.75rem;
+  --button-radius: 0.5rem;
+  --input-radius: 0.5rem;
   --control-height: 2.875rem;
-  --button-height: 48px;
+  --button-height: 3rem;
   --field-gap: 1.125rem;
   --label-gap: 0.5rem;
   --section-gap: 2rem;
@@ -39,4 +39,12 @@
   /* Motion and focus */
   --transition-duration: 160ms;
   --focus-ring-width: 3px;
+
+}
+
+/* sm breakpoint (Tailwind default: 40rem) */
+@media (min-width: 640px) {
+  :root {
+    --gutter: 1.5rem;
+  }
 }
