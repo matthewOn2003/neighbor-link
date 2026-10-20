@@ -5,6 +5,7 @@ import { useRouter } from "@/i18n/navigation";
 import { useLocale } from "@/i18n";
 import { useRequest } from "@/hooks/useRequest";
 import { FormPage, FormSection, Input, Select, useToast } from "@/components/ui";
+import { DatePicker } from "@/components/ui/DatePicker";
 import { Spinner } from "@/components/ui/Spinner";
 import { accountCreate, accountUpdate } from "@/services/staff/account";
 import { saveErrorMessage, useStatusOptions } from "./common";
@@ -15,6 +16,8 @@ const EMPTY_FORM = {
   name: "",
   phone: "",
   email: "",
+  employee_no: "",
+  hire_date: "",
   position_id: "",
   status: "active",
 };
@@ -54,6 +57,8 @@ export function UserForm({ record }) {
       name: form.name.trim(),
       phone: form.phone.trim(),
       email: form.email.trim(),
+      employee_no: form.employee_no.trim(),
+      hire_date: form.hire_date,
       position_id: Number(form.position_id),
       status: form.status,
     };
@@ -109,6 +114,8 @@ export function UserForm({ record }) {
         <Input label={t("name")} name="name" value={form.name} onChange={(v) => updateField("name", v)} required error={errors.name} />
         <Input label={t("phone")} name="phone" value={form.phone} onChange={(v) => updateField("phone", v)} />
         <Input label={t("email")} name="email" type="email" value={form.email} onChange={(v) => updateField("email", v)} />
+        <Input label={t("employee_no")} name="employee_no" value={form.employee_no} onChange={(v) => updateField("employee_no", v)} />
+        <DatePicker label={t("hire_date")} name="hire_date" value={form.hire_date} onChange={(v) => updateField("hire_date", v)} />
         <Select
           label={t("position")}
           name="position_id"

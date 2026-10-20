@@ -34,6 +34,22 @@ func ParseIDParam(r *http.Request) (uint, error) {
 	return ParseID(r.PathValue("id"))
 }
 
+// ParseOptionalInt parses an optional non-negative integer. Empty input means no filter;
+// malformed input is an error so invalid filters are not silently ignored.
+func ParseOptionalInt(raw string) (*int, error) {
+	raw = strings.TrimSpace(raw)
+	if raw == "" {
+		return nil, nil
+	}
+	value, err := strconv.Atoi(raw)
+	if err != nil {
+		return nil, err
+	}
+	if value < 0 {
+		return nil, strconv.ErrSyntax
+	}
+	return &value, nil
+}
 
 // ParseOptionalID parses an optional numeric ID. Empty input means no filter;
 // malformed input is an error so invalid filters are not silently ignored.

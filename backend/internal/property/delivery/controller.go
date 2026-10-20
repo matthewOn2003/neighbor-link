@@ -53,6 +53,10 @@ type unitListRequest struct {
 	FloorID     string `json:"floor_id"`
 	Status      string `json:"status"`
 	Keyword     string `json:"keyword"`
+	Bedrooms    string `json:"bedrooms"`
+	SizeMin     string `json:"size_min"`
+	SizeMax     string `json:"size_max"`
+	TenantName  string `json:"tenant_name"`
 }
 
 func decodeBody(r *http.Request, dst any) bool {
@@ -211,9 +215,26 @@ func (c *PropertyController) UnitList(w http.ResponseWriter, r *http.Request) {
 		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid floor_id")
 		return
 	}
+	bedrooms, err := httpx.ParseOptionalInt(req.Bedrooms)
+	if err != nil {
+		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid bedrooms")
+		return
+	}
+	sizeMin, err := httpx.ParseOptionalInt(req.SizeMin)
+	if err != nil {
+		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid size_min")
+		return
+	}
+	sizeMax, err := httpx.ParseOptionalInt(req.SizeMax)
+	if err != nil {
+		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid size_max")
+		return
+	}
 	filter := repository.UnitFilter{
 		PropertyID: propertyID, BlockID: blockID, FloorID: floorID,
 		Status: strings.TrimSpace(req.Status), Keyword: strings.TrimSpace(req.Keyword),
+		Bedrooms: bedrooms, SizeMin: sizeMin, SizeMax: sizeMax,
+		TenantName: strings.TrimSpace(req.TenantName),
 	}
 	units, total, err := c.usecase.ListUnits(filter, currentPage, perPage)
 	if err != nil {

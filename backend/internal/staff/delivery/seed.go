@@ -78,12 +78,14 @@ func SeedRootAdmin(db *gorm.DB, username string) error {
 			return err
 		}
 		pos := Position{
-			DepartmentID:  dept.ID,
-			Name:          "Root Admin",
-			Code:          "root_admin",
-			Description:   "Full access to every admin module",
-			PermissionIDs: string(permJSON),
-			Status:        "active",
+			DepartmentID:   dept.ID,
+			Name:           "Root Admin",
+			Code:           "root_admin",
+			Description:    "Full access to every admin module",
+			Level:          "director",
+			EmploymentType: "full_time",
+			PermissionIDs:  string(permJSON),
+			Status:         "active",
 		}
 		if err := tx.Where("code = ?", pos.Code).FirstOrCreate(&pos).Error; err != nil {
 			return fmt.Errorf("seed root admin position: %w", err)

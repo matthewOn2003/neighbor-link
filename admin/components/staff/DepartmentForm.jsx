@@ -8,7 +8,15 @@ import { Spinner } from "@/components/ui/Spinner";
 import { departmentCreate, departmentUpdate } from "@/services/staff/department";
 import { saveErrorMessage, useStatusOptions } from "./common";
 
-const EMPTY_FORM = { name: "", code: "", description: "", status: "active" };
+const EMPTY_FORM = {
+  name: "",
+  code: "",
+  description: "",
+  manager_name: "",
+  location: "",
+  phone: "",
+  status: "active",
+};
 
 export function DepartmentForm({ record }) {
   const { t } = useLocale();
@@ -37,6 +45,9 @@ export function DepartmentForm({ record }) {
       name: form.name.trim(),
       code: form.code.trim(),
       description: form.description.trim(),
+      manager_name: form.manager_name.trim(),
+      location: form.location.trim(),
+      phone: form.phone.trim(),
       status: form.status,
     };
 
@@ -78,6 +89,9 @@ export function DepartmentForm({ record }) {
       <FormSection title={t("details")}>
         <Input label={t("department_name")} name="name" value={form.name} onChange={(v) => updateField("name", v)} required error={errors.name} />
         <Input label={t("code")} name="code" value={form.code} onChange={(v) => updateField("code", v)} required error={errors.code} />
+        <Input label={t("manager_name")} name="manager_name" value={form.manager_name} onChange={(v) => updateField("manager_name", v)} />
+        <Input label={t("location")} name="location" value={form.location} onChange={(v) => updateField("location", v)} />
+        <Input label={t("phone")} name="phone" value={form.phone} onChange={(v) => updateField("phone", v)} />
         <Textarea label={t("description")} name="description" value={form.description} onChange={(v) => updateField("description", v)} rows={3} />
         <Select label={t("status")} name="status" value={form.status} onChange={(v) => updateField("status", v)} options={statusOptions} />
       </FormSection>
