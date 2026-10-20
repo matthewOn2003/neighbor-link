@@ -78,6 +78,10 @@ type UnitFilter struct {
 	FloorID    *uint
 	Status     string
 	Keyword    string
+	Bedrooms   *int
+	SizeMin    *int
+	SizeMax    *int
+	TenantName string
 }
 
 type UnitListItem struct {
@@ -326,6 +330,19 @@ func (r *SQLiteRepository) filteredUnits(f UnitFilter) *gorm.DB {
 	if f.Keyword != "" {
 		like := "%" + strings.ToLower(f.Keyword) + "%"
 		q = q.Where("LOWER(units.code) LIKE ?", like)
+	}
+	if f.Bedrooms != nil {
+		q = q.Where("units.bedrooms = ?", *f.Bedrooms)
+	}
+	if f.SizeMin != nil {
+		q = q.Where("units.size_sqft >= ?", *f.SizeMin)
+	}
+	if f.SizeMax != nil {
+		q = q.Where("units.size_sqft <= ?", *f.SizeMax)
+	}
+	if f.TenantName != "" {
+		like := "%" + strings.ToLower(f.TenantName) + "%"
+		q = q.Where(`EXISTS (SELECT 1 FROM tenants t WHERE t.unit_id = units.id AND LOWER(t.name) LIKE ?)`, like)
 	}
 	return q
 }
