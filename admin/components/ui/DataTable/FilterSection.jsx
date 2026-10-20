@@ -13,7 +13,19 @@ export function FilterSection({ values, badges, onClear, filterHint, resetFilter
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-3">
         <div className="flex min-w-0 flex-1 items-center gap-3">
-          <span className="shrink-0 text-sm font-semibold text-scene-content">Filter Criteria</span>
+          <button
+            className="inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-lg bg-primary/10 px-4 py-2 text-sm font-semibold text-primary transition-colors hover:bg-primary/15"
+            type="button"
+            aria-expanded={open}
+            onClick={() => setOpen((current) => !current)}
+          >
+            <Icon name="filter_alt" className="text-lg" />
+            <span>Filters</span>
+            <Icon
+              name="expand_more"
+              className={`text-lg transition-transform duration-200 ease-out ${open ? "rotate-180" : ""}`}
+            />
+          </button>
           <div className="scrollbar-hidden flex min-w-0 flex-1 items-center gap-2 overflow-x-auto pb-1">
             {activeBadges.map(({ key, label, display }) => (
               <span
@@ -35,19 +47,6 @@ export function FilterSection({ values, badges, onClear, filterHint, resetFilter
           </div>
           {filterHint ? <span className="shrink-0 text-xs text-subtle">• {filterHint}</span> : null}
         </div>
-        <button
-          className="inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-lg bg-primary/10 px-4 py-2 text-sm font-semibold text-primary transition-colors hover:bg-primary/15"
-          type="button"
-          aria-expanded={open}
-          onClick={() => setOpen((current) => !current)}
-        >
-          <Icon name="filter_alt" className="text-lg" />
-          <span>Filters</span>
-          <Icon
-            name="expand_more"
-            className={`text-lg transition-transform duration-200 ease-out ${open ? "rotate-180" : ""}`}
-          />
-        </button>
       </div>
 
       <div

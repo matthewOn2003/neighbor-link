@@ -5,7 +5,10 @@ import { Link } from "@/i18n/navigation";
 import { Icon } from "@/components/ui/Icon";
 import { Spinner } from "@/components/ui/Spinner";
 import { DataTable } from "@/components/ui/DataTable";
+import { Input } from "@/components/ui/Input";
+import { Select } from "@/components/ui/Select";
 import { UnitStatusBadge } from "@/components/property/parts";
+import { useDraftFilters } from "@/hooks/useDraftFilters";
 import { useRequest } from "@/hooks/useRequest";
 import { useDropdown } from "@/hooks/useDropdown";
 import { useLocale } from "@/i18n";
@@ -14,9 +17,17 @@ export default function FloorDetailPage({ params }) {
   const { id, blockId, floorId } = use(params);
   const { t, locale } = useLocale();
   const { data: floor, loading, error } = useRequest(`/property/floor/${floorId}`);
-  const { labelOf } = useDropdown(["unit_status"]);
+  const { labelOf, optionsOf } = useDropdown(["unit_status"]);
+  const { draft, setDraft, applied, apply, reset, clear } = useDraftFilters({
+    status: "",
+    keyword: "",
+  });
+
+  const statusOptions = [{ value: "", label: t("all_statuses") }, ...optionsOf("unit_status")];
+  const statusMap = Object.fromEntries(statusOptions.map((option) => [option.value, option]));
 
   if (error) {
+
     return <main className="p-4 md:p-8 text-error">{error}</main>;
   }
   if (loading || !floor) {
@@ -40,9 +51,37 @@ export default function FloorDetailPage({ params }) {
 
         <DataTable
           api="/property/unit/list"
-          params={{ floor_id: floorId }}
+          params={{ ...applied, floor_id: floorId }}
+          filterValues={draft}
+          filterBadges={[
+            { key: "status", label: t("status"), display: (value) => statusMap[value]?.label ?? value },
+            { key: "keyword", label: t("unit_code") },
+          ]}
+          onClearFilter={clear}
           title={t("floor_level", { level: floor.level })}
           description={`${t("block")} ${floor.block_code}`}
+          filters={(
+            <>
+              <Select
+                variant="filter"
+                name="status"
+                label={t("status")}
+                value={draft.status}
+                onChange={(status) => setDraft((current) => ({ ...current, status }))}
+                options={statusOptions}
+              />
+
+              <Input
+                variant="filter"
+                name="keyword"
+                label={t("unit_code")}
+                value={draft.keyword}
+                onChange={(keyword) => setDraft((current) => ({ ...current, keyword }))}
+              />
+            </>
+          )}
+          resetFilters={reset}
+          applyFilters={apply}
           emptyText={t("no_units")}
           header={() => (
             <tr className="bg-accent text-subtle font-semibold">

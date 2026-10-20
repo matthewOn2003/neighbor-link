@@ -1,7 +1,7 @@
 import { Icon } from "@/components/ui/Icon";
 
 const filterInput =
-  "h-[var(--control-height)] w-full rounded-[var(--input-radius)] border border-line bg-accent pl-3.5 pr-9 text-sm text-scene-content outline-none transition-[border-color,box-shadow] duration-[var(--transition-duration)] hover:border-primary/45 focus:border-primary focus:shadow-[0_0_0_var(--focus-ring-width)_rgba(216,109,67,0.15)] [&::-webkit-calendar-picker-indicator]:hidden";
+  "h-[var(--control-height)] w-full rounded-lg border border-line/60 bg-accent pl-3 pr-9 text-sm text-scene-content outline-none transition-colors focus:border-primary [&::-webkit-calendar-picker-indicator]:hidden";
 
 const formInput = "input pr-9 [&::-webkit-calendar-picker-indicator]:hidden";
 
