@@ -5,8 +5,10 @@ import { useList } from "@/hooks/useList";
 import { useDragScroll } from "@/hooks/useDragScroll";
 import { Icon } from "../Icon";
 import { Spinner } from "../Spinner";
+import { FilterSection } from "./FilterSection";
 
 export { SummaryCard } from "./SummaryCard";
+export { FilterSection } from "./FilterSection";
 
 const NAV_BTN = `inline-flex items-center gap-1 px-3 py-2 rounded-lg bg-primary/10 text-subtle hover:text-scene-content hover:bg-[#e5eeff] text-xs font-semibold transition-colors disabled:opacity-60`;
 
@@ -29,10 +31,16 @@ function buildPagination(current, total) {
 export function DataTable({
   api,
   params,
+  filterValues,
+  filterBadges,
+  onClearFilter,
   title,
   description,
   buttons,
   filters,
+  filterHint,
+  resetFilters,
+  applyFilters,
   summary,
   header,
   body,
@@ -41,7 +49,7 @@ export function DataTable({
   className = "",
 }) {
   const [perPage] = useState(10);
-  const drag = useDragScroll();
+  // const drag = useDragScroll();
 
   // 筛选条件或每页条数变化时，页码回到 1
   const scope = `${JSON.stringify(params ?? {})}|${perPage}`;
@@ -96,16 +104,31 @@ export function DataTable({
 
       {/* summary */}
       {summary ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">{summary(ctx)}</div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6 gap-4">{summary(ctx)}</div>
       ) : null}
 
+      {/* <hr className="border-line/40" /> */}
+
       {/* filters */}
-      {filters ? <div className="flex flex-wrap items-center gap-3">{filters}</div> : null}
+      {filters ? (
+        <FilterSection
+          values={filterValues ?? params}
+          badges={filterBadges}
+          onClear={onClearFilter}
+          filterHint={filterHint}
+          resetFilters={resetFilters}
+          applyFilters={applyFilters}
+        >
+          {filters}
+        </FilterSection>
+      ) : null}
+
 
       {/* table */}
       <div className={`${loading && rows.length > 0 ? "opacity-60" : ""} transition-opacity`}>
         {table ? (
-          <div className="table-wrap" {...drag}>
+          // <div className="table-wrap" {...drag}>
+          <div className="table-wrap">
             <table className="table">
               <thead>{header(ctx)}</thead>
               <tbody>{status ? null : bodyNode}</tbody>

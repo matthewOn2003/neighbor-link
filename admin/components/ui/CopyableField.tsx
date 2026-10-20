@@ -35,7 +35,7 @@ export function CopyableField({ label, value }: { label: string; value: string }
         >
           {value}
         </code>
-        <button type="button" className="btn btn-outline btn-sm" onClick={handleCopy}>
+        <button type="button" className="btn btn-outline" onClick={handleCopy}>
           {copied ? "Copied" : "Copy"}
         </button>
       </div>

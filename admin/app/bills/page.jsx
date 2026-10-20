@@ -147,12 +147,12 @@ export default function BillsPage() {
                         <Link href={"/bills/" + bill.id} className="text-primary-dark hover:underline">BL-{String(bill.id).padStart(5, "0")}</Link>
                       </td>
                       <td className="px-4 py-4">
-                        <div className="font-medium text-scene-content">{bill.tenant_name}</div>
+                        <div className="font-semibold text-scene-content">{bill.tenant_name}</div>
                         <div className="text-xs text-subtle">{bill.property_name || "—"} · {bill.unit_code || "—"}</div>
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap">{bill.billing_period}</td>
                       <td className="px-4 py-4 whitespace-nowrap">{bill.due_date}</td>
-                      <td className="px-4 py-4 whitespace-nowrap font-medium">{money(Number(bill.amount) + Number(bill.late_fee), locale)}</td>
+                      <td className="px-4 py-4 whitespace-nowrap font-semibold">{money(Number(bill.amount) + Number(bill.late_fee), locale)}</td>
                       <td className="px-4 py-4 whitespace-nowrap">{money(bill.amount_paid, locale)}</td>
                       <td className="px-4 py-4"><span className={"status-pill " + (statusClass[bill.status] || "neutral")}>{t(statusKeys[bill.status] || statusKeys.unpaid)}</span></td>
                       <td className="px-4 py-4 whitespace-nowrap"><Link href={"/bills/" + bill.id} className="text-primary-dark hover:underline">{t("view_details")}</Link></td>

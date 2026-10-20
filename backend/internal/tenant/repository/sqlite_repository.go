@@ -27,10 +27,16 @@ type Tenant struct {
 }
 
 // TenantFilter holds the optional list filters. Zero values mean "no filter".
+// ContractEndFrom and ContractEndTo are inclusive "YYYY-MM-DD" dates.
 type TenantFilter struct {
-	Keyword    string
-	Status     string
-	PropertyID *uint
+	Keyword         string
+	Status          string
+	TenantName      string
+	PropertyUnit    string
+	Email           string
+	Phone           string
+	ContractEndFrom string
+	ContractEndTo   string
 }
 
 type SQLiteRepository struct {
@@ -161,7 +167,6 @@ func sameUnit(a, b *uint) bool {
 	return *a == *b
 }
 
-
 func (r *SQLiteRepository) Count() (int64, error) {
 	var total int64
 	err := r.db.Model(&Tenant{}).Count(&total).Error
@@ -177,16 +182,34 @@ type TenantListItem struct {
 }
 
 func (r *SQLiteRepository) filtered(f TenantFilter) *gorm.DB {
-	q := r.db.Model(&Tenant{})
+	q := r.db.Model(&Tenant{}).
+		Joins("LEFT JOIN properties ON properties.id = tenants.property_id").
+		Joins("LEFT JOIN units ON units.id = tenants.unit_id")
 	if f.Keyword != "" {
 		like := "%" + strings.ToLower(f.Keyword) + "%"
-		q = q.Where("LOWER(tenants.name) LIKE ? OR LOWER(tenants.email) LIKE ? OR tenants.phone LIKE ?", like, like, like)
+		q = q.Where("(LOWER(tenants.name) LIKE ? OR LOWER(tenants.email) LIKE ? OR tenants.phone LIKE ?)", like, like, like)
 	}
 	if f.Status != "" {
 		q = q.Where("tenants.status = ?", f.Status)
 	}
-	if f.PropertyID != nil {
-		q = q.Where("tenants.property_id = ?", *f.PropertyID)
+	if f.TenantName != "" {
+		q = q.Where("LOWER(tenants.name) LIKE ?", "%"+strings.ToLower(f.TenantName)+"%")
+	}
+	if f.PropertyUnit != "" {
+		like := "%" + strings.ToLower(f.PropertyUnit) + "%"
+		q = q.Where("(LOWER(properties.name) LIKE ? OR LOWER(units.code) LIKE ?)", like, like)
+	}
+	if f.Email != "" {
+		q = q.Where("LOWER(tenants.email) LIKE ?", "%"+strings.ToLower(f.Email)+"%")
+	}
+	if f.Phone != "" {
+		q = q.Where("tenants.phone LIKE ?", "%"+f.Phone+"%")
+	}
+	if f.ContractEndFrom != "" {
+		q = q.Where("tenants.contract_end >= ?", f.ContractEndFrom)
+	}
+	if f.ContractEndTo != "" {
+		q = q.Where("tenants.contract_end <= ?", f.ContractEndTo)
 	}
 	return q
 }
@@ -201,8 +224,6 @@ func (r *SQLiteRepository) List(f TenantFilter, currentPage, perPage int) ([]Ten
 	offset := (currentPage - 1) * perPage
 	err := r.filtered(f).
 		Select("tenants.*, properties.name AS property_name, properties.address AS property_address, units.code AS unit").
-		Joins("LEFT JOIN properties ON properties.id = tenants.property_id").
-		Joins("LEFT JOIN units ON units.id = tenants.unit_id").
 		Order("tenants.id asc").
 		Offset(offset).Limit(perPage).
 		Scan(&items).Error

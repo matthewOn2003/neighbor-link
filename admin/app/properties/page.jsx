@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Link } from "@/i18n/navigation";
 import { Icon } from "@/components/ui/Icon";
 import { Spinner } from "@/components/ui/Spinner";
-import { SearchBar } from "@/components/ui/SearchBar";
+// import { SearchBar } from "@/components/ui/SearchBar";
 import { OccupancyBar, PropertyCover, StatBlock } from "@/components/property/parts";
 import { useDragScroll } from "@/hooks/useDragScroll";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
@@ -34,7 +34,7 @@ function PropertyCard({ property, typeLabel, t }) {
         </div>
 
         <p className="text-xs text-subtle truncate">
-          {t("developer")}: <span className="font-medium text-scene-content">{property.developer_name ?? "-"}</span>
+          {t("developer")}: <span className="font-semibold text-scene-content">{property.developer_name ?? "-"}</span>
         </p>
 
         <div className="grid grid-cols-3 gap-2">
@@ -117,11 +117,11 @@ export default function PropertiesPage() {
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
-              <SearchBar
+              {/* <SearchBar
                 value={keywordInput}
                 onChange={setKeywordInput}
                 placeholder={t("search_properties")}
-              />
+              /> */}
 
               <select
                 className="dropdown w-auto min-w-[160px]"

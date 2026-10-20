@@ -12,15 +12,13 @@ export default plugin(function ({ addComponents }) {
       padding: "0 2.25rem 0 0.875rem",
       borderRadius: "var(--input-radius)",
       border: "var(--border-width) solid var(--line)",
-      backgroundColor: "var(--control-background)",
+      backgroundColor: "var(--accent)",
       backgroundImage: chevron,
       backgroundRepeat: "no-repeat",
       backgroundPosition: "right 0.75rem center",
       backgroundSize: "1rem",
-      color: "var(--foreground)",
+      // color: "var(--subtle)",
       fontSize: "0.875rem",
-      fontWeight: "500",
-      lineHeight: "1.25",
       textOverflow: "ellipsis",
       whiteSpace: "nowrap",
       appearance: "none",
@@ -41,8 +39,7 @@ export default plugin(function ({ addComponents }) {
         backgroundColor: "var(--accent)",
       },
       "&:required:invalid": {
-        color: "var(--subtle)",
-        fontWeight: "400",
+        // color: "var(--subtle)",
       },
     },
 
@@ -77,18 +74,16 @@ export default plugin(function ({ addComponents }) {
         borderRadius: "var(--input-radius)",
         backgroundColor: "var(--accent)",
         maxHeight: "18rem",
-        // 与全局滚动条保持一致的颜色（弹出层选不到 ::-webkit-scrollbar）
-        scrollbarWidth: "thin",
-        scrollbarColor: "var(--scrollbar-thumb) transparent",
+        // 隐藏弹出层滚动条，仍可滚动
+        scrollbarWidth: "none",
       },
       ".dropdown option": {
         display: "flex",
         alignItems: "center",
         padding: "0.75rem 0.75rem",
-        borderRadius: "calc(var(--input-radius) - 2px)",
+        // borderRadius: "calc(var(--input-radius) - 2px)",
         fontSize: "0.875rem",
-        fontWeight: "400",
-        color: "var(--foreground)",
+        // color: "var(--subtle)",
         cursor: "pointer",
       },
       ".dropdown option::checkmark": {
@@ -101,7 +96,7 @@ export default plugin(function ({ addComponents }) {
       ".dropdown option:checked": {
         backgroundColor: "color-mix(in srgb, var(--primary) 10%, transparent)",
         color: "var(--primary)",
-        fontWeight: "600",
+        // fontWeight: "600",
       },
       ".dropdown option[disabled]": {
         color: "var(--subtle)",

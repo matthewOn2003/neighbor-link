@@ -5,15 +5,18 @@
 
 export type SelectOption = { label: string; value: string };
 
+// variant="filter" is the compact control used in DataTable's filter panel.
+// It renders only the given options, so an "All" option with value "" is shown as the selected default.
 export function Select({
   label,
   name,
   value,
   onChange,
   options,
-  placeholder = "Select…",
+  placeholder = "- Select -",
   error,
   required,
+  variant = "form",
 }: {
   label: string;
   name: string;
@@ -23,7 +26,33 @@ export function Select({
   placeholder?: string;
   error?: string;
   required?: boolean;
+  variant?: "form" | "filter";
 }) {
+  if (variant === "filter") {
+    return (
+      <div className="flex flex-col gap-1.5">
+        <label className="text-xs font-semibold text-subtle" htmlFor={name}>
+          {label}
+        </label>
+        <div>
+          <select
+            id={name}
+            name={name}
+            className="dropdown"
+            value={value}
+            onChange={(event) => onChange(event.target.value)}
+          >
+            {options.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="field">
       <label className="field-label" htmlFor={name}>
