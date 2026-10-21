@@ -6,7 +6,8 @@ import Image from "next/image";
 import { useLocale } from "@/i18n";
 import { useLoginMutation } from "@/store/authApi";
 import LangSelect from "@/components/LangSelect";
-import { FormButton, FormError, FormGuard, FormInput, rules, FormValues } from "@matthew2003/formguard";
+import { Input } from "@/components/ui/Input";
+import { FormButton, FormError, FormGuard } from "@matthew2003/formguard";
 
 function getErrorMessage(error: unknown): string | undefined {
   if (typeof error === "object" && error !== null && "data" in error) {
@@ -18,19 +19,36 @@ function getErrorMessage(error: unknown): string | undefined {
   return undefined;
 }
 
+type LoginFields = { username: string; password: string };
+
 export default function Home() {
   const router = useRouter();
   const [login] = useLoginMutation();
   const { t } = useLocale();
+  const [form, setForm] = useState<LoginFields>({ username: "admin", password: "" });
+  const [fieldErrors, setFieldErrors] = useState<Partial<LoginFields>>({});
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  async function handleSubmit(values: FormValues) {
+  function updateField(key: keyof LoginFields) {
+    return (value: string) => {
+      setForm((current) => ({ ...current, [key]: value }));
+      setFieldErrors((current) => ({ ...current, [key]: undefined }));
+    };
+  }
+
+  async function handleSubmit() {
+    const nextErrors: Partial<LoginFields> = {};
+    if (!form.username.trim()) nextErrors.username = t("field_required");
+    if (!form.password) nextErrors.password = t("field_required");
+    setFieldErrors(nextErrors);
+    if (Object.keys(nextErrors).length > 0) return;
+
     setError("");
     setIsLoading(true);
 
     try {
-      await login({ username: values.username as string, password: values.password as string, role: "admin" }).unwrap();
+      await login({ username: form.username, password: form.password, role: "admin" }).unwrap();
       router.push("/dashboard");
     } catch (submitError) {
       setError(getErrorMessage(submitError) ?? t("login_failed"));
@@ -52,8 +70,21 @@ export default function Home() {
           className="login-form"
           tokens={{ radius: "6px", focusColor: "#315b57", buttonBackground: "#315b57" }}
         >
-          <FormInput name="username" label={t("username")} autoComplete="username" validators={[rules.required(t("field_required"))]} />
-          <FormInput name="password" label={t("password")} type="password" autoComplete="current-password" validators={[rules.required(t("field_required"))]} />
+          <Input
+            name="username"
+            label={t("username")}
+            value={form.username}
+            error={fieldErrors.username}
+            onChange={updateField("username")}
+          />
+          <Input
+            name="password"
+            label={t("password")}
+            type="password"
+            value={form.password}
+            error={fieldErrors.password}
+            onChange={updateField("password")}
+          />
           <FormError>{error}</FormError>
           <FormButton loading={isLoading}>{isLoading ? t("signing_in") : t("sign_in")}</FormButton>
         </FormGuard>
