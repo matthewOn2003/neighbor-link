@@ -129,14 +129,17 @@ export default function BillsPage() {
           resetFilters={reset}
           applyFilters={apply}
           emptyText={t("no_bills")}
-          summary={({ summary = {} }) => (
+          summary={({ summary }) => {
+            const stats = summary ?? {};
+            return (
             <>
-              <SummaryCard label={t("bill_total_amount")} value={money(summary.total_amount, locale)} icon="receipt_long" />
-              <SummaryCard label={t("bill_total_paid")} value={money(summary.total_paid, locale)} icon="task_alt" />
-              <SummaryCard label={t("bill_outstanding")} value={money(summary.outstanding, locale)} icon="account_balance_wallet" />
-              <SummaryCard label={t("bill_overdue_count")} value={String(summary.overdue_count ?? 0)} icon="schedule" />
+              <SummaryCard label={t("bill_total_amount")} value={money(stats.total_amount, locale)} icon="receipt_long" />
+              <SummaryCard label={t("bill_total_paid")} value={money(stats.total_paid, locale)} icon="task_alt" />
+              <SummaryCard label={t("bill_outstanding")} value={money(stats.outstanding, locale)} icon="account_balance_wallet" />
+              <SummaryCard label={t("bill_overdue_count")} value={String(stats.overdue_count ?? 0)} icon="schedule" />
             </>
-          )}
+            );
+          }}
           header={() => (
             <tr className="bg-accent text-subtle font-semibold">
               {["bill_number", "tenant", "billing_period", "due_date", "bill_amount", "bill_paid", "status", "action"].map((key) => (

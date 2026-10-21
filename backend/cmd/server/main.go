@@ -31,6 +31,7 @@ import (
 	paymentusecase "backend/internal/payment/usecase"
 	"backend/internal/pkg/database"
 	"backend/internal/pkg/middleware"
+	"backend/internal/pkg/storage"
 	propertydelivery "backend/internal/property/delivery"
 	propertyrepository "backend/internal/property/repository"
 	propertyusecase "backend/internal/property/usecase"
@@ -131,7 +132,8 @@ func main() {
 
 	// Controllers
 	userController := delivery.NewUserController(userUsecase, tokenSecret, cookieSecure)
-	propertyController := propertydelivery.NewPropertyController(propertyUsecase)
+	propertyController := propertydelivery.NewPropertyController(propertyUsecase).
+		WithStorage(storage.NewUploader(storage.LoadConfigFromEnv()))
 	tenantController := tenantdelivery.NewTenantController(tenantUsecase)
 	dictionaryController := dictionarydelivery.NewDictionaryController(dictionaryUsecase)
 	staffController := staffdelivery.NewController(db)

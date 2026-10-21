@@ -21,7 +21,7 @@ function PropertyCard({ property, typeLabel, t }) {
       className="group flex flex-col h-full rounded-xl bg-accent shadow overflow-hidden hover:shadow-lg transition-shadow"
       href={`/properties/${property.id}`}
     >
-      <PropertyCover id={property.id} coverImage={property.cover_image} className="h-36" />
+      <PropertyCover id={property.id} coverImage={property.cover_image_url} className="h-36" />
       <div className="flex flex-col flex-1 gap-3 p-4">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
