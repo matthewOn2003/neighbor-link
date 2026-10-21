@@ -6,6 +6,7 @@ import { useLocale } from "@/i18n";
 import { Icon } from "@/components/ui/Icon";
 import { useRequest } from "@/hooks/useRequest";
 import NotificationSheet from "@/components/portal/NotificationSheet";
+import AccountMenu from "@/components/shell/AccountMenu";
 
 function initialsOf(name) {
   const parts = String(name ?? "").trim().split(/\s+/).filter(Boolean);
@@ -47,13 +48,7 @@ export default function PortalHeader() {
             <Icon name="notifications" className="text-[20px]" />
             {actionCount > 0 ? <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-secondary" /> : null}
           </button>
-          <div
-            aria-label={data?.name ?? t("profile")}
-            title={data?.name ?? ""}
-            className="grid h-9 w-9 place-items-center rounded-full border border-primary/30 bg-primary/15 text-xs font-bold text-primary"
-          >
-            {initialsOf(data?.name)}
-          </div>
+          <AccountMenu name={data?.name} initials={initialsOf(data?.name)} />
         </div>
       </div>
     </header>
