@@ -15,6 +15,8 @@ export default function RequestDetail({ loading, item, icon, backHref, backLabel
   if (!item) return <EmptyState icon="error" title={t("record_not_found")} />;
 
   const tone = STATUS_TONE[item.status] ?? "neutral";
+  const attachments = item.attachments ?? [];
+  const notes = item.notes ?? [];
   const fields = rows
     .map(([label, value]) => ({ label, value }))
     .filter((f) => f.value !== undefined && f.value !== null && f.value !== "");
@@ -60,6 +62,46 @@ export default function RequestDetail({ loading, item, icon, backHref, backLabel
             <p className="whitespace-pre-line text-sm text-on-surface">{description}</p>
           </div>
         ) : null}
+
+        {attachments.length > 0 ? (
+          <div>
+            <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">{t("portal_attachments")}</p>
+            <div className="grid grid-cols-3 gap-2">
+              {attachments.map((a) =>
+                a.file_url ? (
+                  <a
+                    key={a.id}
+                    href={a.file_url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="block aspect-square overflow-hidden rounded-xl border border-white/[0.08] bg-black/30"
+                  >
+                    <img src={a.file_url} alt={a.file_name} className="h-full w-full object-cover" />
+                  </a>
+                ) : null,
+              )}
+            </div>
+          </div>
+        ) : null}
+
+        <div>
+          <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">{t("portal_property_notes")}</p>
+          {notes.length === 0 ? (
+            <p className="text-xs text-on-surface-variant">{t("portal_no_property_notes")}</p>
+          ) : (
+            <ul className="flex flex-col gap-2">
+              {notes.map((n) => (
+                <li key={n.id} className="rounded-xl border border-white/[0.06] bg-black/30 p-3">
+                  <div className="flex items-center justify-between gap-2 text-[11px] text-on-surface-variant">
+                    <span className="truncate font-semibold text-on-surface">{n.author_name}</span>
+                    <span className="shrink-0">{formatDateTime(n.created_at, locale)}</span>
+                  </div>
+                  <p className="mt-1.5 whitespace-pre-line text-xs text-on-surface">{n.body}</p>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
 
         {resolution ? (
           <div className="rounded-xl border border-emerald-400/25 bg-emerald-500/10 p-3.5">

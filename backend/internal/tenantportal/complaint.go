@@ -12,6 +12,12 @@ import (
 	"backend/internal/pkg/response"
 )
 
+// complaintDetailView is one complaint with the property notes written on it.
+type complaintDetailView struct {
+	*complaintrepo.Detail
+	Notes []noteItem `json:"notes"`
+}
+
 type complaintCreateRequest struct {
 	Title       string `json:"title"`
 	Description string `json:"description"`
@@ -101,5 +107,10 @@ func (c *Controller) ComplaintDetail(w http.ResponseWriter, r *http.Request) {
 		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to load complaint")
 		return
 	}
-	response.WriteSuccess(w, http.StatusOK, d)
+	notes, err := c.loadNotes("complaint", d.ID)
+	if err != nil {
+		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to load complaint")
+		return
+	}
+	response.WriteSuccess(w, http.StatusOK, complaintDetailView{Detail: d, Notes: notes})
 }

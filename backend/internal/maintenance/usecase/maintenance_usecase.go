@@ -195,3 +195,13 @@ func (uc *MaintenanceUsecase) Update(id uint, in UpdateInput) (*repository.Detai
 	}
 	return uc.repo.FindDetail(id)
 }
+
+// AddAttachment records a photo for a repair request.
+func (uc *MaintenanceUsecase) AddAttachment(a *repository.Attachment) error {
+	return uc.repo.AddAttachment(a)
+}
+
+// Attachments returns the photos of a repair request.
+func (uc *MaintenanceUsecase) Attachments(requestID uint) ([]repository.Attachment, error) {
+	return uc.repo.ListAttachments(requestID)
+}

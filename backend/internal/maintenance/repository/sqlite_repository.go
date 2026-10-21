@@ -46,7 +46,21 @@ type ListItem struct {
 	UpdatedAt    time.Time  `json:"updated_at"`
 	ResolvedAt   *time.Time `json:"resolved_at"`
 	ScheduledAt  *string    `json:"scheduled_at"`
+	NoteCount    int64      `json:"note_count"`
 }
+
+// Attachment is a photo attached to a repair request. FileKey is the object-storage key.
+type Attachment struct {
+	ID          uint      `gorm:"primaryKey" json:"id"`
+	RequestID   uint      `gorm:"not null" json:"request_id"`
+	FileKey     string    `gorm:"not null" json:"-"`
+	FileName    string    `json:"file_name"`
+	ContentType string    `json:"content_type"`
+	SizeBytes   int64     `json:"size_bytes"`
+	CreatedAt   time.Time `json:"created_at"`
+}
+
+func (Attachment) TableName() string { return "maintenance_attachments" }
 
 type Detail struct {
 	ListItem
@@ -126,7 +140,8 @@ const listSelect = `maintenance_requests.id, maintenance_requests.title, mainten
 	CASE WHEN maintenance_requests.tenant_id IS NULL THEN 'admin' ELSE 'tenant' END AS source,
 	properties.name AS property_name, units.code AS unit_code, tenants.name AS tenant_name,
 	maintenance_requests.created_at, maintenance_requests.updated_at, maintenance_requests.resolved_at,
-	maintenance_requests.scheduled_at`
+	maintenance_requests.scheduled_at,
+	(SELECT COUNT(*) FROM request_notes WHERE request_notes.kind = 'maintenance' AND request_notes.request_id = maintenance_requests.id) AS note_count`
 
 func (r *SQLiteRepository) List(f Filter, page, perPage int) ([]ListItem, int64, error) {
 	var total int64
@@ -223,4 +238,16 @@ func (r *SQLiteRepository) FindRequest(id uint) (*Request, error) {
 
 func (r *SQLiteRepository) Update(id uint, updates map[string]any) error {
 	return r.db.Model(&Request{}).Where("id = ?", id).Updates(updates).Error
+}
+
+// AddAttachment records a photo uploaded for a repair request.
+func (r *SQLiteRepository) AddAttachment(a *Attachment) error {
+	return r.db.Create(a).Error
+}
+
+// ListAttachments returns the photos of one repair request, oldest first.
+func (r *SQLiteRepository) ListAttachments(requestID uint) ([]Attachment, error) {
+	rows := make([]Attachment, 0)
+	err := r.db.Where("request_id = ?", requestID).Order("id ASC").Find(&rows).Error
+	return rows, err
 }
