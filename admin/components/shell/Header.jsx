@@ -4,6 +4,7 @@ import LangSelect from "@/components/LangSelect";
 import { Icon } from "@/components/ui/Icon";
 import { useLocale } from "@/i18n";
 import { currentUser } from "@/mock/session";
+import AccountMenu from "@/components/shell/AccountMenu";
 
 export default function Header({ onMenuClick }) {
   const { t } = useLocale();
@@ -27,7 +28,7 @@ export default function Header({ onMenuClick }) {
         <LangSelect />
         <div className="h-8 w-px bg-[#dce9ff]" />
         <div className="flex items-center gap-2">
-          <img alt={t("profile")} className="w-8 h-8 rounded-full object-cover" src={currentUser.avatar} />
+          <AccountMenu name={currentUser.name} avatar={currentUser.avatar} />
           <div className="hidden md:flex flex-col text-left">
             <span className="text-xs font-semibold text-scene-content">{currentUser.name}</span>
             <span className="text-xs font-semibold text-subtle">{currentUser.role}</span>
