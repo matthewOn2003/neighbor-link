@@ -14,7 +14,6 @@ import (
 	"gorm.io/gorm"
 )
 
-
 type PropertyController struct {
 	usecase *usecase.PropertyUsecase
 }
@@ -22,7 +21,6 @@ type PropertyController struct {
 func NewPropertyController(uc *usecase.PropertyUsecase) *PropertyController {
 	return &PropertyController{usecase: uc}
 }
-
 
 type propertyListRequest struct {
 	CurrentPage  int    `json:"current_page"`
@@ -76,10 +74,10 @@ func (c *PropertyController) List(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	filter := repository.PropertyFilter{
-		Keyword: strings.TrimSpace(req.Keyword),
+		Keyword:      strings.TrimSpace(req.Keyword),
 		PropertyType: strings.TrimSpace(req.PropertyType),
-		DeveloperID: developerID,
-		Region: strings.TrimSpace(req.Region),
+		DeveloperID:  developerID,
+		Region:       strings.TrimSpace(req.Region),
 	}
 	properties, total, err := c.usecase.List(filter, currentPage, perPage)
 	if err != nil {
@@ -88,7 +86,6 @@ func (c *PropertyController) List(w http.ResponseWriter, r *http.Request) {
 	}
 	response.WriteSuccess(w, http.StatusOK, response.NewListData(properties, currentPage, perPage, total))
 }
-
 
 func (c *PropertyController) Facets(w http.ResponseWriter, r *http.Request) {
 	facets, err := c.usecase.Facets()
@@ -296,8 +293,6 @@ func nonEmptyPtr(s *string) *string {
 	return &v
 }
 
-
-
 func (c *PropertyController) Update(w http.ResponseWriter, r *http.Request) {
 	id, err := httpx.ParseIDParam(r)
 	if err != nil {
@@ -355,4 +350,85 @@ func (c *PropertyController) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	response.WriteSuccess(w, http.StatusOK, map[string]uint{"id": id})
+}
+
+type unitCreateRequest struct {
+	BlockID  uint   `json:"block_id"`
+	FloorID  uint   `json:"floor_id"`
+	Code     string `json:"code"`
+	Bedrooms int    `json:"bedrooms"`
+	SizeSqft int    `json:"size_sqft"`
+	Status   string `json:"status"`
+}
+
+type unitUpdateRequest struct {
+	Code     *string `json:"code"`
+	Bedrooms *int    `json:"bedrooms"`
+	SizeSqft *int    `json:"size_sqft"`
+	Status   *string `json:"status"`
+}
+
+// writeUnitError maps unit usecase errors to API responses.
+func writeUnitError(w http.ResponseWriter, err error) {
+	switch {
+	case errors.Is(err, usecase.ErrUnitNotFound):
+		response.WriteError(w, http.StatusNotFound, "NOT_FOUND", "unit not found")
+	case errors.Is(err, usecase.ErrUnitInvalid):
+		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "block_id, floor_id and code are required; bedrooms and size_sqft must be >= 0")
+	case errors.Is(err, usecase.ErrUnitFloorMismatch):
+		response.WriteError(w, http.StatusBadRequest, "INVALID_FLOOR", "floor does not belong to the selected block")
+	case errors.Is(err, usecase.ErrUnitStatusInvalid):
+		response.WriteError(w, http.StatusBadRequest, "INVALID_STATUS", "status must be one of the unit_status options")
+	case errors.Is(err, usecase.ErrUnitCodeExists):
+		response.WriteError(w, http.StatusConflict, "CODE_EXISTS", "unit code already exists in this block")
+	case errors.Is(err, usecase.ErrUnitHasActiveTenant):
+		response.WriteError(w, http.StatusConflict, "INVALID_STATE", "unit has an active tenant and cannot be set to vacant")
+	default:
+		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to save unit")
+	}
+}
+
+func (c *PropertyController) UnitCreate(w http.ResponseWriter, r *http.Request) {
+	var req unitCreateRequest
+	if !decodeBody(r, &req) {
+		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid request body")
+		return
+	}
+	unit, err := c.usecase.CreateUnit(usecase.UnitCreate{
+		BlockID:  req.BlockID,
+		FloorID:  req.FloorID,
+		Code:     req.Code,
+		Bedrooms: req.Bedrooms,
+		SizeSqft: req.SizeSqft,
+		Status:   req.Status,
+	})
+	if err != nil {
+		writeUnitError(w, err)
+		return
+	}
+	response.WriteSuccess(w, http.StatusCreated, unit)
+}
+
+func (c *PropertyController) UnitUpdate(w http.ResponseWriter, r *http.Request) {
+	id, err := httpx.ParseIDParam(r)
+	if err != nil {
+		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid id")
+		return
+	}
+	var req unitUpdateRequest
+	if !decodeBody(r, &req) {
+		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid request body")
+		return
+	}
+	unit, err := c.usecase.UpdateUnit(id, usecase.UnitUpdate{
+		Code:     req.Code,
+		Bedrooms: req.Bedrooms,
+		SizeSqft: req.SizeSqft,
+		Status:   req.Status,
+	})
+	if err != nil {
+		writeUnitError(w, err)
+		return
+	}
+	response.WriteSuccess(w, http.StatusOK, unit)
 }

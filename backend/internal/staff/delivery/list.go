@@ -211,6 +211,6 @@ func (c *Controller) ListAccounts(w http.ResponseWriter, r *http.Request) {
 		q = whereDateRange(q, "a.hire_date", req.HireFrom, req.HireTo)
 		return q
 	}
-	selectExpr := "a.id, a.username, a.name, a.phone, a.email, a.employee_no, a.hire_date, a.created_at, a.position_id, a.status, p.name AS position_name, d.name AS department_name"
+	selectExpr := "a.id, a.username, a.name, a.phone, a.email, a.employee_no, a.hire_date, a.created_at, a.updated_at, a.position_id, a.status, p.name AS position_name, d.name AS department_name"
 	writePagedList[Account](w, build, selectExpr, "a.id DESC", currentPage, perPage, "failed to list accounts")
 }

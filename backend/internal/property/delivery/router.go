@@ -25,6 +25,8 @@ func NewPropertyRouter(controller *PropertyController, tokenSecret string, allow
 	mux.HandleFunc("POST /api/v1/property/floor/list", adminMiddleware(controller.FloorList))
 	mux.HandleFunc("POST /api/v1/property/floor/{id}", adminMiddleware(controller.FloorDetail))
 	mux.HandleFunc("POST /api/v1/property/unit/list", adminMiddleware(controller.UnitList))
+	mux.HandleFunc("POST /api/v1/property/unit/create", adminMiddleware(controller.UnitCreate))
+	mux.HandleFunc("POST /api/v1/property/unit/update/{id}", adminMiddleware(controller.UnitUpdate))
 	mux.HandleFunc("POST /api/v1/property/create", adminMiddleware(controller.Create))
 	mux.HandleFunc("POST /api/v1/property/update/{id}", adminMiddleware(controller.Update))
 	mux.HandleFunc("POST /api/v1/property/delete/{id}", adminMiddleware(controller.Delete))

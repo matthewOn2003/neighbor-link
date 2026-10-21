@@ -85,17 +85,34 @@ type UnitFilter struct {
 }
 
 type UnitListItem struct {
-	ID         uint    `json:"id"`
-	BlockID    uint    `json:"block_id"`
-	FloorID    uint    `json:"floor_id"`
-	BlockCode  string  `json:"block_code"`
-	FloorLevel int     `json:"floor_level"`
-	Code       string  `json:"code"`
-	Bedrooms   int     `json:"bedrooms"`
-	SizeSqft   int     `json:"size_sqft"`
-	Status     string  `json:"status"`
-	TenantName *string `json:"tenant_name"`
+	ID         uint      `json:"id"`
+	BlockID    uint      `json:"block_id"`
+	FloorID    uint      `json:"floor_id"`
+	BlockCode  string    `json:"block_code"`
+	FloorLevel int       `json:"floor_level"`
+	Code       string    `json:"code"`
+	Bedrooms   int       `json:"bedrooms"`
+	SizeSqft   int       `json:"size_sqft"`
+	Status     string    `json:"status"`
+	TenantName *string   `json:"tenant_name"`
+	CreatedAt  time.Time `json:"created_at"`
+	UpdatedAt  time.Time `json:"updated_at"`
 }
+
+// Unit is a single rentable unit. It is used for create and update responses.
+type Unit struct {
+	ID        uint      `gorm:"primaryKey" json:"id"`
+	BlockID   uint      `gorm:"not null" json:"block_id"`
+	FloorID   uint      `gorm:"not null" json:"floor_id"`
+	Code      string    `gorm:"not null" json:"code"`
+	Bedrooms  int       `gorm:"not null" json:"bedrooms"`
+	SizeSqft  int       `json:"size_sqft"`
+	Status    string    `gorm:"not null" json:"status"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
+func (Unit) TableName() string { return "units" }
 
 type FloorDetail struct {
 	ID           uint   `json:"id"`
@@ -356,7 +373,8 @@ func (r *SQLiteRepository) ListUnits(f UnitFilter, currentPage, perPage int) ([]
 	err := r.filteredUnits(f).
 		Select(`units.id, units.block_id, units.floor_id, blocks.code AS block_code, floors.level AS floor_level,
 			units.code, units.bedrooms, units.size_sqft, units.status,
-			(SELECT tenants.name FROM tenants WHERE tenants.unit_id = units.id LIMIT 1) AS tenant_name`).
+			(SELECT tenants.name FROM tenants WHERE tenants.unit_id = units.id LIMIT 1) AS tenant_name,
+			units.created_at, units.updated_at`).
 		Order("units.code asc").
 		Offset((currentPage - 1) * perPage).Limit(perPage).
 		Scan(&items).Error
@@ -366,9 +384,56 @@ func (r *SQLiteRepository) ListUnits(f UnitFilter, currentPage, perPage int) ([]
 	return items, total, nil
 }
 
-
 func (r *SQLiteRepository) Count() (int64, error) {
 	var total int64
 	err := r.db.Model(&Property{}).Count(&total).Error
 	return total, err
+}
+
+func (r *SQLiteRepository) CreateUnit(u *Unit) error {
+	return r.db.Create(u).Error
+}
+
+func (r *SQLiteRepository) FindUnit(id uint) (*Unit, error) {
+	var unit Unit
+	if err := r.db.First(&unit, id).Error; err != nil {
+		return nil, err
+	}
+	return &unit, nil
+}
+
+func (r *SQLiteRepository) UpdateUnit(id uint, updates map[string]any) error {
+	return r.db.Model(&Unit{}).Where("id = ?", id).Updates(updates).Error
+}
+
+// FloorBelongsToBlock reports whether the floor exists and is part of the block.
+func (r *SQLiteRepository) FloorBelongsToBlock(floorID, blockID uint) (bool, error) {
+	var n int64
+	err := r.db.Table("floors").Where("id = ? AND block_id = ?", floorID, blockID).Count(&n).Error
+	return n > 0, err
+}
+
+// UnitCodeTaken reports whether another unit in the block already uses the code. excludeID 0 checks all units.
+func (r *SQLiteRepository) UnitCodeTaken(blockID uint, code string, excludeID uint) (bool, error) {
+	q := r.db.Table("units").Where("block_id = ? AND code = ?", blockID, code)
+	if excludeID != 0 {
+		q = q.Where("id <> ?", excludeID)
+	}
+	var n int64
+	err := q.Count(&n).Error
+	return n > 0, err
+}
+
+// IsUnitStatus reports whether value is one of the unit_status dictionary options.
+func (r *SQLiteRepository) IsUnitStatus(value string) (bool, error) {
+	var n int64
+	err := r.db.Table("options").Where("slug = ? AND value = ?", "unit_status", value).Count(&n).Error
+	return n > 0, err
+}
+
+// HasActiveTenant reports whether an active tenant is assigned to the unit.
+func (r *SQLiteRepository) HasActiveTenant(unitID uint) (bool, error) {
+	var n int64
+	err := r.db.Table("tenants").Where("unit_id = ? AND status = ?", unitID, "active").Count(&n).Error
+	return n > 0, err
 }
