@@ -10,7 +10,7 @@ import BillCard from "@/components/portal/BillCard";
 import ProofCard from "@/components/portal/ProofCard";
 import PaymentProofSheet from "@/components/portal/PaymentProofSheet";
 import InvoiceSheet from "@/components/portal/InvoiceSheet";
-import { EmptyState, FilterChips, GlassCard, LoadingBlock, SegmentedTabs } from "@/components/portal/primitives";
+import { EmptyState, FilterChips, GlassCard, LoadingBlock, SegmentedTabs, Stagger } from "@/components/portal/primitives";
 
 export default function BillingPage() {
   return (
@@ -122,13 +122,15 @@ function BillingContent() {
           <EmptyState icon="receipt_long" title={t("no_bills")} />
         ) : (
           <div className="flex flex-col gap-3">
-            {visibleBills.map((bill) => (
+            {visibleBills.map((bill, index) => (
+              <Stagger key={bill.id} index={index}>
               <BillCard
                 key={bill.id}
                 bill={bill}
                 onUpload={(billId) => setSheet({ billId })}
                 onInvoice={(billId) => setInvoiceBillId(billId)}
               />
+              </Stagger>
             ))}
           </div>
         )
@@ -139,13 +141,15 @@ function BillingContent() {
           <EmptyState icon="fact_check" title={t("no_payment_proofs")} />
         ) : (
           <div className="flex flex-col gap-3">
-            {proofList.map((proof) => (
+            {proofList.map((proof, index) => (
+              <Stagger key={proof.id} index={index}>
               <ProofCard
                 key={proof.id}
                 proof={proof}
                 billPeriod={periodOf[proof.bill_id]}
                 onReupload={(billId) => setSheet({ billId })}
               />
+              </Stagger>
             ))}
           </div>
         )

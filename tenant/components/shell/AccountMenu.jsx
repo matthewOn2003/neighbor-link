@@ -56,7 +56,7 @@ export default function AccountMenu({ name, initials }) {
       {open ? (
         <div
           role="menu"
-          className="absolute right-0 top-11 z-50 w-48 rounded-2xl border border-white/10 bg-surface-container-high p-1.5 shadow-2xl shadow-black/40"
+          className="absolute right-0 top-11 z-50 w-48 origin-top-right animate-scale-in rounded-2xl border border-white/10 bg-surface-container-high p-1.5 shadow-2xl shadow-black/40"
         >
           {name ? <p className="truncate px-3 py-2 text-xs font-semibold text-on-surface-variant">{name}</p> : null}
           <button

@@ -1,12 +1,13 @@
 "use client";
 
 import { Link } from "@/i18n/navigation";
+import { useEffect, useState } from "react";
 import { useLocale } from "@/i18n";
 import { Icon } from "@/components/ui/Icon";
 import { useRequest } from "@/hooks/useRequest";
 import { ordinal, wholeMoney } from "@/components/portal/format";
 import { BILL_LABEL_KEY, MAINTENANCE_ICON, REQUEST_STAGE, REQUEST_STAGE_TOTAL, useDictLabel } from "@/components/portal/status";
-import { EmptyState, GlassCard, IconTile, LoadingBlock, Pill, ProgressBar } from "@/components/portal/primitives";
+import { EmptyState, GlassCard, IconTile, LoadingBlock, Pill, ProgressBar, Stagger } from "@/components/portal/primitives";
 
 // The home screen answers one question: what do I need to do? Everything else lives in the other tabs.
 const ATTENTION_LIMIT = 2;
@@ -38,7 +39,9 @@ export default function DashboardPage() {
 
         <div>
           <p className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">{t("outstanding")}</p>
-          <p className="mt-1 text-3xl font-extrabold tracking-tight text-on-surface">{wholeMoney(data.outstanding_balance, locale)}</p>
+          <p className="mt-1 text-3xl font-extrabold tracking-tight text-on-surface">
+            <BalanceFigure value={data.outstanding_balance} locale={locale} />
+          </p>
           <div className="mt-2">
             {data.outstanding_balance > 0 ? (
               <Pill tone="amber">{t("portal_balance_due")}</Pill>
@@ -78,8 +81,9 @@ export default function DashboardPage() {
           </GlassCard>
         ) : null}
 
-        {attention.map(({ key, overdue: bill, request: item }) =>
-          bill ? (
+        {attention.map(({ key, overdue: bill, request: item }, index) => (
+          <Stagger key={key} index={index}>
+          {bill ? (
             <Link key={key} href="/billing">
               <GlassCard className="flex items-center gap-3 border-rose-500/20 p-4 transition-transform active:scale-[0.99]">
                 <IconTile icon="priority_high" tone="rose" size="sm" />
@@ -115,8 +119,9 @@ export default function DashboardPage() {
                 </div>
               </GlassCard>
             </Link>
-          ),
-        )}
+          )}
+          </Stagger>
+        ))}
       </section>
 
       <section className="flex flex-col gap-2.5">
@@ -137,4 +142,28 @@ function QuickAction({ href, icon, tone, label }) {
       <span className="text-sm font-bold text-on-surface">{label}</span>
     </Link>
   );
+}
+
+/** The balance counts up to its value once when the page opens. */
+function BalanceFigure({ value, locale }) {
+  const shown = useCountUp(value);
+  return wholeMoney(shown, locale);
+}
+
+function useCountUp(target, duration = 800) {
+  const [shown, setShown] = useState(0);
+  useEffect(() => {
+    const start = performance.now();
+    let frame = 0;
+    function tick(now) {
+      const progress = Math.min(1, (now - start) / duration);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      // Whole numbers while counting; the exact value once it lands.
+      setShown(progress < 1 ? Math.round(target * eased) : target);
+      if (progress < 1) frame = requestAnimationFrame(tick);
+    }
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [target, duration]);
+  return shown;
 }

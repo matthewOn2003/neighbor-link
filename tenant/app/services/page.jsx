@@ -10,7 +10,7 @@ import { useDropdown } from "@/hooks/useDropdown";
 import { useOptionLabel, STATUS_FILTERS, STATUS_LABEL_KEY } from "@/components/portal/status";
 import { RepairCard, ComplaintCard } from "@/components/portal/RequestCards";
 import NewRequestSheet from "@/components/portal/NewRequestSheet";
-import { EmptyState, FilterChips, LoadingBlock, SegmentedTabs, inputClass } from "@/components/portal/primitives";
+import { EmptyState, FilterChips, LoadingBlock, SegmentedTabs, Stagger, inputClass } from "@/components/portal/primitives";
 
 export default function ServicesPage() {
   return (
@@ -112,21 +112,21 @@ function ServicesContent() {
             description={t("portal_no_matching_hint")}
           />
         ) : null}
-        {list.map((item) =>
-          kind === "maintenance" ? (
-            <RepairCard
-              key={item.id}
-              item={item}
-              categoryLabel={optionLabel("maintenance_category", dictOption(dict, "maintenance_category", item.category))}
-            />
-          ) : (
-            <ComplaintCard
-              key={item.id}
-              item={item}
-              categoryLabel={optionLabel("complaint_category", dictOption(dict, "complaint_category", item.category))}
-            />
-          ),
-        )}
+        {list.map((item, index) => (
+          <Stagger key={item.id} index={index}>
+            {kind === "maintenance" ? (
+              <RepairCard
+                item={item}
+                categoryLabel={optionLabel("maintenance_category", dictOption(dict, "maintenance_category", item.category))}
+              />
+            ) : (
+              <ComplaintCard
+                item={item}
+                categoryLabel={optionLabel("complaint_category", dictOption(dict, "complaint_category", item.category))}
+              />
+            )}
+          </Stagger>
+        ))}
       </section>
 
       <button

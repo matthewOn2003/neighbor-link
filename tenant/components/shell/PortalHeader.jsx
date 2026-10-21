@@ -46,7 +46,7 @@ export default function PortalHeader() {
             className="relative grid h-9 w-9 place-items-center rounded-full border border-white/10 bg-white/[0.04] text-on-surface transition-colors hover:bg-white/[0.08]"
           >
             <Icon name="notifications" className="text-[20px]" />
-            {actionCount > 0 ? <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-secondary" /> : null}
+            {actionCount > 0 ? <span className="absolute right-2 top-2 h-2 w-2 animate-pulse rounded-full bg-secondary" /> : null}
           </button>
           <AccountMenu name={data?.name} initials={initialsOf(data?.name)} />
         </div>
