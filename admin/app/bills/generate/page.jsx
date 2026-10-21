@@ -31,7 +31,7 @@ export default function GenerateBillsPage() {
       if (count > 0) {
         toast.success(t("bills_generated", { count }));
       } else {
-        toast.info(t("no_new_bills_generated"));
+        toast.success(t("no_new_bills_generated"));
       }
       router.push("/bills");
     } catch (err) {
