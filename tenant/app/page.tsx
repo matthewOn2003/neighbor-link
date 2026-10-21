@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type FormEvent, type ReactNode } from "react";
 import { useRouter } from "@/i18n/navigation";
 import Image from "next/image";
 import { useLocale } from "@/i18n";
 import { useLoginMutation } from "@/store/authApi";
 import LangSelect from "@/components/LangSelect";
-import { Input } from "@/components/ui/Input";
-import { FormButton, FormError, FormGuard } from "@matthew2003/formguard";
+import { Icon } from "@/components/ui/Icon";
+import { inputClass } from "@/components/portal/primitives";
 
 function getErrorMessage(error: unknown): string | undefined {
   if (typeof error === "object" && error !== null && "data" in error) {
@@ -37,7 +37,8 @@ export default function Home() {
     };
   }
 
-  async function handleSubmit() {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
     const nextErrors: Partial<LoginFields> = {};
     if (!form.username.trim()) nextErrors.username = t("field_required");
     if (!form.password) nextErrors.password = t("field_required");
@@ -58,37 +59,77 @@ export default function Home() {
   }
 
   return (
-    <main className="login-shell">
-      <section className="login-panel">
-        <div className="login-header">
-          <Image className="eyebrow" src="/neighbor-link-logo.svg" alt={t("brand_name")} width={1197} height={356} priority />
-          <LangSelect />
+    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-background px-4 py-12 font-sans text-on-surface antialiased selection:bg-primary-container selection:text-white">
+      <div className="pointer-events-none absolute -left-24 -top-24 h-72 w-72 rounded-full bg-primary/20 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-24 -right-16 h-72 w-72 rounded-full bg-secondary/10 blur-3xl" />
+      <div className="absolute right-4 top-4 z-10">
+        <LangSelect />
+      </div>
+
+      <main className="relative w-full max-w-sm">
+        <div className="glass-panel rounded-3xl p-7">
+          <div className="flex flex-col items-center text-center">
+            <div className="grid h-16 w-16 place-items-center rounded-2xl border border-white/10 bg-gradient-to-br from-surface-container-high to-surface-container-low p-2.5 shadow-inner">
+              <Image src="/stitch/logo.png" alt={t("brand_name")} width={44} height={44} className="h-full w-full object-contain" priority />
+            </div>
+            <p className="mt-4 text-[11px] font-bold uppercase tracking-[0.2em] text-primary">NeighborLink</p>
+            <h1 className="mt-1.5 text-2xl font-extrabold tracking-tight text-on-surface">{t("portal_login_title")}</h1>
+            <p className="mt-2 text-xs leading-relaxed text-on-surface-variant">{t("portal_login_subtitle")}</p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="mt-7 flex flex-col gap-4" noValidate>
+            <Field label={t("username")} icon="person" error={fieldErrors.username}>
+              <input
+                name="username"
+                autoComplete="username"
+                className={`${inputClass} pl-11`}
+                value={form.username}
+                onChange={(event) => updateField("username")(event.target.value)}
+              />
+            </Field>
+            <Field label={t("password")} icon="lock" error={fieldErrors.password}>
+              <input
+                name="password"
+                type="password"
+                autoComplete="current-password"
+                className={`${inputClass} pl-11`}
+                value={form.password}
+                onChange={(event) => updateField("password")(event.target.value)}
+              />
+            </Field>
+
+            {error ? (
+              <p role="alert" className="rounded-xl border border-rose-500/25 bg-rose-950/40 px-3 py-2 text-xs text-rose-200">
+                {error}
+              </p>
+            ) : null}
+
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="mt-1 flex items-center justify-center gap-2 rounded-2xl bg-primary-container py-3.5 text-sm font-bold text-white shadow-lg shadow-primary-container/30 transition-all active:scale-[0.98] disabled:opacity-60"
+            >
+              {isLoading ? t("signing_in") : t("sign_in")}
+              {isLoading ? null : <Icon name="arrow_forward" className="text-[18px]" />}
+            </button>
+          </form>
         </div>
-        <FormGuard
-          initialValues={{ username: "", password: "" }}
-          onSubmit={handleSubmit}
-          className="login-form"
-          tokens={{ radius: "6px", focusColor: "#315b57", buttonBackground: "#315b57" }}
-        >
-          <Input
-            name="username"
-            label={t("username")}
-            value={form.username}
-            error={fieldErrors.username}
-            onChange={updateField("username")}
-          />
-          <Input
-            name="password"
-            label={t("password")}
-            type="password"
-            value={form.password}
-            error={fieldErrors.password}
-            onChange={updateField("password")}
-          />
-          <FormError>{error}</FormError>
-          <FormButton loading={isLoading}>{isLoading ? t("signing_in") : t("sign_in")}</FormButton>
-        </FormGuard>
-      </section>
-    </main>
+
+        <p className="mt-5 text-center text-xs text-on-surface-variant">{t("portal_login_help")}</p>
+      </main>
+    </div>
+  );
+}
+
+function Field({ label, icon, error, children }: { label: string; icon: string; error?: string; children: ReactNode }) {
+  return (
+    <label className="flex flex-col gap-1.5">
+      <span className="text-[11px] font-semibold text-on-surface-variant">{label}</span>
+      <span className="relative">
+        <Icon name={icon} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[18px] text-on-surface-variant" />
+        {children}
+      </span>
+      {error ? <span className="text-[11px] text-rose-300">{error}</span> : null}
+    </label>
   );
 }

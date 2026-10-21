@@ -664,5 +664,8 @@
   "portal_announcements_title": "物业公告",
   "portal_no_announcements": "暂无公告。",
   "portal_settings": "设置",
-  "portal_language": "语言"
+  "portal_language": "语言",
+  "portal_login_title": "欢迎回家",
+  "portal_login_subtitle": "登录以管理您的住所、账单和服务请求。",
+  "portal_login_help": "无法登录？请联系租赁办公室。"
 }
