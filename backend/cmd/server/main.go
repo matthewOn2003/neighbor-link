@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"log"
 
 	staffdelivery "backend/internal/staff/delivery"
@@ -46,7 +47,8 @@ import (
 )
 
 func main() {
-	if err := godotenv.Load(); err != nil {
+	// .env is optional: on Render the variables come from the platform environment.
+	if err := godotenv.Load(); err != nil && !errors.Is(err, os.ErrNotExist) {
 		log.Fatalf("加载 .env 失败: %v", err)
 	}
 
