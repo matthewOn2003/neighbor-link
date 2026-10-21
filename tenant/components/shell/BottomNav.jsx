@@ -19,7 +19,7 @@ export default function BottomNav({ activeKey }) {
               aria-current={active ? "page" : undefined}
               className={`flex flex-col items-center justify-center gap-1 transition-colors ${active ? "text-primary" : "text-on-surface-variant hover:text-on-surface"}`}
             >
-              <span className={`flex h-8 w-10 items-center justify-center rounded-full transition-all ${active ? "bg-primary/10" : ""}`}>
+              <span className={`flex h-8 w-10 items-center justify-center rounded-full transition-all duration-300 ${active ? "scale-110 bg-primary/10" : "scale-100"}`}>
                 <Icon name={item.icon} className={`text-[22px] ${active ? "fill-1" : ""}`} />
               </span>
               <span className="text-[10px] font-bold uppercase tracking-wider">{t(item.labelKey)}</span>

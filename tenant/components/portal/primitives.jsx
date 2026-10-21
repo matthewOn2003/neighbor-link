@@ -68,7 +68,7 @@ export function SegmentedTabs({ items, value, onChange }) {
             role="tab"
             aria-selected={active}
             onClick={() => onChange(item.key)}
-            className={`flex flex-1 items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-bold transition-all ${
+            className={`flex flex-1 items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-bold transition-all duration-300 ${
               active
                 ? "bg-primary-container text-white shadow-lg shadow-primary-container/30"
                 : "text-on-surface-variant hover:text-on-surface"
@@ -114,7 +114,7 @@ export function ProgressBar({ value, max }) {
   const pct = max > 0 ? Math.min(100, Math.round((value / max) * 100)) : 0;
   return (
     <div className="h-2 w-full overflow-hidden rounded-full bg-white/[0.08]">
-      <div className="h-full rounded-full bg-gradient-to-r from-violet-500 via-purple-400 to-primary transition-all" style={{ width: `${pct}%` }} />
+      <div className="h-full origin-left animate-bar-grow rounded-full bg-gradient-to-r from-violet-500 via-purple-400 to-primary transition-all" style={{ width: `${pct}%` }} />
     </div>
   );
 }
@@ -136,8 +136,17 @@ export function LoadingBlock({ rows = 3 }) {
   return (
     <div className="flex flex-col gap-3">
       {Array.from({ length: rows }).map((_, i) => (
-        <div key={i} className="glass-panel h-24 animate-pulse rounded-2xl" />
+        <div key={i} className="glass-panel shimmer-effect h-24 overflow-hidden rounded-2xl" />
       ))}
+    </div>
+  );
+}
+
+/** Fades a list item up, delayed by its position so a list arrives one row after another. */
+export function Stagger({ index = 0, className = "", children }) {
+  return (
+    <div className={`animate-fade-up ${className}`} style={{ animationDelay: `${Math.min(index, 8) * 60}ms` }}>
+      {children}
     </div>
   );
 }
@@ -166,13 +175,13 @@ export function Sheet({ open, title, subtitle, icon, onClose, footer, children }
 
   if (!open) return null;
   return (
-    <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/70 backdrop-blur-md" onClick={onClose} role="presentation">
+    <div className="fixed inset-0 z-[60] flex animate-fade-in items-end justify-center bg-black/70 backdrop-blur-md" onClick={onClose} role="presentation">
       <div
         role="dialog"
         aria-modal="true"
         aria-label={title}
         onClick={(event) => event.stopPropagation()}
-        className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-t-3xl border-t border-white/10 bg-[#161722] px-5 pb-8 pt-3 shadow-2xl"
+        className="max-h-[90vh] w-full max-w-lg animate-sheet-up overflow-y-auto rounded-t-3xl border-t border-white/10 bg-[#161722] px-5 pb-8 pt-3 shadow-2xl"
       >
         <div className="mx-auto mb-4 h-1 w-12 rounded-full bg-white/20" />
         <div className="flex items-center justify-between gap-3 border-b border-white/10 pb-3">
@@ -249,7 +258,7 @@ export function Disclosure({ icon, title, trailing, defaultOpen = false, childre
           <Icon name={open ? "expand_less" : "expand_more"} className="text-[20px] text-on-surface-variant" />
         </span>
       </button>
-      {open ? <div className="flex flex-col gap-2.5">{children}</div> : null}
+      {open ? <div className="flex animate-fade-up flex-col gap-2.5">{children}</div> : null}
     </section>
   );
 }

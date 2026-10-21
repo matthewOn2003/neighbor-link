@@ -67,7 +67,7 @@ export default function Home() {
       </div>
 
       <main className="relative w-full max-w-sm">
-        <div className="glass-panel rounded-3xl p-7">
+        <div className="glass-panel animate-fade-up rounded-3xl p-7">
           <div className="flex flex-col items-center text-center">
             <div className="grid h-16 w-16 place-items-center rounded-2xl border border-white/10 bg-gradient-to-br from-surface-container-high to-surface-container-low p-2.5 shadow-inner">
               <Image src="/stitch/logo.png" alt={t("brand_name")} width={44} height={44} className="h-full w-full object-contain" priority />
@@ -99,7 +99,7 @@ export default function Home() {
             </Field>
 
             {error ? (
-              <p role="alert" className="rounded-xl border border-rose-500/25 bg-rose-950/40 px-3 py-2 text-xs text-rose-200">
+              <p key={error} role="alert" className="animate-shake rounded-xl border border-rose-500/25 bg-rose-950/40 px-3 py-2 text-xs text-rose-200">
                 {error}
               </p>
             ) : null}
