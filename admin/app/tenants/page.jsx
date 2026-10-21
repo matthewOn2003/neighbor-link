@@ -6,11 +6,11 @@ import { Icon } from "@/components/ui/Icon";
 import { DataTable, SummaryCard } from "@/components/ui/DataTable";
 import { Input } from "@/components/ui/Input";
 import { DatePicker } from "@/components/ui/DatePicker";
-import { Checkbox } from "@/components/ui/Checkbox";
 import { Select } from "@/components/ui/Select";
 import { useDropdown } from "@/hooks/useDropdown";
-import { useSelection } from "@/hooks/useSelection";
 import { useLocale } from "@/i18n";
+import { request } from "@/services/request";
+import { fdl } from "@/utils/date";
 
 const getInitials = (name = "") =>
   name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join("").toUpperCase();
@@ -24,16 +24,7 @@ const formatBalance = (value, locale) =>
 const formatMonthYear = (date, locale) =>
   new Date(`${date}T00:00:00`).toLocaleDateString(locale, { month: "short", year: "numeric" });
 
-async function copyToClipboard(value) {
-  try {
-    await navigator.clipboard.writeText(value);
-  } catch {
-    // Ignore clipboard failures.
-  }
-}
-
 export default function TenantsPage() {
-  const sel = useSelection();
   const { t, locale } = useLocale();
   const { draft, setDraft, applied, apply, reset, clear } = useDraftFilters({
     status: "",
@@ -67,6 +58,34 @@ export default function TenantsPage() {
             { key: "contract_end_to", label: t("contract_end_to") },
           ]}
           onClearFilter={clear}
+          exportConfig={{
+            filename: "tenants",
+            columns: [
+              { label: t("tenant_name"), get: (r) => r.name },
+              { label: t("phone"), get: (r) => r.phone },
+              { label: t("email"), get: (r) => r.email },
+              { label: t("property"), get: (r) => r.property_name },
+              { label: t("unit"), get: (r) => r.unit },
+              { label: t("contract_end"), get: (r) => r.contract_end },
+              { label: t("monthly_rent"), get: (r) => r.monthly_rent },
+              { label: t("outstanding_balance"), get: (r) => r.outstanding_balance },
+              { label: t("status"), get: (r) => statusMap[r.status]?.label ?? r.status },
+              { label: t("created_at"), get: (r) => fdl(r.created_at) },
+              { label: t("updated_at"), get: (r) => fdl(r.updated_at) },
+            ],
+          }}
+          importConfig={{
+            title: t("import_tenants"),
+            sampleName: "tenants-import-template",
+            columns: [
+              { key: "username", label: t("username"), required: true, sample: "tenant_jsmith" },
+              { key: "name", label: t("name"), required: true, sample: "John Smith" },
+              { key: "phone", label: t("phone"), required: true, sample: "012-3456789" },
+              { key: "email", label: t("email"), sample: "john@example.com" },
+              { key: "status", label: t("status"), sample: "active" },
+            ],
+            onRow: (values) => request("/tenant/create", { ...values, status: values.status || "active" }),
+          }}
           title={t("tenants")}
           description={t("manage_tenants_description")}
           summary={({ total }) => (
@@ -139,25 +158,14 @@ export default function TenantsPage() {
           applyFilters={apply}
           buttons={(
             <>
-              <button className="btn btn-outline" type="button">
-                <Icon name="file_upload" className="text-lg" />
-                <span>{t("export_csv")}</span>
-              </button>
-
               <Link className="btn btn-primary" href="/tenants/new">
                 <Icon name="add" className="text-lg" />
                 <span>{t("add_tenant")}</span>
               </Link>
             </>
           )}
-          header={({ rows }) => (
+          header={() => (
             <tr className="bg-accent text-subtle font-semibold">
-              <th className="sticky-left">
-                <Checkbox
-                  checked={sel.isAllSelected(rows)}
-                  onChange={() => sel.toggleAll(rows)}
-                />
-              </th>
               <th>{t("tenant_name")}</th>
               <th>{t("contact_info")}</th>
               <th>{t("property_and_unit")}</th>
@@ -173,12 +181,6 @@ export default function TenantsPage() {
               const status = statusMap[tenant.status];
               return (
                 <tr className="group" key={tenant.id}>
-                  <td className="sticky-left">
-                    <Checkbox
-                      checked={sel.isSelected(tenant.id)}
-                      onChange={() => sel.toggle(tenant.id)}
-                    />
-                  </td>
                   <td>
                     <div className="flex items-center gap-3">
                       <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-semibold bg-scene text-primary">

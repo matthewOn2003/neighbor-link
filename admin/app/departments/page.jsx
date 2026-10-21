@@ -3,22 +3,20 @@
 import { useState } from "react";
 import { Link } from "@/i18n/navigation";
 import { useDraftFilters } from "@/hooks/useDraftFilters";
-import { useSelection } from "@/hooks/useSelection";
 import { useLocale } from "@/i18n";
 import { Icon } from "@/components/ui/Icon";
 import { DataTable, SummaryCard } from "@/components/ui/DataTable";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { DatePicker } from "@/components/ui/DatePicker";
-import { Checkbox } from "@/components/ui/Checkbox";
 import { ConfirmDialog, useToast } from "@/components/ui";
-import { departmentDelete } from "@/services/staff/department";
+import { departmentCreate, departmentDelete } from "@/services/staff/department";
+import { fdl } from "@/utils/date";
 import { RowActions, StatusPill, saveErrorMessage, useStatusOptions } from "@/components/staff/common";
 
 export default function DepartmentsPage() {
   const { t } = useLocale();
   const toast = useToast();
-  const sel = useSelection();
   const statusOptions = useStatusOptions();
   const { draft, setDraft, applied, apply, reset, clear } = useDraftFilters({
     keyword: "",
@@ -66,6 +64,35 @@ export default function DepartmentsPage() {
             { key: "created_to", label: t("created_to") },
           ]}
           onClearFilter={clear}
+          exportConfig={{
+            filename: "departments",
+            columns: [
+              { label: t("department_name"), get: (r) => r.name },
+              { label: t("code"), get: (r) => r.code },
+              { label: t("manager_name"), get: (r) => r.manager_name },
+              { label: t("phone"), get: (r) => r.phone },
+              { label: t("location"), get: (r) => r.location },
+              { label: t("description"), get: (r) => r.description },
+              { label: t("headcount"), get: (r) => r.headcount },
+              { label: t("status"), get: (r) => statusLabel[r.status] ?? r.status },
+              { label: t("created_at"), get: (r) => fdl(r.created_at) },
+              { label: t("updated_at"), get: (r) => fdl(r.updated_at) },
+            ],
+          }}
+          importConfig={{
+            title: t("import_departments"),
+            sampleName: "departments-import-template",
+            columns: [
+              { key: "name", label: t("department_name"), required: true, sample: "Operations" },
+              { key: "code", label: t("code"), required: true, sample: "OPS" },
+              { key: "manager_name", label: t("manager_name"), sample: "Alice Tan" },
+              { key: "phone", label: t("phone"), sample: "03-12345678" },
+              { key: "location", label: t("location"), sample: "Kuala Lumpur" },
+              { key: "description", label: t("description"), sample: "" },
+              { key: "status", label: t("status"), sample: "active" },
+            ],
+            onRow: (values) => departmentCreate({ ...values, status: values.status || "active" }),
+          }}
           title={t("departments")}
           description={t("departments_description")}
           summary={({ total }) => (
@@ -143,14 +170,8 @@ export default function DepartmentsPage() {
               <span>{t("add_department")}</span>
             </Link>
           )}
-          header={({ rows }) => (
+          header={() => (
             <tr className="bg-accent text-subtle font-semibold">
-              <th className="sticky-left">
-                <Checkbox
-                  checked={sel.isAllSelected(rows)}
-                  onChange={() => sel.toggleAll(rows)}
-                />
-              </th>
               <th>{t("department_name")}</th>
               <th>{t("code")}</th>
               <th>{t("manager_name")}</th>
@@ -163,12 +184,6 @@ export default function DepartmentsPage() {
           body={({ rows, reload }) =>
             rows.map((department) => (
               <tr key={department.id} className="group">
-                <td className="sticky-left">
-                  <Checkbox
-                    checked={sel.isSelected(department.id)}
-                    onChange={() => sel.toggle(department.id)}
-                  />
-                </td>
                 <td>
                   <div className="flex flex-col">
                     <span className="font-semibold text-scene-content">{department.name}</span>

@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import { Icon } from "../Icon";
+import { useLocale } from "@/i18n";
 
 export function FilterSection({ values, badges, onClear, filterHint, resetFilters, applyFilters, children }) {
+  const { t } = useLocale();
   const [open, setOpen] = useState(true);
 
   // 有值的筛选项显示为 badge，基于当前输入，不必等 Apply
@@ -20,7 +22,7 @@ export function FilterSection({ values, badges, onClear, filterHint, resetFilter
             onClick={() => setOpen((current) => !current)}
           >
             <Icon name="filter_alt" className="text-lg" />
-            <span>Filters</span>
+            <span>{t("filters")}</span>
             <Icon
               name="expand_more"
               className={`text-lg transition-transform duration-200 ease-out ${open ? "rotate-180" : ""}`}
@@ -36,7 +38,7 @@ export function FilterSection({ values, badges, onClear, filterHint, resetFilter
                 <span className="font-semibold text-primary">{display ? display(values[key]) : values[key]}</span>
                 <button
                   type="button"
-                  aria-label={`Clear ${label}`}
+                  aria-label={t("clear_filter", { label })}
                   className="inline-flex items-center justify-center rounded-full text-subtle transition-colors hover:text-scene-content"
                   onClick={() => onClear?.(key)}
                 >
@@ -60,12 +62,12 @@ export function FilterSection({ values, badges, onClear, filterHint, resetFilter
               <div className="flex items-center justify-end gap-3 border-t border-line/40 px-gutter py-4">
                 {resetFilters ? (
                   <button className="btn btn-outline" type="button" onClick={resetFilters}>
-                    Clear All
+                    {t("clear_all")}
                   </button>
                 ) : null}
                 {applyFilters ? (
                   <button className="btn btn-primary" type="button" onClick={applyFilters}>
-                    Apply Filters
+                    {t("apply_filters")}
                   </button>
                 ) : null}
               </div>

@@ -5,21 +5,20 @@ import { Link } from "@/i18n/navigation";
 import { useDraftFilters } from "@/hooks/useDraftFilters";
 import { useDropdown } from "@/hooks/useDropdown";
 import { useRequest } from "@/hooks/useRequest";
-import { useSelection } from "@/hooks/useSelection";
 import { useLocale } from "@/i18n";
 import { Icon } from "@/components/ui/Icon";
 import { DataTable, SummaryCard } from "@/components/ui/DataTable";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
-import { Checkbox } from "@/components/ui/Checkbox";
 import { ConfirmDialog, useToast } from "@/components/ui";
-import { positionDelete } from "@/services/staff/position";
+import { positionCreate, positionDelete } from "@/services/staff/position";
+import { fdl } from "@/utils/date";
+import { fetchAllRows } from "@/utils/excel";
 import { RowActions, StatusPill, saveErrorMessage, useStatusOptions } from "@/components/staff/common";
 
 export default function PositionsPage() {
   const { t } = useLocale();
   const toast = useToast();
-  const sel = useSelection();
   const statusOptions = useStatusOptions();
   const { draft, setDraft, applied, apply, reset, clear } = useDraftFilters({
     keyword: "",
@@ -79,6 +78,49 @@ export default function PositionsPage() {
             { key: "status", label: t("status"), display: (value) => statusLabel[value] ?? value },
           ]}
           onClearFilter={clear}
+          exportConfig={{
+            filename: "positions",
+            columns: [
+              { label: t("position_name"), get: (r) => r.name },
+              { label: t("code"), get: (r) => r.code },
+              { label: t("department"), get: (r) => r.department_name },
+              { label: t("level"), get: (r) => labelOf("position_level", r.level) },
+              { label: t("employment_type"), get: (r) => labelOf("employment_type", r.employment_type) },
+              { label: t("description"), get: (r) => r.description },
+              { label: t("headcount"), get: (r) => r.headcount },
+              { label: t("status"), get: (r) => statusLabel[r.status] ?? r.status },
+              { label: t("created_at"), get: (r) => fdl(r.created_at) },
+              { label: t("updated_at"), get: (r) => fdl(r.updated_at) },
+            ],
+          }}
+          importConfig={{
+            title: t("import_positions"),
+            sampleName: "positions-import-template",
+            columns: [
+              { key: "department", label: t("department"), required: true, sample: "Operations" },
+              { key: "name", label: t("position_name"), required: true, sample: "Property Officer" },
+              { key: "code", label: t("code"), required: true, sample: "PROP_OFFICER" },
+              { key: "level", label: t("level"), sample: "staff" },
+              { key: "employment_type", label: t("employment_type"), sample: "full_time" },
+              { key: "description", label: t("description"), sample: "" },
+              { key: "status", label: t("status"), sample: "active" },
+            ],
+            onRow: async (values) => {
+              const all = await fetchAllRows("/staff-department/list", {});
+              const department = all.find((d) => d.name.toLowerCase() === values.department.toLowerCase());
+              if (!department) throw new Error(t("import_department_not_found", { name: values.department }));
+              return positionCreate({
+                department_id: department.id,
+                name: values.name,
+                code: values.code,
+                level: values.level || "staff",
+                employment_type: values.employment_type || "full_time",
+                description: values.description,
+                status: values.status || "active",
+                permission_ids: [],
+              });
+            },
+          }}
           title={t("positions")}
           description={t("positions_description")}
           summary={({ total }) => (
@@ -149,14 +191,8 @@ export default function PositionsPage() {
               <span>{t("add_position")}</span>
             </Link>
           )}
-          header={({ rows }) => (
+          header={() => (
             <tr className="bg-accent text-subtle font-semibold">
-              <th className="sticky-left">
-                <Checkbox
-                  checked={sel.isAllSelected(rows)}
-                  onChange={() => sel.toggleAll(rows)}
-                />
-              </th>
               <th>{t("position_name")}</th>
               <th>{t("code")}</th>
               <th>{t("department")}</th>
@@ -170,12 +206,6 @@ export default function PositionsPage() {
           body={({ rows, reload }) =>
             rows.map((position) => (
               <tr key={position.id} className="group">
-                <td className="sticky-left">
-                  <Checkbox
-                    checked={sel.isSelected(position.id)}
-                    onChange={() => sel.toggle(position.id)}
-                  />
-                </td>
                 <td>
                   <div className="flex flex-col">
                     <span className="font-semibold text-scene-content">{position.name}</span>

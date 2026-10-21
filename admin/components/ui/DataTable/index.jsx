@@ -2,10 +2,12 @@
 
 import { useState } from "react";
 import { useList } from "@/hooks/useList";
-import { useDragScroll } from "@/hooks/useDragScroll";
+import { useLocale } from "@/i18n";
+import { downloadRowsAsXlsx, fetchAllRows } from "@/utils/excel";
 import { Icon } from "../Icon";
 import { Spinner } from "../Spinner";
 import { FilterSection } from "./FilterSection";
+import { ImportModal } from "./ImportModal";
 
 export { SummaryCard } from "./SummaryCard";
 export { FilterSection } from "./FilterSection";
@@ -27,6 +29,10 @@ function buildPagination(current, total) {
 /**
  * title / description / buttons / filters：传 JSX
  * summary / header / body：传函数，参数是 ctx（rows、total、summary、loading、error、page、perPage、reload）
+ *
+ * exportConfig：{ filename, columns: [{ label, get(row) }] }，传入后显示导出按钮（导出当前筛选下的全部记录）
+ * importConfig：{ title, sampleName, columns: [{ key, label, required, sample }], onRow(values) }，
+ *               传入后显示导入按钮（位于导出按钮旁边），onRow 对每行执行创建
  */
 export function DataTable({
   api,
@@ -45,10 +51,15 @@ export function DataTable({
   header,
   body,
   table = true,
-  emptyText = "No records match the current filters.",
+  emptyText,
   className = "",
+  exportConfig,
+  importConfig,
 }) {
+  const { t } = useLocale();
   const [perPage] = useState(10);
+  const [exporting, setExporting] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
   // const drag = useDragScroll();
 
   // 筛选条件或每页条数变化时，页码回到 1
@@ -77,17 +88,30 @@ export function DataTable({
   const message =
     status === "loading" ? (
       <span className="inline-flex items-center gap-2">
-        <Spinner size="sm" label="Loading" />
-        Loading...
+        <Spinner size="sm" label={t("loading")} />
+        {t("loading")}
       </span>
     ) : status === "error" ? (
       <span className="inline-flex items-center gap-3 text-error">
         {error}
-        <button className="underline" type="button" onClick={reload}>Retry</button>
+        <button className="underline" type="button" onClick={reload}>{t("retry")}</button>
       </span>
     ) : (
-      emptyText
+      emptyText ?? t("no_records_match_filters")
     );
+
+  async function handleExport() {
+    if (!exportConfig || exporting) return;
+    setExporting(true);
+    try {
+      const all = await fetchAllRows(api, params ?? {});
+      downloadRowsAsXlsx(exportConfig.filename, exportConfig.columns, all);
+    } catch (err) {
+      window.alert(err?.message || t("export_failed"));
+    } finally {
+      setExporting(false);
+    }
+  }
 
   const bodyNode = body(ctx);
 
@@ -99,7 +123,21 @@ export function DataTable({
           <h1 className="text-3xl font-semibold text-scene-content">{title}</h1>
           <p className="text-sm font-normal text-subtle">{description}</p>
         </div>
-        <div className="flex flex-wrap items-center gap-3">{buttons}</div>
+        <div className="flex flex-wrap items-center gap-3">
+          {exportConfig ? (
+            <button className="btn btn-outline" type="button" onClick={handleExport} disabled={exporting}>
+              <Icon name="download" className="text-lg" />
+              <span>{exporting ? t("exporting") : t("export_excel")}</span>
+            </button>
+          ) : null}
+          {importConfig ? (
+            <button className="btn btn-outline" type="button" onClick={() => setImportOpen(true)}>
+              <Icon name="upload" className="text-lg" />
+              <span>{t("import_excel")}</span>
+            </button>
+          ) : null}
+          {buttons}
+        </div>
       </div>
 
       {/* summary */}
@@ -141,17 +179,29 @@ export function DataTable({
         {status ? <div className="px-6 py-10 text-center text-sm text-subtle">{message}</div> : null}
       </div>
 
+      {importConfig ? (
+        <ImportModal
+          open={importOpen}
+          onClose={() => setImportOpen(false)}
+          title={importConfig.title}
+          columns={importConfig.columns}
+          sampleName={importConfig.sampleName}
+          onRow={importConfig.onRow}
+          onFinished={reload}
+        />
+      ) : null}
+
       {/* pagination */}
       <div className="px-6 py-4 bg-accent flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="text-xs text-subtle">
-          Showing <b className="text-scene-content font-semibold">{from}</b> to{" "}
-          <b className="text-scene-content font-semibold">{to}</b> of{" "}
-          <b className="text-scene-content font-semibold">{total}</b> results
+          {t("showing")} <b className="text-scene-content font-semibold">{from}</b> {t("to")}{" "}
+          <b className="text-scene-content font-semibold">{to}</b> {t("of")}{" "}
+          <b className="text-scene-content font-semibold">{total}</b> {t("results")}
         </div>
         <div className="flex items-center gap-2">
           <button className={NAV_BTN} disabled={page === 1} type="button" onClick={() => setPage(page - 1)}>
             <Icon name="chevron_left" />
-            Prev
+            {t("previous")}
           </button>
           {pages.map((p, i) =>
             p === "..." ? (
@@ -172,7 +222,7 @@ export function DataTable({
             ),
           )}
           <button className={NAV_BTN} disabled={page >= totalPages} type="button" onClick={() => setPage(page + 1)}>
-            Next
+            {t("next")}
             <Icon name="chevron_right" />
           </button>
         </div>

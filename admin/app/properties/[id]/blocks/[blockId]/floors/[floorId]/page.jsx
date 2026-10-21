@@ -7,20 +7,19 @@ import { Spinner } from "@/components/ui/Spinner";
 import { DataTable, SummaryCard } from "@/components/ui/DataTable";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
-import { Checkbox } from "@/components/ui/Checkbox";
 import { UnitStatusBadge } from "@/components/property/parts";
 import { useDraftFilters } from "@/hooks/useDraftFilters";
 import { useRequest } from "@/hooks/useRequest";
 import { useDropdown } from "@/hooks/useDropdown";
-import { useSelection } from "@/hooks/useSelection";
 import { useLocale } from "@/i18n";
+import { request } from "@/services/request";
+import { fdl } from "@/utils/date";
 
 const BEDROOM_OPTIONS = [1, 2, 3, 4, 5];
 
 export default function FloorDetailPage({ params }) {
   const { id, blockId, floorId } = use(params);
   const { t, locale } = useLocale();
-  const sel = useSelection();
   const { data: floor, loading, error } = useRequest(`/property/floor/${floorId}`);
   const { labelOf, optionsOf } = useDropdown(["unit_status"]);
   const { draft, setDraft, applied, apply, reset, clear } = useDraftFilters({
@@ -76,8 +75,47 @@ export default function FloorDetailPage({ params }) {
             { key: "tenant_name", label: t("tenant_name") },
           ]}
           onClearFilter={clear}
+          exportConfig={{
+            filename: `floor-${floor.level}-units`,
+            columns: [
+              { label: t("unit_code"), get: (r) => r.code },
+              { label: t("block"), get: (r) => r.block_code },
+              { label: t("floor_level", { level: floor.level }), get: (r) => r.floor_level },
+              { label: t("bedrooms"), get: (r) => r.bedrooms },
+              { label: t("size_sqft"), get: (r) => r.size_sqft },
+              { label: t("status"), get: (r) => labelOf("unit_status", r.status) },
+              { label: t("tenant"), get: (r) => r.tenant_name },
+              { label: t("created_at"), get: (r) => fdl(r.created_at) },
+              { label: t("updated_at"), get: (r) => fdl(r.updated_at) },
+            ],
+          }}
+          importConfig={{
+            title: t("import_units"),
+            sampleName: `floor-${floor.level}-units-import-template`,
+            columns: [
+              { key: "code", label: t("unit_code"), required: true, sample: `${floor.block_code}-${String(floor.level).padStart(2, "0")}-01` },
+              { key: "bedrooms", label: t("bedrooms"), required: true, sample: "2" },
+              { key: "size_sqft", label: t("size_sqft"), required: true, sample: "750" },
+              { key: "status", label: t("status"), sample: "vacant" },
+            ],
+            onRow: (values) =>
+              request("/property/unit/create", {
+                block_id: Number(blockId),
+                floor_id: Number(floorId),
+                code: values.code,
+                bedrooms: Number(values.bedrooms),
+                size_sqft: Number(values.size_sqft),
+                status: values.status || "vacant",
+              }),
+          }}
           title={t("floor_level", { level: floor.level })}
           description={`${t("block")} ${floor.block_code}`}
+          buttons={(
+            <Link href={`/properties/${id}/blocks/${blockId}/floors/${floorId}/units/new`} className="btn btn-primary">
+              <Icon name="add" className="text-lg" />
+              <span>{t("new_unit")}</span>
+            </Link>
+          )}
           summary={({ total }) => (
             <SummaryCard label={t("total_units")} value={total} icon="meeting_room" />
           )}
@@ -139,30 +177,19 @@ export default function FloorDetailPage({ params }) {
           resetFilters={reset}
           applyFilters={apply}
           emptyText={t("no_units")}
-          header={({ rows }) => (
+          header={() => (
             <tr className="bg-accent text-subtle font-semibold">
-              <th className="sticky-left">
-                <Checkbox
-                  checked={sel.isAllSelected(rows)}
-                  onChange={() => sel.toggleAll(rows)}
-                />
-              </th>
               <th>{t("unit_code")}</th>
               <th>{t("bedrooms")}</th>
               <th>{t("size_sqft")}</th>
               <th>{t("status")}</th>
               <th>{t("tenant")}</th>
+              <th className="text-center">{t("action")}</th>
             </tr>
           )}
           body={({ rows }) =>
             rows.map((unit) => (
               <tr className="group" key={unit.id}>
-                <td className="sticky-left">
-                  <Checkbox
-                    checked={sel.isSelected(unit.id)}
-                    onChange={() => sel.toggle(unit.id)}
-                  />
-                </td>
                 <td className="font-semibold text-scene-content">{unit.code}</td>
                 <td>{unit.bedrooms}</td>
                 <td>{Number(unit.size_sqft).toLocaleString(locale)}</td>
@@ -170,6 +197,17 @@ export default function FloorDetailPage({ params }) {
                   <UnitStatusBadge status={unit.status} label={labelOf("unit_status", unit.status)} />
                 </td>
                 <td className="text-scene-content">{unit.tenant_name ?? "-"}</td>
+                <td>
+                  <div className="flex justify-center items-center gap-2">
+                    <Link
+                      className="btn btn-primary !p-0 size-10 grid place-items-center"
+                      href={`/properties/${id}/blocks/${blockId}/floors/${floorId}/units/${unit.id}`}
+                      aria-label={t("edit_unit")}
+                    >
+                      <Icon name="edit" className="text-lg" />
+                    </Link>
+                  </div>
+                </td>
               </tr>
             ))
           }

@@ -3,10 +3,12 @@
 import { Icon } from "@/components/ui/Icon";
 import { Spinner } from "@/components/ui/Spinner";
 import { useDashboardOverview } from "@/hooks/useDashboardOverview";
+import { useLocale } from "@/i18n";
 
 const money = (value) => `RM ${Number(value || 0).toLocaleString("en-MY", { maximumFractionDigits: 0 })}`;
 
 export default function DashboardPage() {
+  const { t } = useLocale();
   const { data, loading, error, reload } = useDashboardOverview();
 
   if (loading && !data) {
@@ -24,7 +26,7 @@ export default function DashboardPage() {
           <p className="text-sm text-error">Could not load the dashboard.</p>
           <button type="button" className="btn btn-outline mt-4" onClick={reload}>
             <Icon name="refresh" className="text-lg" />
-            <span>Try again</span>
+            <span>{t("try_again")}</span>
           </button>
         </div>
       </div>
@@ -42,7 +44,7 @@ export default function DashboardPage() {
   return (
     <main className="flex w-full flex-col gap-6 p-4 md:p-8">
       <header>
-        <h1 className="text-3xl font-semibold text-scene-content">Dashboard</h1>
+        <h1 className="text-3xl font-semibold text-scene-content">{t("dashboard")}</h1>
         <p className="mt-1 text-sm text-subtle">Portfolio health, cash collection and operational queue.</p>
       </header>
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">

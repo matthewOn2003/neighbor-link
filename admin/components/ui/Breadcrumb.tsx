@@ -1,4 +1,5 @@
 import { Link } from "@/i18n/navigation";
+import { useLocale } from "@/i18n";
 
 export type BreadcrumbItem = {
   label: string;
@@ -6,8 +7,9 @@ export type BreadcrumbItem = {
 };
 
 export function Breadcrumb({ items }: { items: BreadcrumbItem[] }) {
+  const { t } = useLocale();
   return (
-    <nav aria-label="Breadcrumb" style={{ marginBottom: "1rem" }}>
+    <nav aria-label={t("breadcrumb")} style={{ marginBottom: "1rem" }}>
       <ol className="flex flex-wrap items-center gap-2 text-sm">
         {items.map((item, index) => {
           const isLast = index === items.length - 1;

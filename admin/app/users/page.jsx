@@ -4,23 +4,21 @@ import { useState } from "react";
 import { Link } from "@/i18n/navigation";
 import { useDraftFilters } from "@/hooks/useDraftFilters";
 import { useRequest } from "@/hooks/useRequest";
-import { useSelection } from "@/hooks/useSelection";
 import { useLocale } from "@/i18n";
-import { fds } from "@/utils/date";
 import { Icon } from "@/components/ui/Icon";
 import { DataTable, SummaryCard } from "@/components/ui/DataTable";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { DatePicker } from "@/components/ui/DatePicker";
-import { Checkbox } from "@/components/ui/Checkbox";
 import { ConfirmDialog, useToast } from "@/components/ui";
-import { accountDelete } from "@/services/staff/account";
+import { accountCreate, accountDelete } from "@/services/staff/account";
+import { fdl, fds } from "@/utils/date";
+import { fetchAllRows } from "@/utils/excel";
 import { RowActions, StatusPill, saveErrorMessage, useStatusOptions } from "@/components/staff/common";
 
 export default function UsersPage() {
   const { t } = useLocale();
   const toast = useToast();
-  const sel = useSelection();
   const statusOptions = useStatusOptions();
   const { draft, setDraft, applied, apply, reset, clear } = useDraftFilters({
     keyword: "",
@@ -83,6 +81,53 @@ export default function UsersPage() {
             { key: "hire_date_to", label: t("hire_date_to") },
           ]}
           onClearFilter={clear}
+          exportConfig={{
+            filename: "staff-accounts",
+            columns: [
+              { label: t("username"), get: (r) => r.username },
+              { label: t("name"), get: (r) => r.name },
+              { label: t("employee_no"), get: (r) => r.employee_no },
+              { label: t("email"), get: (r) => r.email },
+              { label: t("phone"), get: (r) => r.phone },
+              { label: t("position"), get: (r) => r.position_name },
+              { label: t("department"), get: (r) => r.department_name },
+              { label: t("hire_date"), get: (r) => fds(r.hire_date) },
+              { label: t("status"), get: (r) => statusLabel[r.status] ?? r.status },
+              { label: t("created_at"), get: (r) => fdl(r.created_at) },
+              { label: t("updated_at"), get: (r) => fdl(r.updated_at) },
+            ],
+          }}
+          importConfig={{
+            title: t("import_users"),
+            sampleName: "staff-accounts-import-template",
+            columns: [
+              { key: "username", label: t("username"), required: true, sample: "jsmith" },
+              { key: "password", label: t("password"), required: true, sample: "ChangeMe123!" },
+              { key: "name", label: t("name"), required: true, sample: "John Smith" },
+              { key: "position_code", label: t("position_code"), required: true, sample: "PROP_OFFICER" },
+              { key: "employee_no", label: t("employee_no"), sample: "E0001" },
+              { key: "hire_date", label: t("hire_date"), sample: "2026-01-15" },
+              { key: "email", label: t("email"), sample: "jsmith@example.com" },
+              { key: "phone", label: t("phone"), sample: "012-3456789" },
+              { key: "status", label: t("status"), sample: "active" },
+            ],
+            onRow: async (values) => {
+              const all = await fetchAllRows("/staff-position/list", {});
+              const position = all.find((p) => p.code.toLowerCase() === values.position_code.toLowerCase());
+              if (!position) throw new Error(t("import_position_not_found", { code: values.position_code }));
+              return accountCreate({
+                username: values.username,
+                password: values.password,
+                name: values.name,
+                phone: values.phone,
+                email: values.email,
+                employee_no: values.employee_no,
+                hire_date: values.hire_date,
+                position_id: position.id,
+                status: values.status || "active",
+              });
+            },
+          }}
           title={t("users")}
           description={t("users_description")}
           summary={({ total }) => (
@@ -162,14 +207,8 @@ export default function UsersPage() {
               <span>{t("add_user")}</span>
             </Link>
           )}
-          header={({ rows }) => (
+          header={() => (
             <tr className="bg-accent text-subtle font-semibold">
-              <th className="sticky-left">
-                <Checkbox
-                  checked={sel.isAllSelected(rows)}
-                  onChange={() => sel.toggleAll(rows)}
-                />
-              </th>
               <th>{t("account")}</th>
               <th>{t("name")}</th>
               <th>{t("contact_info")}</th>
@@ -182,12 +221,6 @@ export default function UsersPage() {
           body={({ rows, reload }) =>
             rows.map((user) => (
               <tr key={user.id} className="group">
-                <td className="sticky-left">
-                  <Checkbox
-                    checked={sel.isSelected(user.id)}
-                    onChange={() => sel.toggle(user.id)}
-                  />
-                </td>
                 <td>
                   <div className="flex flex-col">
                     <span className="font-semibold text-scene-content">{user.username}</span>
