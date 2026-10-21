@@ -14,7 +14,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const tab = activeTabFor(pathname);
   return (
     <div className="min-h-screen bg-background font-sans text-on-surface antialiased selection:bg-primary-container selection:text-white">
-      <PortalHeader subtitleKey={tab.subtitleKey} />
+      <PortalHeader />
       <main className="relative z-10 mx-auto w-full max-w-lg px-4 pb-32 pt-20">{children}</main>
       <BottomNav activeKey={tab.key} />
     </div>

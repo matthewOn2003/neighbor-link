@@ -2,8 +2,7 @@
 
 import { useLocale } from "@/i18n";
 import { Icon } from "@/components/ui/Icon";
-import { money } from "@/components/payments/shared";
-import { formatDate, monthOf } from "./format";
+import { formatDate, monthOf, wholeMoney } from "./format";
 import { BILL_LABEL_KEY, BILL_TONE } from "./status";
 import { GhostButton, GlassCard, PrimaryButton, Pill, TILE_CLASSES } from "./primitives";
 
@@ -35,7 +34,7 @@ export default function BillCard({ bill, onUpload, onInvoice }) {
         <p className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
           {owing ? t("outstanding") : t("portal_cleared")}
         </p>
-        <p className="mt-1 text-xl font-extrabold text-on-surface">{money(owing ? bill.outstanding : bill.amount, locale)}</p>
+        <p className="mt-1 text-xl font-extrabold text-on-surface">{wholeMoney(owing ? bill.outstanding : bill.amount, locale)}</p>
       </div>
 
       <div className={`grid gap-2.5 ${payable ? "grid-cols-2" : "grid-cols-1"}`}>

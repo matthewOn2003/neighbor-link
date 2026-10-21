@@ -57,3 +57,10 @@ export function ordinal(day) {
       return `${n}th`;
   }
 }
+
+/** Money for summary figures: whole amounts drop the ".00" tail, amounts with cents keep two decimals. */
+export function wholeMoney(value, locale) {
+  const n = Number(value || 0);
+  const digits = Number.isInteger(n) ? { maximumFractionDigits: 0 } : { minimumFractionDigits: 2, maximumFractionDigits: 2 };
+  return `RM ${n.toLocaleString(locale, digits)}`;
+}

@@ -4,7 +4,7 @@ import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useLocale } from "@/i18n";
 import { Icon } from "@/components/ui/Icon";
-import { money } from "@/components/payments/shared";
+import { wholeMoney } from "@/components/portal/format";
 import { useRequest } from "@/hooks/useRequest";
 import BillCard from "@/components/portal/BillCard";
 import ProofCard from "@/components/portal/ProofCard";
@@ -38,6 +38,8 @@ function BillingContent() {
   // Oldest bill that needs attention: overdue first, otherwise waiting for review.
   const actionBill = [...billList].reverse().find((b) => b.display_status === "overdue" || b.display_status === "pending_review");
   const declined = proofList.find((p) => p.status === "rejected" && p.bill_id === actionBill?.id);
+  // An overdue bill gets its upload button in the banner, so the page does not repeat it below.
+  const bannerUpload = actionBill?.display_status === "overdue";
   const periodOf = Object.fromEntries(billList.map((b) => [b.id, b.billing_period]));
 
   const counts = billList.reduce((acc, b) => {
@@ -71,16 +73,27 @@ function BillingContent() {
                 <span className="text-[11px] text-on-surface-variant">{t("due_date")}: {actionBill.due_date}</span>
               </div>
               <p className="mt-1 text-sm font-bold text-on-surface">
-                {money(actionBill.outstanding, locale)} {actionBill.display_status === "overdue" ? t("bill_display_overdue") : ""}
+                {wholeMoney(actionBill.outstanding, locale)} {actionBill.display_status === "overdue" ? t("bill_display_overdue") : ""}
               </p>
               <p className="mt-1 text-xs text-on-surface-variant">
                 {declined ? `${t("portal_proof_declined", { period: actionBill.billing_period })} ${declined.reject_reason}` : t("portal_bill_due_hint")}
               </p>
+              {bannerUpload ? (
+                <button
+                  type="button"
+                  onClick={() => setSheet({ billId: actionBill.id })}
+                  className="mt-3 inline-flex items-center gap-1.5 rounded-xl bg-primary-container px-4 py-2.5 text-xs font-bold text-white shadow-lg shadow-primary-container/30 active:scale-[0.98]"
+                >
+                  <Icon name="upload_file" className="text-[16px]" />
+                  {t("portal_upload_proof")}
+                </button>
+              ) : null}
             </div>
           </div>
         </GlassCard>
       ) : null}
 
+      {!bannerUpload ? (
       <button
         type="button"
         onClick={() => setSheet({ billId: null })}
@@ -89,6 +102,7 @@ function BillingContent() {
         <Icon name="add_a_photo" className="text-[18px]" />
         {t("submit_payment_proof")}
       </button>
+      ) : null}
 
       <SegmentedTabs
         value={tab}

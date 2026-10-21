@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Image from "next/image";
 import { useLocale } from "@/i18n";
-import LangSelect from "@/components/LangSelect";
 import { Icon } from "@/components/ui/Icon";
 import { useRequest } from "@/hooks/useRequest";
 import NotificationSheet from "@/components/portal/NotificationSheet";
@@ -18,12 +17,13 @@ function initialsOf(name) {
     .toUpperCase();
 }
 
-export default function PortalHeader({ subtitleKey }) {
+export default function PortalHeader() {
   const { t } = useLocale();
   const { data } = useRequest("/tenant-portal/me", {});
   const notices = useRequest("/tenant-portal/notification/list", { current_page: 1, per_page: 1 });
   const [open, setOpen] = useState(false);
-  const unread = notices.data?.summary?.unread_count ?? 0;
+  // The dot marks only notifications that need action; announcements stay quiet.
+  const actionCount = notices.data?.summary?.action_count ?? 0;
 
   return (
     <>
@@ -35,7 +35,6 @@ export default function PortalHeader({ subtitleKey }) {
           </div>
           <div className="flex min-w-0 flex-col">
             <span className="truncate text-[17px] font-bold leading-none tracking-tight text-on-surface">NeighborLink</span>
-            <span className="mt-0.5 truncate text-[11px] font-medium tracking-wide text-on-surface-variant">{t(subtitleKey)}</span>
           </div>
         </div>
         <div className="flex shrink-0 items-center gap-2">
@@ -46,9 +45,8 @@ export default function PortalHeader({ subtitleKey }) {
             className="relative grid h-9 w-9 place-items-center rounded-full border border-white/10 bg-white/[0.04] text-on-surface transition-colors hover:bg-white/[0.08]"
           >
             <Icon name="notifications" className="text-[20px]" />
-            {unread > 0 ? <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-secondary" /> : null}
+            {actionCount > 0 ? <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-secondary" /> : null}
           </button>
-          <LangSelect />
           <div
             aria-label={data?.name ?? t("profile")}
             title={data?.name ?? ""}
