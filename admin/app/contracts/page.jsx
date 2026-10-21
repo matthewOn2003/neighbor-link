@@ -10,6 +10,8 @@ import { useRequest } from "@/hooks/useRequest";
 import { request } from "@/services/request";
 import { useLocale } from "@/i18n";
 import { useToast } from "@/components/ui";
+import { PdfPreviewModal } from "@/components/ui/PdfPreviewModal";
+import { buildSimplePdf } from "@/utils/pdf";
 
 const money = (value, locale) =>
   "RM " + Number(value || 0).toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -21,12 +23,66 @@ const statusKeys = {
   terminated: "contract_status_terminated",
 };
 
+const contractRef = (id) => "CT-" + String(id).padStart(5, "0");
+const pdfMoney = (value) => "RM " + (Number(value) || 0).toFixed(2);
+const pdfContractStatus = { draft: "Draft", active: "Active", expired: "Expired", terminated: "Terminated" };
+
+// Contract summary PDF: English labels and values only (the built-in PDF font is Latin-only).
+// tenant is the /tenant/detail response (used for email); it may be null.
+function buildContractSummaryPdf(contract, tenant) {
+  return buildSimplePdf({
+    title: "Lease Agreement Summary",
+    subtitle: contractRef(contract.id),
+    sections: [
+      {
+        heading: "Parties",
+        rows: [
+          ["Tenant name", contract.tenant_name],
+          ["Tenant phone", tenant?.phone || contract.tenant_phone],
+          ["Tenant email", tenant?.email],
+        ],
+      },
+      {
+        heading: "Property and unit",
+        rows: [
+          ["Property", contract.property_name],
+          ["Unit", contract.unit_code],
+        ],
+      },
+      {
+        heading: "Term",
+        rows: [
+          ["Start date", contract.start_date],
+          ["End date", contract.end_date],
+          ["Billing day", contract.billing_day],
+          ["Status", pdfContractStatus[contract.status] ?? contract.status],
+        ],
+      },
+      {
+        heading: "Financial",
+        rows: [
+          ["Monthly rent", pdfMoney(contract.monthly_rent)],
+          ["Security deposit", pdfMoney(contract.security_deposit)],
+        ],
+      },
+      { heading: "Notes", rows: [["Notes", contract.notes]] },
+    ],
+    footer: "Generated " + new Date().toISOString().slice(0, 10),
+  });
+}
+
+async function buildContractPdf(contract) {
+  const tenant = await request("/tenant/detail/" + contract.tenant_id).catch(() => null);
+  return buildContractSummaryPdf(contract, tenant);
+}
+
 export default function ContractsPage() {
   const { t, locale } = useLocale();
   const toast = useToast();
   const [input, setInput] = useState("");
   const [status, setStatus] = useState("");
   const [page, setPage] = useState(1);
+  const [pdfContract, setPdfContract] = useState(null);
   const keyword = useDebouncedValue(input.trim(), 300);
   const { data, loading, error, reload } = useRequest("/contract/list", {
     current_page: page,
@@ -135,6 +191,7 @@ export default function ContractsPage() {
                       <td className="px-4 py-4"><span className={"status-pill " + (contract.status === "active" ? "success" : contract.status === "expired" ? "warning" : "neutral")}>{t(statusKeys[contract.status] || statusKeys.draft)}</span></td>
                       <td className="px-4 py-4 whitespace-nowrap">
                         <Link href={"/contracts/" + contract.id} className="text-primary-dark hover:underline">{t("view_details")}</Link>
+                        <button type="button" aria-label={t("view_pdf")} title={t("view_pdf")} className="ml-3 align-middle text-primary-dark hover:text-scene-content" onClick={() => setPdfContract(contract)}><Icon name="visibility" className="text-lg" /></button>
                         {contract.status === "draft" ? <button type="button" className="ml-3 text-primary-dark hover:underline" onClick={() => activate(contract)}>{t("activate_contract")}</button> : null}
                       </td>
                     </tr>
@@ -155,6 +212,14 @@ export default function ContractsPage() {
           ) : null}
         </section>
       </div>
+
+      <PdfPreviewModal
+        open={Boolean(pdfContract)}
+        onClose={() => setPdfContract(null)}
+        title={t("lease_agreement_summary")}
+        fileName={pdfContract ? "lease-summary-" + contractRef(pdfContract.id) : "lease-summary"}
+        build={() => buildContractPdf(pdfContract)}
+      />
     </main>
   );
 }

@@ -12,7 +12,7 @@ export default function Header({ onMenuClick }) {
       <div className="flex items-center gap-2 min-w-0 flex-1 md:flex-none">
         <button
           type="button"
-          aria-label="Menu"
+          aria-label={t("menu_label")}
           onClick={onMenuClick}
           className="md:hidden shrink-0 p-2 rounded-xl text-subtle hover:text-[#0b1c30] hover:bg-primary/10 transition-colors"
         >
@@ -38,7 +38,7 @@ export default function Header({ onMenuClick }) {
         <LangSelect />
         <div className="h-8 w-px bg-[#dce9ff]" />
         <div className="flex items-center gap-2">
-          <img alt="Profile" className="w-8 h-8 rounded-full object-cover" src={currentUser.avatar} />
+          <img alt={t("profile")} className="w-8 h-8 rounded-full object-cover" src={currentUser.avatar} />
           <div className="hidden md:flex flex-col text-left">
             <span className="text-xs font-semibold text-scene-content">{currentUser.name}</span>
             <span className="text-xs font-semibold text-subtle">{currentUser.role}</span>
