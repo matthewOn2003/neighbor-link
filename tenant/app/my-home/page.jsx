@@ -21,6 +21,7 @@ export default function MyHomePage() {
   const optionLabel = useOptionLabel();
   const me = useRequest("/tenant-portal/me", {});
   const wifi = useRequest("/tenant-portal/wifi", {});
+  const announcements = useRequest("/tenant-portal/announcement/list", { current_page: 1, per_page: 3 });
   const dict = useDropdown(["property_type"]);
   const [logout] = useLogoutMutation();
   const [showQr, setShowQr] = useState(false);
@@ -142,6 +143,23 @@ export default function MyHomePage() {
           </GlassCard>
         </section>
       ) : null}
+
+      <section className="flex flex-col gap-2.5">
+        <SectionTitle icon="campaign" title={t("portal_announcements_title")} />
+        {announcements.data?.list?.length ? (
+          announcements.data.list.map((item) => (
+            <GlassCard key={item.id} className="flex flex-col gap-1 p-4">
+              <p className="text-sm font-bold text-on-surface">{item.title}</p>
+              {item.body ? <p className="line-clamp-2 text-xs text-on-surface-variant">{item.body}</p> : null}
+              <p className="mt-0.5 text-[10px] text-on-surface-variant/70">{formatDate(item.published_at, locale)}</p>
+            </GlassCard>
+          ))
+        ) : (
+          <GlassCard className="p-2">
+            <EmptyState icon="campaign" title={t("portal_no_announcements")} />
+          </GlassCard>
+        )}
+      </section>
 
       <section className="flex flex-col gap-2.5">
         <SectionTitle icon="concierge" title={t("portal_utilities_title")} />
