@@ -61,6 +61,7 @@ type ProofListItem struct {
 	Amount       float64    `json:"amount"`
 	PaidAt       string     `json:"paid_at"`
 	Reference    string     `json:"reference"`
+	FileKey      string     `json:"-"`
 	FileURL      string     `json:"file_url"`
 	Status       string     `json:"status"`
 	RejectReason string     `json:"reject_reason"`
@@ -147,7 +148,7 @@ func (r *SQLiteRepository) ListProofs(f ProofFilter, page, perPage int) ([]Proof
 	err := r.filteredProofs(f).
 		Select(`payment_proofs.id, payment_proofs.bill_id, bills.billing_period AS bill_period, tenants.name AS tenant_name,
 			properties.name AS property_name, units.code AS unit_code, payment_proofs.amount, payment_proofs.paid_at,
-			payment_proofs.reference, payment_proofs.file_url, payment_proofs.status, payment_proofs.reject_reason,
+			payment_proofs.reference, payment_proofs.file_key, payment_proofs.status, payment_proofs.reject_reason,
 			payment_proofs.reviewed_by, payment_proofs.reviewed_at, payment_proofs.created_at`).
 		Order("payment_proofs.id DESC").
 		Offset((page - 1) * perPage).Limit(perPage).

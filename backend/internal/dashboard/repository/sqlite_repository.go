@@ -97,18 +97,53 @@ func (r *SQLiteRepository) ContractsEndingBetween(from, to string) ([]ContractRo
 	return rows, err
 }
 
-type ComplaintCounts struct {
-	Open   int64 `json:"open"`
-	Urgent int64 `json:"urgent"`
+type MaintenanceCounts struct {
+	Open           int64 `json:"open"`
+	Urgent         int64 `json:"urgent"`
+	NewThisWeek    int64 `json:"new_this_week"`
+	NewFromTenant  int64 `json:"new_from_tenant"`
+	NewFromAdmin   int64 `json:"new_from_admin"`
 }
 
-// OpenComplaints counts maintenance requests that are open or in progress, and how many of them are urgent.
-func (r *SQLiteRepository) OpenComplaints() (ComplaintCounts, error) {
-	var counts ComplaintCounts
-	err := r.db.Raw(`SELECT COUNT(*) AS open,
-		COALESCE(SUM(CASE WHEN priority = 'urgent' THEN 1 ELSE 0 END), 0) AS urgent
-		FROM maintenance_requests WHERE status IN ('open', 'in_progress')`).Scan(&counts).Error
+// MaintenanceStats counts maintenance requests that are open or in progress, urgent ones among them,
+// and requests created on or after weekStart (YYYY-MM-DD), split by whether a tenant raised them.
+func (r *SQLiteRepository) MaintenanceStats(weekStart string) (MaintenanceCounts, error) {
+	var counts MaintenanceCounts
+	err := r.db.Raw(`SELECT
+		COALESCE(SUM(CASE WHEN status IN ('open', 'in_progress') THEN 1 ELSE 0 END), 0) AS open,
+		COALESCE(SUM(CASE WHEN status IN ('open', 'in_progress') AND priority = 'urgent' THEN 1 ELSE 0 END), 0) AS urgent,
+		COALESCE(SUM(CASE WHEN date(created_at) >= ? THEN 1 ELSE 0 END), 0) AS new_this_week,
+		COALESCE(SUM(CASE WHEN date(created_at) >= ? AND tenant_id IS NOT NULL THEN 1 ELSE 0 END), 0) AS new_from_tenant,
+		COALESCE(SUM(CASE WHEN date(created_at) >= ? AND tenant_id IS NULL THEN 1 ELSE 0 END), 0) AS new_from_admin
+		FROM maintenance_requests`, weekStart, weekStart, weekStart).Scan(&counts).Error
 	return counts, err
+}
+
+// OpenComplaints counts complaints that are still open or in progress.
+func (r *SQLiteRepository) OpenComplaints() (int64, error) {
+	var total int64
+	err := r.db.Table("complaints").Where("status IN ?", []string{"open", "in_progress"}).Count(&total).Error
+	return total, err
+}
+
+type ProofCounts struct {
+	Pending       int64   `json:"pending"`
+	PendingAmount float64 `json:"pending_amount"`
+}
+
+// PendingProofs counts payment proofs waiting for review and the total amount they claim.
+func (r *SQLiteRepository) PendingProofs() (ProofCounts, error) {
+	var counts ProofCounts
+	err := r.db.Raw(`SELECT COUNT(*) AS pending, COALESCE(SUM(amount), 0) AS pending_amount
+		FROM payment_proofs WHERE status = 'pending'`).Scan(&counts).Error
+	return counts, err
+}
+
+// OpenBills counts bills that are neither paid nor void.
+func (r *SQLiteRepository) OpenBills() (int64, error) {
+	var total int64
+	err := r.db.Table("bills").Where("status NOT IN ?", []string{"paid", "void"}).Count(&total).Error
+	return total, err
 }
 
 type MonthTotal struct {
@@ -157,12 +192,13 @@ func (r *SQLiteRepository) RecentPayments(limit int) ([]EventRow, error) {
 
 func (r *SQLiteRepository) RecentComplaints(limit int) ([]EventRow, error) {
 	rows := make([]EventRow, 0)
-	err := r.db.Raw(`SELECT maintenance_requests.id, maintenance_requests.created_at AS at,
-		COALESCE((SELECT tenants.name FROM tenants WHERE tenants.unit_id = maintenance_requests.unit_id AND tenants.status = 'active' LIMIT 1), '') AS tenant_name,
+	err := r.db.Raw(`SELECT complaints.id, complaints.created_at AS at,
+		COALESCE(tenants.name, '') AS tenant_name,
 		COALESCE(properties.name, '') AS property_name, 0 AS amount
-		FROM maintenance_requests
-		LEFT JOIN properties ON properties.id = maintenance_requests.property_id
-		ORDER BY maintenance_requests.id DESC LIMIT ?`, limit).Scan(&rows).Error
+		FROM complaints
+		LEFT JOIN tenants ON tenants.id = complaints.tenant_id
+		LEFT JOIN properties ON properties.id = complaints.property_id
+		ORDER BY complaints.id DESC LIMIT ?`, limit).Scan(&rows).Error
 	return rows, err
 }
 

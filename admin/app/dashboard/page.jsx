@@ -33,11 +33,17 @@ export default function DashboardPage() {
     );
   }
 
-  const { summary } = data;
+  const { summary, properties = [] } = data;
   const cards = [
     ["Occupancy", `${summary.occupancyRate}%`, `${summary.occupiedUnits} / ${summary.totalUnits} units`],
+    ["Vacant units", String(summary.vacantUnits), `${summary.activeLeases} active leases`],
     ["Collected this cycle", money(summary.cycleCollectedAmount), `of ${money(summary.cycleBilledAmount)} billed`],
+    ["Outstanding this cycle", money(summary.cycleOutstandingAmount), `${summary.openBills} open bills`],
     ["Overdue", money(summary.cycleOverdueAmount), `${summary.cycleOverdueCount} bills past due`],
+    ["Proofs to review", String(summary.pendingProofCount), `${money(summary.pendingProofAmount)} claimed`],
+    ["Open maintenance", String(summary.openMaintenance), `${summary.urgentMaintenance} urgent`],
+    ["New requests this week", String(summary.maintenanceNewWeek), `${summary.maintenanceNewTenant} from tenants · ${summary.maintenanceNewAdmin} from admin`],
+    ["Open complaints", String(summary.openComplaints), "tenant complaints in progress"],
     ["Leases ending in 60 days", String(summary.contractsExpiring60d), `${summary.contractsExpiring30d} within 30 days`],
   ];
 
@@ -47,7 +53,7 @@ export default function DashboardPage() {
         <h1 className="text-3xl font-semibold text-scene-content">{t("dashboard")}</h1>
         <p className="mt-1 text-sm text-subtle">Portfolio health, cash collection and operational queue.</p>
       </header>
-      <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
         {cards.map(([label, value, sub]) => (
           <div key={label} className="rounded-2xl border border-line/50 bg-accent p-5 shadow-sm">
             <p className="text-xs font-semibold uppercase text-subtle">{label}</p>
@@ -55,6 +61,33 @@ export default function DashboardPage() {
             <p className="mt-1 text-xs text-subtle">{sub}</p>
           </div>
         ))}
+      </section>
+      <section className="rounded-2xl border border-line/50 bg-accent p-5 shadow-sm">
+        <h2 className="text-sm font-semibold text-scene-content">Properties</h2>
+        <div className="mt-3 overflow-x-auto">
+          <table className="w-full text-left text-sm">
+            <thead className="text-xs uppercase text-subtle">
+              <tr>
+                <th className="py-2 pr-4 font-semibold">Property</th>
+                <th className="py-2 pr-4 font-semibold">Units</th>
+                <th className="py-2 pr-4 font-semibold">Occupied</th>
+                <th className="py-2 pr-4 font-semibold">Vacant</th>
+                <th className="py-2 pr-4 font-semibold">Under maintenance</th>
+              </tr>
+            </thead>
+            <tbody>
+              {properties.map((p) => (
+                <tr key={p.id} className="border-t border-line/50">
+                  <td className="py-2 pr-4 text-scene-content">{p.name}</td>
+                  <td className="py-2 pr-4">{p.totalUnits}</td>
+                  <td className="py-2 pr-4">{p.occupiedUnits}</td>
+                  <td className="py-2 pr-4">{p.totalUnits - p.occupiedUnits - p.maintenanceUnits}</td>
+                  <td className="py-2 pr-4">{p.maintenanceUnits}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </section>
     </main>
   );

@@ -57,12 +57,14 @@ func (uc *MaintenanceUsecase) Detail(id uint) (*repository.Detail, error) {
 }
 
 // CreateInput is the input for a new maintenance request. The property is derived from the unit.
+// TenantID is set for requests raised from the tenant portal and stays nil for admin-created ones.
 type CreateInput struct {
 	Title       string
 	Description string
 	Category    string
 	Priority    string
 	UnitID      uint
+	TenantID    *uint
 	Assignee    string
 }
 
@@ -107,6 +109,7 @@ func (uc *MaintenanceUsecase) Create(in CreateInput) (*repository.Detail, error)
 	request := &repository.Request{
 		PropertyID:  &propertyID,
 		UnitID:      &unitID,
+		TenantID:    in.TenantID,
 		Category:    category,
 		Priority:    priority,
 		Title:       title,

@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	billrepo "backend/internal/bill/repository"
 	"backend/internal/payment/repository"
@@ -13,16 +14,42 @@ import (
 	"backend/internal/pkg/httpx"
 	"backend/internal/pkg/middleware"
 	"backend/internal/pkg/response"
+	"backend/internal/pkg/storage"
 	userdelivery "backend/internal/user/delivery"
 )
+
+// proofPresignTTL is how long a payment proof image link stays valid.
+const proofPresignTTL = time.Hour
 
 type PaymentController struct {
 	uc     *usecase.PaymentUsecase
 	secret string
+	store  storage.Uploader
 }
 
 func NewPaymentController(uc *usecase.PaymentUsecase, tokenSecret string) *PaymentController {
 	return &PaymentController{uc: uc, secret: tokenSecret}
+}
+
+// WithStorage attaches object storage used to generate proof image links.
+func (c *PaymentController) WithStorage(u storage.Uploader) *PaymentController {
+	c.store = u
+	return c
+}
+
+// fillProofURLs replaces file_url with a short-lived presigned link. Without storage the link stays empty,
+// because the bucket is private and the stored value is not readable.
+func (c *PaymentController) fillProofURLs(rows []repository.ProofListItem) {
+	for i := range rows {
+		rows[i].FileURL = ""
+		if c.store == nil || rows[i].FileKey == "" {
+			continue
+		}
+		link, err := c.store.Presign(rows[i].FileKey, proofPresignTTL)
+		if err == nil {
+			rows[i].FileURL = link
+		}
+	}
 }
 
 // filterRequest is shared by the proof and payment list endpoints. IDs and amounts are sent as strings,
@@ -115,6 +142,7 @@ func (c *PaymentController) ProofList(w http.ResponseWriter, r *http.Request) {
 		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to list payment proofs")
 		return
 	}
+	c.fillProofURLs(rows)
 	response.WriteSuccess(w, http.StatusOK, response.NewListData(rows, page, perPage, total))
 }
 

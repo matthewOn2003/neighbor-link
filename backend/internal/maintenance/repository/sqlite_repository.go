@@ -36,6 +36,7 @@ type ListItem struct {
 	Category     string     `json:"category"`
 	Priority     string     `json:"priority"`
 	Status       string     `json:"status"`
+	Source       string     `json:"source"`
 	Assignee     string     `json:"assignee"`
 	PropertyName *string    `json:"property_name"`
 	UnitCode     *string    `json:"unit_code"`
@@ -60,6 +61,8 @@ type Filter struct {
 	Status      string
 	Priority    string
 	Category    string
+	Source      string
+	TenantID    *uint
 	PropertyID  *uint
 	UnitID      *uint
 	CreatedFrom string
@@ -92,6 +95,14 @@ func (r *SQLiteRepository) filtered(f Filter) *gorm.DB {
 	if f.Category != "" {
 		q = q.Where("maintenance_requests.category = ?", f.Category)
 	}
+	if f.Source == "admin" {
+		q = q.Where("maintenance_requests.tenant_id IS NULL")
+	} else if f.Source == "tenant" {
+		q = q.Where("maintenance_requests.tenant_id IS NOT NULL")
+	}
+	if f.TenantID != nil {
+		q = q.Where("maintenance_requests.tenant_id = ?", *f.TenantID)
+	}
 	if f.PropertyID != nil {
 		q = q.Where("maintenance_requests.property_id = ?", *f.PropertyID)
 	}
@@ -110,6 +121,7 @@ func (r *SQLiteRepository) filtered(f Filter) *gorm.DB {
 
 const listSelect = `maintenance_requests.id, maintenance_requests.title, maintenance_requests.category,
 	maintenance_requests.priority, maintenance_requests.status, maintenance_requests.assignee,
+	CASE WHEN maintenance_requests.tenant_id IS NULL THEN 'admin' ELSE 'tenant' END AS source,
 	properties.name AS property_name, units.code AS unit_code, tenants.name AS tenant_name,
 	maintenance_requests.created_at, maintenance_requests.updated_at, maintenance_requests.resolved_at`
 
