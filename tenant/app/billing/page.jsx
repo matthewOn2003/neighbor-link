@@ -33,7 +33,6 @@ function BillingContent() {
 
   const billList = bills.data?.list ?? [];
   const proofList = proofs.data?.list ?? [];
-  const summary = bills.data?.summary ?? {};
   const proofTotal = proofs.data?.pagination?.total ?? 0;
 
   // Oldest bill that needs attention: overdue first, otherwise waiting for review.
@@ -81,23 +80,6 @@ function BillingContent() {
           </div>
         </GlassCard>
       ) : null}
-
-      <div className="grid grid-cols-2 gap-3">
-        <GlassCard className="p-4">
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">{t("portal_total_invoices")}</span>
-            <Icon name="receipt" className="text-[18px] text-primary" />
-          </div>
-          <p className="mt-2 text-2xl font-extrabold text-on-surface">{summary.total_invoices ?? 0}</p>
-        </GlassCard>
-        <GlassCard className="p-4">
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">{t("payment_proofs")}</span>
-            <Icon name="verified_user" className="text-[18px] text-secondary" />
-          </div>
-          <p className="mt-2 text-2xl font-extrabold text-on-surface">{proofTotal}</p>
-        </GlassCard>
-      </div>
 
       <button
         type="button"

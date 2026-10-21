@@ -662,5 +662,9 @@
   "portal_request_error_TOO_MANY_FILES": "You can attach up to 5 photos.",
   "portal_request_error_FILE_TOO_LARGE": "Each photo must be 10 MB or smaller.",
   "portal_request_error_UNSUPPORTED_FILE_TYPE": "Only JPEG, PNG and WebP photos are accepted.",
-  "portal_request_error_STORAGE_NOT_CONFIGURED": "Photo upload is not available right now."
+  "portal_request_error_STORAGE_NOT_CONFIGURED": "Photo upload is not available right now.",
+  "portal_needs_attention": "Needs your attention",
+  "portal_nothing_pending": "Nothing needs your attention right now.",
+  "portal_announcements_title": "Building announcements",
+  "portal_no_announcements": "No announcements yet."
 }

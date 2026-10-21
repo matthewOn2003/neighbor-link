@@ -662,5 +662,9 @@
   "portal_request_error_TOO_MANY_FILES": "最多只能附加 5 张照片。",
   "portal_request_error_FILE_TOO_LARGE": "每张照片需不超过 10 MB。",
   "portal_request_error_UNSUPPORTED_FILE_TYPE": "仅支持 JPEG、PNG、WebP 照片。",
-  "portal_request_error_STORAGE_NOT_CONFIGURED": "照片上传暂不可用。"
+  "portal_request_error_STORAGE_NOT_CONFIGURED": "照片上传暂不可用。",
+  "portal_needs_attention": "需要你处理",
+  "portal_nothing_pending": "目前没有需要你处理的事项。",
+  "portal_announcements_title": "物业公告",
+  "portal_no_announcements": "暂无公告。"
 }
