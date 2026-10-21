@@ -2,6 +2,7 @@ package tenantportal
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -13,6 +14,7 @@ import (
 	"unicode/utf8"
 
 	paymentrepo "backend/internal/payment/repository"
+	"backend/internal/pkg/httpx"
 	"backend/internal/pkg/response"
 	"backend/internal/pkg/storage"
 )
@@ -157,13 +159,28 @@ func (c *Controller) ProofList(w http.ResponseWriter, r *http.Request) {
 		response.WriteError(w, http.StatusNotFound, "TENANT_NOT_LINKED", "no tenant profile is linked to this account")
 		return
 	}
+	var req tenantListRequest
+	if json.NewDecoder(r.Body).Decode(&req) != nil {
+		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid request body")
+		return
+	}
 	rows, err := c.payments.ListTenantProofs(tenantID)
 	if err != nil {
 		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to load payment proofs")
 		return
 	}
-	for i := range rows {
-		c.presignProof(&rows[i])
+	status := strings.TrimSpace(req.Status)
+	filtered := make([]paymentrepo.PaymentProof, 0, len(rows))
+	for _, p := range rows {
+		if status != "" && p.Status != status {
+			continue
+		}
+		filtered = append(filtered, p)
 	}
-	response.WriteSuccess(w, http.StatusOK, rows)
+	page, perPage := httpx.NormalizePagination(req.CurrentPage, req.PerPage)
+	pageRows := paginate(filtered, page, perPage)
+	for i := range pageRows {
+		c.presignProof(&pageRows[i])
+	}
+	response.WriteSuccess(w, http.StatusOK, response.NewListData(pageRows, page, perPage, int64(len(filtered))))
 }

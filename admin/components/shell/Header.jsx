@@ -18,17 +18,6 @@ export default function Header({ onMenuClick }) {
         >
           <Icon name="menu" />
         </button>
-        <div className="relative flex items-center min-w-0 flex-1 md:flex-none md:w-96">
-          <Icon name="search" className="absolute left-3 text-subtle" />
-          <input
-            className="w-full bg-primary/10 rounded-xl pl-9 pr-12 py-2 text-xs font-normal text-scene-content placeholder-text-muted outline-none focus:bg-accent transition-all"
-            placeholder={t("search_placeholder")}
-            type="text"
-          />
-          <div className="hidden md:flex absolute right-3 items-center px-2 py-0.5 rounded bg-accent text-xs font-semibold text-subtle shadow">
-            ⌘K
-          </div>
-        </div>
       </div>
       <div className="flex items-center gap-3 md:gap-6 shrink-0">
         <button className="relative p-2 rounded-xl text-subtle hover:text-[#0b1c30] hover:bg-primary/10 transition-colors">

@@ -3,8 +3,10 @@
 package tenantportal
 
 import (
+	"encoding/json"
 	"errors"
 	"net/http"
+	"strings"
 	"time"
 
 	billrepo "backend/internal/bill/repository"
@@ -14,6 +16,7 @@ import (
 	maintenancerepo "backend/internal/maintenance/repository"
 	maintenanceusecase "backend/internal/maintenance/usecase"
 	paymentrepo "backend/internal/payment/repository"
+	"backend/internal/pkg/httpx"
 	"backend/internal/pkg/middleware"
 	"backend/internal/pkg/response"
 	"backend/internal/pkg/storage"
@@ -177,6 +180,11 @@ func (c *Controller) Bills(w http.ResponseWriter, r *http.Request) {
 		response.WriteError(w, http.StatusNotFound, "TENANT_NOT_LINKED", "no tenant profile is linked to this account")
 		return
 	}
+	var req tenantListRequest
+	if json.NewDecoder(r.Body).Decode(&req) != nil {
+		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid request body")
+		return
+	}
 
 	rows := []bill{}
 	err = c.db.Raw(`
@@ -202,5 +210,24 @@ func (c *Controller) Bills(w http.ResponseWriter, r *http.Request) {
 		isOverdue := rules.IsOverdue(b.Status, b.BillingPeriod, overdueDay, now)
 		b.DisplayStatus = rules.DisplayStatus(b.Status, b.PendingProofs, isOverdue)
 	}
-	response.WriteSuccess(w, http.StatusOK, rows)
+
+	status := strings.TrimSpace(req.Status)
+	filtered := make([]bill, 0, len(rows))
+	for _, b := range rows {
+		if status != "" && b.DisplayStatus != status {
+			continue
+		}
+		filtered = append(filtered, b)
+	}
+	page, perPage := httpx.NormalizePagination(req.CurrentPage, req.PerPage)
+	response.WriteSuccess(w, http.StatusOK, response.NewListData(paginate(filtered, page, perPage), page, perPage, int64(len(filtered))))
+}
+
+// paginate returns the slice for the 1-based page, or an empty slice when the page is past the end.
+func paginate[T any](rows []T, page, perPage int) []T {
+	start := (page - 1) * perPage
+	if start >= len(rows) {
+		return []T{}
+	}
+	return rows[start:min(start+perPage, len(rows))]
 }

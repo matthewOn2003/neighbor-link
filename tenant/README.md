@@ -1,4 +1,4 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+Neighbor Link tenant portal. Built with [Next.js](https://nextjs.org), sharing the same frontend architecture as `admin/` (hooks, services, UI components, styles, i18n); only the business pages differ.
 
 ## Getting Started
 
