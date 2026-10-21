@@ -33,7 +33,7 @@ export default function LangSelect() {
         <div
           className="absolute right-0 top-full mt-2 min-w-[8rem] py-2 z-50"
           style={{
-            background: "var(--panel-background)",
+            background: "#ffffff",
             border: "var(--border-width) solid var(--panel-border)",
             borderRadius: "var(--button-radius)",
             boxShadow: "var(--panel-shadow)",
