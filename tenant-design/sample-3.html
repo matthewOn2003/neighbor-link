@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html class="h-full dark" lang="en" style="">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    name="viewport">
+  <meta content="mobile_tab" name="shell-type">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+    rel="stylesheet">
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap"
+    rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+    rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "surface-container-low": "#161722",
+            "surface-bright": "#383843",
+            "surface-container-high": "#242533",
+            "surface-dim": "#10111a",
+            "tertiary": "#c0c1ff",
+            "tertiary-fixed-dim": "#c0c1ff",
+            "outline": "#958ea0",
+            "on-secondary-container": "#ffe494",
+            "secondary-container": "#423200",
+            "on-tertiary-fixed": "#07006c",
+            "on-surface-variant": "#a7a1b5",
+            "surface-tint": "#d0bcff",
+            "surface": "#0d0e17",
+            "secondary-fixed-dim": "#e9c349",
+            "on-secondary-fixed-variant": "#574500",
+            "primary-fixed-dim": "#d0bcff",
+            "on-tertiary": "#1000a9",
+            "primary": "#c4a3ff",
+            "on-primary-fixed-variant": "#5516be",
+            "background": "#0d0e17",
+            "on-surface": "#f1efff",
+            "secondary-fixed": "#ffe088",
+            "inverse-primary": "#6d3bd7",
+            "on-tertiary-fixed-variant": "#2f2ebe",
+            "error": "#ff6b81",
+            "error-container": "#4e101b",
+            "surface-container": "#1b1c28",
+            "on-primary-container": "#f1e9ff",
+            "on-secondary-fixed": "#241a00",
+            "on-primary": "#2b006c",
+            "tertiary-fixed": "#e1e0ff",
+            "secondary": "#f5cd5a",
+            "primary-fixed": "#e9ddff",
+            "surface-container-lowest": "#08090f",
+            "outline-variant": "#34313f",
+            "surface-variant": "#2a2b38",
+            "surface-container-highest": "#2e303f",
+            "inverse-surface": "#e3e1ef",
+            "on-background": "#f1efff",
+            "on-tertiary-container": "#d8d9ff",
+            "on-error-container": "#ffdada",
+            "on-primary-fixed": "#23005c",
+            "tertiary-container": "#2f3175",
+            "primary-container": "#6d3bd7",
+            "inverse-on-surface": "#2f303a",
+            "on-secondary": "#3c2f00",
+            "on-error": "#690005"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.375rem",
+            "lg": "0.75rem",
+            "xl": "1rem",
+            "2xl": "1.25rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "space-xl": "2.5rem",
+            "space-xs": "0.25rem",
+            "margin": "1rem",
+            "space-sm": "0.5rem",
+            "gutter": "1rem",
+            "space-md": "1rem",
+            "space-lg": "1.5rem"
+          },
+          "fontFamily": {
+            "title-lg": ["Plus Jakarta Sans"],
+            "body-lg": ["Plus Jakarta Sans"],
+            "headline-md": ["Plus Jakarta Sans"],
+            "headline-lg": ["Plus Jakarta Sans"],
+            "headline-sm": ["Plus Jakarta Sans"],
+            "label-caps": ["Plus Jakarta Sans"],
+            "body-md": ["Plus Jakarta Sans"],
+            "title-md": ["Plus Jakarta Sans"],
+            "label-md": ["Plus Jakarta Sans"],
+            "label-lg": ["Plus Jakarta Sans"],
+            "label-sm": ["Inter"],
+            "body-sm": ["Plus Jakarta Sans"]
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @layer base {
+
+      html,
+      body {
+        width: 100vw;
+        min-height: 100%;
+        margin: 0;
+        padding: 0;
+        background-color: #0d0e17;
+      }
+
+      body {
+        overscroll-behavior: none;
+      }
+
+      .pb-safe {
+        padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
+      }
+
+      .pt-safe {
+        padding-top: env(safe-area-inset-top, 0px);
+      }
+    }
+
+    ::-webkit-scrollbar {
+      display: none;
+    }
+
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    /* Shimmer animation for luxury button */
+    @keyframes shimmer {
+      0% {
+        transform: translateX(-100%);
+      }
+
+      100% {
+        transform: translateX(200%);
+      }
+    }
+
+    .shimmer-effect::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.18), transparent);
+      animation: shimmer 3.5s infinite;
+    }
+  </style>
+  <style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+
+<body
+  class="bg-background font-body-md text-on-surface antialiased min-h-full flex flex-col relative overflow-x-hidden selection:bg-primary/30 selection:text-white">
+  <!-- Subtle Ambient Glows -->
+  <div
+    class="fixed top-0 left-1/2 -translate-x-1/2 w-[420px] h-[340px] bg-gradient-to-b from-primary-container/25 via-purple-600/10 to-transparent blur-[100px] pointer-events-none z-0">
+  </div>
+  <div class="fixed top-96 -right-20 w-[280px] h-[280px] bg-rose-500/10 blur-[90px] pointer-events-none z-0"></div>
+  <div class="fixed bottom-36 -left-20 w-[300px] h-[300px] bg-indigo-600/15 blur-[90px] pointer-events-none z-0"></div>
+  <!-- Header -->
+  <header class="fixed top-0 inset-x-0 z-50 bg-[#0d0e17]/80 backdrop-blur-2xl border-b border-white/[0.06] pt-safe">
+    <div class="h-16 px-margin flex items-center justify-between gap-space-sm">
+      <div class="flex items-center gap-space-sm min-w-0">
+        <div
+          class="relative p-1 rounded-xl bg-gradient-to-tr from-white/10 to-white/5 border border-white/10 shadow-inner">
+          <img alt="NeighborLink Logo" class="h-7 w-auto object-contain flex-shrink-0"
+            src="https://lh3.googleusercontent.com/aida-public/AB6AXuA9_JQW_pMZq6jfAB2kH9kJPlxduptDX5BO7NqLOcfg_BwDfTUVBa19LUSQtzENguYuH7sJES5roVvvVBSNrExbz3tUoyw2e3e1p1MchWFawVuRiNiSR4d7_CrAS0Wmy44fmiG7ZR53g3pTWjsSXxKMFnI2ZpEJ_XBm-4Ftn_NQou0TC8-EnimX-ZCuJYG1W-Z2oGZ0sF9f_mXUtIT1DynYMkVSUCBFOLd-aiLeskiT9n2_W17qrnrS">
+        </div>
+        <div class="flex flex-col min-w-0">
+          <span
+            class="font-headline-sm text-headline-sm font-bold tracking-tight text-white flex items-center gap-1.5 truncate">
+            NeighborLink
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 ring-2 ring-emerald-400/20"></span>
+          </span>
+          <span
+            class="font-label-sm text-[11px] text-on-surface-variant font-medium tracking-wider uppercase truncate">Billing
+            &amp; Proofs</span>
+        </div>
+      </div>
+      <div class="flex items-center gap-2 flex-shrink-0">
+        <button aria-label="Notifications"
+          class="relative w-10 h-10 flex items-center justify-center rounded-xl bg-white/[0.04] border border-white/10 text-on-surface hover:bg-white/[0.08] transition-all shadow-sm"
+          type="button">
+          <span class="material-symbols-outlined text-[20px] text-zinc-300">notifications</span>
+          <span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-rose-500"></span>
+        </button>
+        <a aria-label="Profile"
+          class="w-10 h-10 flex items-center justify-center rounded-xl p-[2px] bg-gradient-to-tr from-primary to-rose-400/80 shadow-md hover:scale-105 transition-transform"
+          data-path="tenant-profile" href="#">
+          <img alt="Profile" class="w-full h-full rounded-[10px] object-cover"
+            src="https://lh3.googleusercontent.com/aida-public/AB6AXuB_u_oRBotgWLou9r8j3ur5LN3x1vPBOJzCwbBJF22svhms05gvpk5J7nh3l8Nk2QHywhuQCCbz2YXakNAv4AmDPj6j9R33rEgzNkG9JSGPrBkxLrmg4pA9gMUrd6VVLJ_lUqPk8HXYyjVy6YsofI6pc3A_HoyyV0CD5u3nTLy9ld8kpignTmoiYBNqeSsWAciZrE8gL1p0vf4Sl82NhJyalnKzVz_837P6AUEO8k3ESU_dDnmVJ5xG">
+        </a>
+      </div>
+    </div>
+  </header>
+  <main class="flex-1 w-full pt-20 pb-28 px-margin flex flex-col relative z-10">
+    <div class="flex flex-col w-full gap- space-md">
+      <!-- Top Attention Banner & Financial Summary Bento -->
+      <section class="flex flex-col gap-3.5 mb-2">
+        <!-- Executive-Grade Alert Card -->
+        <div
+          class="relative w-full rounded-2xl p-4 overflow-hidden border border-rose-500/30 bg-gradient-to-br from-rose-950/70 via-[#231018]/80 to-[#160c13]/90 shadow-[0_10px_30px_-10px_rgba(225,29,72,0.35)] backdrop-blur-xl">
+          <!-- Ambient card glow & highlights -->
+          <div class="absolute -top-12 -right-8 w-36 h-36 bg-rose-500/20 rounded-full blur-2xl pointer-events-none">
+          </div>
+          <div
+            class="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-rose-400/50 to-transparent">
+          </div>
+          <div class="flex items-start gap-3.5 relative z-10">
+            <div
+              class="w-11 h-11 rounded-xl bg-gradient-to-b from-rose-500/30 to-rose-600/10 border border-rose-400/30 text-rose-300 flex items-center justify-center flex-shrink-0">
+              <span class="material-symbols-outlined text-[24px]"
+                style="font-variation-settings: 'FILL' 1;">warning</span>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between gap-1">
+                <span
+                  class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-rose-500/20 border border-rose-500/30 text-[10px] uppercase font-bold tracking-widest text-rose-300">
+                  <span class="w-1.5 h-1.5 rounded-full bg-rose-400 animate-pulse"></span>
+                  Action Required
+                </span>
+                <span class="font-label-sm text-[11px] text-rose-200/70 font-medium">Due 2026-10-22</span>
+              </div>
+              <p class="text-[22px] font-extrabold text-white tracking-tight mt-1">RM 1,800.00 Overdue</p>
+              <p class="font-body-sm text-[12px] text-rose-100/80 mt-1 leading-snug">
+                Period 2026-10 transfer proof was declined. Please verify and resubmit.
+              </p>
+            </div>
+          </div>
+        </div>
+        <!-- Key Stat Split (Bento Grid) -->
+        <div class="grid grid-cols-2 gap-3">
+          <!-- Metric 1: Total Invoices -->
+          <div
+            class="relative bg-gradient-to-b from-white/[0.07] to-white/[0.02] border border-white/10 p-3.5 rounded-2xl shadow-lg shadow-black/40 backdrop-blur-md overflow-hidden group">
+            <div
+              class="absolute -right-3 -top-3 w-16 h-16 bg-primary/10 rounded-full blur-xl pointer-events-none group-hover:bg-primary/20 transition-colors">
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="font-label-md text-[12px] text-zinc-400 font-medium">Total Invoices</span>
+              <div
+                class="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500/25 to-purple-500/10 border border-indigo-400/20 flex items-center justify-center text-primary shadow-inner">
+                <span class="material-symbols-outlined text-[18px]">receipt</span>
+              </div>
+            </div>
+            <div class="mt-2.5 flex items-baseline gap-1.5">
+              <span class="text-[26px] font-bold text-white tracking-tight">24</span>
+              <span class="font-body-sm text-[12px] text-zinc-400 font-normal">records</span>
+            </div>
+            <div class="mt-1 w-full bg-white/5 h-1 rounded-full overflow-hidden">
+              <div class="bg-gradient-to-r from-primary to-indigo-400 h-full w-[95%]"></div>
+            </div>
+          </div>
+          <!-- Metric 2: Payment Proofs -->
+          <div
+            class="relative bg-gradient-to-b from-white/[0.07] to-white/[0.02] border border-white/10 p-3.5 rounded-2xl shadow-lg shadow-black/40 backdrop-blur-md overflow-hidden group">
+            <div
+              class="absolute -right-3 -top-3 w-16 h-16 bg-amber-400/10 rounded-full blur-xl pointer-events-none group-hover:bg-amber-400/20 transition-colors">
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="font-label-md text-[12px] text-zinc-400 font-medium">Payment Proofs</span>
+              <div
+                class="w-8 h-8 rounded-xl bg-gradient-to-br from-amber-500/25 to-yellow-500/10 border border-amber-400/20 flex items-center justify-center text-amber-300 shadow-inner">
+                <span class="material-symbols-outlined text-[18px]">verified_user</span>
+              </div>
+            </div>
+            <div class="mt-2.5 flex items-baseline gap-1.5">
+              <span class="text-[26px] font-bold text-white tracking-tight">8</span>
+              <span class="font-body-sm text-[12px] text-zinc-400 font-normal">uploaded</span>
+            </div>
+            <div class="mt-1 w-full bg-white/5 h-1 rounded-full overflow-hidden">
+              <div class="bg-gradient-to-r from-amber-400 to-yellow-300 h-full w-[33%]"></div>
+            </div>
+          </div>
+        </div>
+        <!-- Primary Radiant CTA Button -->
+        <button
+          class="relative w-full h-[52px] rounded-2xl font-label-lg text-[15px] font-semibold flex items-center justify-center gap-2 overflow-hidden active:scale-[0.98] transition-transform shimmer-effect bg-gradient-to-r from-[#6d3bd7] via-[#8554eb] to-[#a078ff] text-white border border-white/20"
+          id="open-upload-modal" type="button">
+          <div class="w-6 h-6 rounded-lg bg-white/20 flex items-center justify-center">
+            <span class="material-symbols-outlined text-[18px] text-white">add_a_photo</span>
+          </div>
+          <span class="tracking-wide">Submit Payment Proof</span>
+        </button>
+      </section>
+      <!-- Interactive Segmented Navigation (Pill Switcher) -->
+      <div
+        class="w-full bg-[#161722]/90 border border-white/[0.08] p-1 rounded-2xl grid grid-cols-2 gap-1 text-center font-label-md text-label-md shadow-inner mb-3">
+        <button
+          class="py-2.5 rounded-xl bg-gradient-to-b from-white/15 to-white/5 text-white font-semibold border border-white/10 transition-all flex items-center justify-center gap-1.5"
+          id="tab-btn-bills" type="button">
+          <span class="material-symbols-outlined text-[18px] text-primary">event_repeat</span>
+          <span class="">Monthly Bills (24)</span>
+        </button>
+        <button
+          class="py-2.5 rounded-xl text-zinc-400 hover:text-white transition-all flex items-center justify-center gap-1.5 border border-transparent"
+          id="tab-btn-proofs" type="button">
+          <span class="material-symbols-outlined text-[18px]">receipt_long</span>
+          <span class="">Payment Proofs (8)</span>
+        </button>
+      </div>
+      <!-- Horizontal Filter Chips -->
+      <div class="flex items-center gap-2 overflow-x-auto pb-2 -mx-margin px-margin no-scrollbar mb-1">
+        <button
+          class="filter-chip px-3.5 py-1.5 rounded-full bg-gradient-to-r from-primary-container to-indigo-500 text-white font-label-sm text-[12px] font-semibold flex-shrink-0 border border-white/15 transition-all"
+          type="button">
+          All Statuses
+        </button>
+        <button
+          class="filter-chip px-3.5 py-1.5 rounded-full bg-[#181926] text-zinc-400 hover:text-white font-label-sm text-[12px] flex-shrink-0 border border-white/[0.06] transition-all"
+          type="button">
+          Overdue (1)
+        </button>
+        <button
+          class="filter-chip px-3.5 py-1.5 rounded-full bg-[#181926] text-zinc-400 hover:text-white font-label-sm text-[12px] flex-shrink-0 border border-white/[0.06] transition-all"
+          type="button">
+          Paid (23)
+        </button>
+        <button
+          class="filter-chip px-3.5 py-1.5 rounded-full bg-[#181926] text-zinc-400 hover:text-white font-label-sm text-[12px] flex-shrink-0 border border-white/[0.06] transition-all"
+          type="button">
+          Needs Review
+        </button>
+      </div>
+      <!-- TAB PANE 1: MONTHLY BILLS -->
+      <div class="flex flex-col gap-3" id="pane-bills">
+        <!-- Card 1: 2026-10 (Overdue) -->
+        <article
+          class="relative w-full rounded-2xl p-4 bg-gradient-to-b from-[#1b1c28] to-[#141520] border border-rose-500/30 shadow-[0_8px_25px_-8px_rgba(244,63,94,0.25)] flex flex-col gap-3 overflow-hidden">
+          <div class="absolute top-0 right-0 w-28 h-28 bg-rose-500/10 rounded-full blur-2xl pointer-events-none"></div>
+          <div class="flex items-start justify-between gap-2 relative z-10">
+            <div class="flex items-center gap-3">
+              <div
+                class="w-11 h-11 rounded-xl bg-gradient-to-br from-rose-500/25 to-rose-900/30 border border-rose-400/30 text-rose-300 flex items-center justify-center font-bold text-lg shadow-inner">
+                10
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h2 class="text-[17px] font-bold text-white tracking-tight">2026-10</h2>
+                  <span
+                    class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-500/20 border border-rose-500/40 text-rose-300">
+                    <span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span>
+                    Overdue
+                  </span>
+                </div>
+                <p class="font-body-sm text-[12px] text-zinc-400 mt-0.5">Due date: 2026-10-22</p>
+              </div>
+            </div>
+            <div class="text-right">
+              <p class="text-[18px] font-extrabold text-rose-400 tracking-tight">RM 1,800.00</p>
+              <span class="text-[11px] text-zinc-400 uppercase tracking-wider font-medium">Bill Total</span>
+            </div>
+          </div>
+          <!-- Financial Micro Ledger -->
+          <div
+            class="bg-black/30 border border-white/[0.05] rounded-xl p-3 grid grid-cols-3 gap-2 text-center backdrop-blur-sm">
+            <div>
+              <span class="text-[11px] text-zinc-400 block font-medium">Late Fee</span>
+              <span class="text-[13px] text-zinc-300 font-semibold mt-0.5 block">RM 0.00</span>
+            </div>
+            <div class="border-x border-white/[0.06]">
+              <span class="text-[11px] text-zinc-400 block font-medium">Paid</span>
+              <span class="text-[13px] text-zinc-300 font-semibold mt-0.5 block">RM 0.00</span>
+            </div>
+            <div>
+              <span class="text-[11px] text-rose-300 block font-medium">Outstanding</span>
+              <span class="text-[13px] text-rose-400 font-bold mt-0.5 block">RM 1,800.00</span>
+            </div>
+          </div>
+          <!-- Action Buttons -->
+          <div class="flex items-center gap-2.5 pt-0.5">
+            <button
+              class="flex-1 h-11 bg-gradient-to-r from-primary-container to-indigo-600 hover:from-primary-container/90 hover:to-indigo-500 text-white rounded-xl font-label-md text-[13px] font-semibold flex items-center justify-center gap-1.5 border border-white/20 active:scale-[0.99] transition-all"
+              onclick="triggerProofModal('2026-10', 'RM 1,800.00')" type="button">
+              <span class="material-symbols-outlined text-[18px]">upload_file</span>
+              <span class="">Upload Proof</span>
+            </button>
+            <button
+              class="h-11 px-4 bg-white/[0.06] hover:bg-white/[0.1] text-zinc-200 border border-white/10 rounded-xl font-label-md text-[13px] font-medium flex items-center justify-center gap-1.5 active:scale-[0.99] transition-all"
+              type="button">
+              <span class="material-symbols-outlined text-[18px] text-zinc-400">receipt</span>
+              <span class="">Invoice</span>
+            </button>
+          </div>
+        </article>
+        <!-- Card 2: 2026-09 (Paid) -->
+        <article
+          class="relative w-full rounded-2xl p-4 bg-gradient-to-b from-[#191a26] to-[#12131d] border border-white/[0.08] shadow-md shadow-black/30 flex flex-col gap-3 overflow-hidden">
+          <div class="flex items-start justify-between gap-2">
+            <div class="flex items-center gap-3">
+              <div
+                class="w-11 h-11 rounded-xl bg-white/[0.04] border border-white/10 text-zinc-300 flex items-center justify-center font-bold text-lg">
+                09
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h2 class="text-[17px] font-bold text-white tracking-tight">2026-09</h2>
+                  <span
+                    class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/15 border border-emerald-400/30 text-emerald-300">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                    Paid
+                  </span>
+                </div>
+                <p class="font-body-sm text-[12px] text-zinc-400 mt-0.5">Due date: 2026-09-22</p>
+              </div>
+            </div>
+            <div class="text-right">
+              <p class="text-[18px] font-bold text-white tracking-tight">RM 1,800.00</p>
+              <span class="text-[11px] text-emerald-400 font-medium tracking-wide">Cleared</span>
+            </div>
+          </div>
+          <div class="bg-black/25 border border-white/[0.04] rounded-xl p-3 grid grid-cols-3 gap-2 text-center">
+            <div>
+              <span class="text-[11px] text-zinc-400 block font-medium">Late Fee</span>
+              <span class="text-[13px] text-zinc-300 block font-semibold mt-0.5">RM 0.00</span>
+            </div>
+            <div class="border-x border-white/[0.05]">
+              <span class="text-[11px] text-zinc-400 block font-medium">Amount Paid</span>
+              <span class="text-[13px] text-zinc-300 block font-semibold mt-0.5">RM 1,800.00</span>
+            </div>
+            <div>
+              <span class="text-[11px] text-zinc-400 block font-medium">Outstanding</span>
+              <span class="text-[13px] text-emerald-400 block font-semibold mt-0.5">RM 0.00</span>
+            </div>
+          </div>
+        </article>
+        <!-- Card 3: 2026-08 (Paid) -->
+        <article
+          class="relative w-full rounded-2xl p-4 bg-gradient-to-b from-[#191a26] to-[#12131d] border border-white/[0.08] shadow-md shadow-black/30 flex flex-col gap-3 overflow-hidden">
+          <div class="flex items-start justify-between gap-2">
+            <div class="flex items-center gap-3">
+              <div
+                class="w-11 h-11 rounded-xl bg-white/[0.04] border border-white/10 text-zinc-300 flex items-center justify-center font-bold text-lg">
+                08
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h2 class="text-[17px] font-bold text-white tracking-tight">2026-08</h2>
+                  <span
+                    class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/15 border border-emerald-400/30 text-emerald-300">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                    Paid
+                  </span>
+                </div>
+                <p class="font-body-sm text-[12px] text-zinc-400 mt-0.5">Due date: 2026-08-22</p>
+              </div>
+            </div>
+            <div class="text-right">
+              <p class="text-[18px] font-bold text-white tracking-tight">RM 1,800.00</p>
+              <span class="text-[11px] text-emerald-400 font-medium tracking-wide">Cleared</span>
+            </div>
+          </div>
+          <div class="bg-black/25 border border-white/[0.04] rounded-xl p-3 grid grid-cols-3 gap-2 text-center">
+            <div>
+              <span class="text-[11px] text-zinc-400 block font-medium">Late Fee</span>
+              <span class="text-[13px] text-zinc-300 block font-semibold mt-0.5">RM 0.00</span>
+            </div>
+            <div class="border-x border-white/[0.05]">
+              <span class="text-[11px] text-zinc-400 block font-medium">Amount Paid</span>
+              <span class="text-[13px] text-zinc-300 block font-semibold mt-0.5">RM 1,800.00</span>
+            </div>
+            <div>
+              <span class="text-[11px] text-zinc-400 block font-medium">Outstanding</span>
+              <span class="text-[13px] text-emerald-400 block font-semibold mt-0.5">RM 0.00</span>
+            </div>
+          </div>
+        </article>
+        <!-- Card 4: 2026-07 (Paid) -->
+        <article
+          class="relative w-full rounded-2xl p-4 bg-gradient-to-b from-[#191a26] to-[#12131d] border border-white/[0.08] shadow-md shadow-black/30 flex flex-col gap-3 overflow-hidden">
+          <div class="flex items-start justify-between gap-2">
+            <div class="flex items-center gap-3">
+              <div
+                class="w-11 h-11 rounded-xl bg-white/[0.04] border border-white/10 text-zinc-300 flex items-center justify-center font-bold text-lg">
+                07
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h2 class="text-[17px] font-bold text-white tracking-tight">2026-07</h2>
+                  <span
+                    class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/15 border border-emerald-400/30 text-emerald-300">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                    Paid
+                  </span>
+                </div>
+                <p class="font-body-sm text-[12px] text-zinc-400 mt-0.5">Due date: 2026-07-22</p>
+              </div>
+            </div>
+            <div class="text-right">
+              <p class="text-[18px] font-bold text-white tracking-tight">RM 1,800.00</p>
+              <span class="text-[11px] text-emerald-400 font-medium tracking-wide">Cleared</span>
+            </div>
+          </div>
+          <div class="bg-black/25 border border-white/[0.04] rounded-xl p-3 grid grid-cols-3 gap-2 text-center">
+            <div>
+              <span class="text-[11px] text-zinc-400 block font-medium">Late Fee</span>
+              <span class="text-[13px] text-zinc-300 block font-semibold mt-0.5">RM 0.00</span>
+            </div>
+            <div class="border-x border-white/[0.05]">
+              <span class="text-[11px] text-zinc-400 block font-medium">Amount Paid</span>
+              <span class="text-[13px] text-zinc-300 block font-semibold mt-0.5">RM 1,800.00</span>
+            </div>
+            <div>
+              <span class="text-[11px] text-zinc-400 block font-medium">Outstanding</span>
+              <span class="text-[13px] text-emerald-400 block font-semibold mt-0.5">RM 0.00</span>
+            </div>
+          </div>
+        </article>
+      </div>
+      <!-- TAB PANE 2: PAYMENT PROOFS -->
+      <div class="hidden flex-col gap-3" id="pane-proofs">
+        <!-- Proof Item 1: Rejected -->
+        <article
+          class="relative w-full rounded-2xl p-4 bg-gradient-to-b from-[#1e1520] to-[#14121a] border border-rose-500/30 shadow-[0_8px_25px_-8px_rgba(244,63,94,0.2)] flex flex-col gap-3 overflow-hidden">
+          <div class="flex items-start justify-between">
+            <div class="flex items-center gap-3">
+              <div
+                class="w-11 h-11 rounded-xl bg-rose-500/20 border border-rose-500/30 text-rose-300 flex items-center justify-center">
+                <span class="material-symbols-outlined text-[20px]">cancel</span>
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="font-headline-sm text-headline-sm text-white font-mono">TRX-7731</span>
+                  <span
+                    class="inline-flex items-center px-2 py-0.5 rounded-full font-label-sm text-[11px] bg-rose-500/20 border border-rose-500/40 text-rose-300 font-semibold">
+                    Rejected
+                  </span>
+                </div>
+                <p class="font-body-sm text-[12px] text-zinc-400 mt-0.5">Paid at 2026-10-18</p>
+              </div>
+            </div>
+            <span class="font-headline-sm text-headline-sm text-white font-bold">RM 1,800.00</span>
+          </div>
+          <!-- Rejection Reason Highlight Box -->
+          <div class="bg-rose-950/40 border border-rose-500/25 p-3 rounded-xl flex items-start gap-2 text-rose-100">
+            <span class="material-symbols-outlined text-rose-400 text-[18px] flex-shrink-0 mt-0.5">info</span>
+            <div class="flex-1">
+              <span class="text-[11px] text-rose-400 uppercase tracking-wider font-bold block">Rejection Reason</span>
+              <p class="text-[12px] text-rose-200 leading-tight mt-0.5">Amount on the transfer does not match the bill
+              </p>
+            </div>
+          </div>
+          <div class="flex items-center justify-between pt-1">
+            <span class="font-label-sm text-[12px] text-zinc-400">Proof Image: Provided</span>
+            <button
+              class="font-label-md text-label-md text-primary font-semibold flex items-center gap-1 hover:underline"
+              onclick="triggerProofModal('2026-10', 'RM 1,800.00')" type="button">
+              <span class="material-symbols-outlined text-[16px]">refresh</span>
+              <span class="">Re-upload Receipt</span>
+            </button>
+          </div>
+        </article>
+        <!-- Proof Item 2: Approved -->
+        <article
+          class="relative w-full rounded-2xl p-4 bg-gradient-to-b from-[#181a24] to-[#12131b] border border-white/[0.08] shadow-md shadow-black/30 flex flex-col gap-2.5">
+          <div class="flex items-start justify-between">
+            <div class="flex items-center gap-3">
+              <div
+                class="w-11 h-11 rounded-xl bg-emerald-500/15 border border-emerald-400/30 text-emerald-300 flex items-center justify-center">
+                <span class="material-symbols-outlined text-[20px]">check_circle</span>
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="font-headline-sm text-headline-sm text-white font-mono">HIST-37-202411</span>
+                  <span
+                    class="inline-flex items-center px-2 py-0.5 rounded-full font-label-sm text-[11px] bg-emerald-500/15 border border-emerald-400/30 text-emerald-300 font-semibold">
+                    Approved
+                  </span>
+                </div>
+                <p class="font-body-sm text-[12px] text-zinc-400 mt-0.5">Paid at 2024-11-20</p>
+              </div>
+            </div>
+            <span class="font-headline-sm text-headline-sm text-white font-bold">RM 1,800.00</span>
+          </div>
+          <div class="flex items-center justify-between text-zinc-400 pt-1 font-body-sm text-body-sm">
+            <span class="">Proof validation cleared by Finance</span>
+            <span class="material-symbols-outlined text-[18px] text-emerald-400">verified</span>
+          </div>
+        </article>
+        <!-- Proof Item 3: Approved -->
+        <article
+          class="relative w-full rounded-2xl p-4 bg-gradient-to-b from-[#181a24] to-[#12131b] border border-white/[0.08] shadow-md shadow-black/30 flex flex-col gap-2.5">
+          <div class="flex items-start justify-between">
+            <div class="flex items-center gap-3">
+              <div
+                class="w-11 h-11 rounded-xl bg-emerald-500/15 border border-emerald-400/30 text-emerald-300 flex items-center justify-center">
+                <span class="material-symbols-outlined text-[20px]">check_circle</span>
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="font-headline-sm text-headline-sm text-white font-mono">HIST-37-202502</span>
+                  <span
+                    class="inline-flex items-center px-2 py-0.5 rounded-full font-label-sm text-[11px] bg-emerald-500/15 border border-emerald-400/30 text-emerald-300 font-semibold">
+                    Approved
+                  </span>
+                </div>
+                <p class="font-body-sm text-[12px] text-zinc-400 mt-0.5">Paid at 2025-02-20</p>
+              </div>
+            </div>
+            <span class="font-headline-sm text-headline-sm text-white font-bold">RM 1,800.00</span>
+          </div>
+          <div class="flex items-center justify-between text-zinc-400 pt-1 font-body-sm text-body-sm">
+            <span class="">Proof validation cleared by Finance</span>
+            <span class="material-symbols-outlined text-[18px] text-emerald-400">verified</span>
+          </div>
+        </article>
+        <!-- Proof Item 4: Approved -->
+        <article
+          class="relative w-full rounded-2xl p-4 bg-gradient-to-b from-[#181a24] to-[#12131b] border border-white/[0.08] shadow-md shadow-black/30 flex flex-col gap-2.5">
+          <div class="flex items-start justify-between">
+            <div class="flex items-center gap-3">
+              <div
+                class="w-11 h-11 rounded-xl bg-emerald-500/15 border border-emerald-400/30 text-emerald-300 flex items-center justify-center">
+                <span class="material-symbols-outlined text-[20px]">check_circle</span>
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="font-headline-sm text-headline-sm text-white font-mono">HIST-37-202505</span>
+                  <span
+                    class="inline-flex items-center px-2 py-0.5 rounded-full font-label-sm text-[11px] bg-emerald-500/15 border border-emerald-400/30 text-emerald-300 font-semibold">
+                    Approved
+                  </span>
+                </div>
+                <p class="font-body-sm text-[12px] text-zinc-400 mt-0.5">Paid at 2025-05-31</p>
+              </div>
+            </div>
+            <span class="font-headline-sm text-headline-sm text-white font-bold">RM 1,850.00</span>
+          </div>
+          <div class="flex items-center justify-between text-zinc-400 pt-1 font-body-sm text-body-sm">
+            <span class="">Includes water surcharge allocation</span>
+            <span class="material-symbols-outlined text-[18px] text-emerald-400">verified</span>
+          </div>
+        </article>
+        <!-- Proof Item 5: Approved -->
+        <article
+          class="relative w-full rounded-2xl p-4 bg-gradient-to-b from-[#181a24] to-[#12131b] border border-white/[0.08] shadow-md shadow-black/30 flex flex-col gap-2.5">
+          <div class="flex items-start justify-between">
+            <div class="flex items-center gap-3">
+              <div
+                class="w-11 h-11 rounded-xl bg-emerald-500/15 border border-emerald-400/30 text-emerald-300 flex items-center justify-center">
+                <span class="material-symbols-outlined text-[20px]">check_circle</span>
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="font-headline-sm text-headline-sm text-white font-mono">HIST-37-202508</span>
+                  <span
+                    class="inline-flex items-center px-2 py-0.5 rounded-full font-label-sm text-[11px] bg-emerald-500/15 border border-emerald-400/30 text-emerald-300 font-semibold">
+                    Approved
+                  </span>
+                </div>
+                <p class="font-body-sm text-[12px] text-zinc-400 mt-0.5">Paid at 2025-08-20</p>
+              </div>
+            </div>
+            <span class="font-headline-sm text-headline-sm text-white font-bold">RM 1,800.00</span>
+          </div>
+          <div class="flex items-center justify-between text-zinc-400 pt-1 font-body-sm text-body-sm">
+            <span class="">Proof validation cleared by Finance</span>
+            <span class="material-symbols-outlined text-[18px] text-emerald-400">verified</span>
+          </div>
+        </article>
+      </div>
+      <!-- Interactive Slide-Up Modal: Submit Payment Proof -->
+      <div class="fixed inset-0 z-50 bg-black/75 backdrop-blur-md hidden flex-col justify-end" id="upload-modal">
+        <div
+          class="w-full bg-[#161722] border-t border-white/10 rounded-t-3xl p- space-lg shadow-2xl flex flex-col gap-4 max-h-[85vh] overflow-y-auto">
+          <div class="w-12 h-1 bg-white/20 rounded-full mx-auto -mt-2 mb-1"></div>
+          <div class="flex items-center justify-between pb-1">
+            <div>
+              <h3 class="font-headline-md text-headline-md text-white font-bold">Submit Payment Proof</h3>
+              <p class="font-body-sm text-body-sm text-zinc-400">Upload bank transfer slip or receipt snapshot</p>
+            </div>
+            <button
+              class="w-9 h-9 rounded-full bg-white/[0.08] border border-white/10 flex items-center justify-center text-zinc-300 hover:text-white"
+              id="close-modal-btn" type="button">
+              <span class="material-symbols-outlined text-[20px]">close</span>
+            </button>
+          </div>
+          <form class="flex flex-col gap-3.5" id="proof-form" onsubmit="event.preventDefault(); handleFormSubmit();">
+            <div class="flex flex-col gap-1">
+              <label class="font-label-md text-label-md text-zinc-300 font-medium">Billing Period</label>
+              <div class="relative">
+                <select
+                  class="w-full h-12 bg-[#1c1e2d] border border-white/10 text-white rounded-xl px-3 font-body-md text-body-md appearance-none focus:outline-none focus:border-primary"
+                  id="modal-period">
+                  <option value="2026-10">2026-10 (RM 1,800.00 Overdue)</option>
+                  <option value="2026-11">2026-11 (Advance payment)</option>
+                  <option value="other">Other / Manual Adjustment</option>
+                </select>
+                <span
+                  class="material-symbols-outlined absolute right-3 top-3.5 text-zinc-400 pointer-events-none text-[20px]">arrow_drop_down</span>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <div class="flex flex-col gap-1">
+                <label class="font-label-md text-label-md text-zinc-300 font-medium">Payment Amount</label>
+                <input
+                  class="w-full h-12 bg-[#1c1e2d] border border-white/10 text-white rounded-xl px-3 font-body-md text-body-md focus:outline-none focus:border-primary"
+                  id="modal-amount" type="text" value="RM 1,800.00">
+              </div>
+              <div class="flex flex-col gap-1">
+                <label class="font-label-md text-label-md text-zinc-300 font-medium">Paid Date</label>
+                <input
+                  class="w-full h-12 bg-[#1c1e2d] border border-white/10 text-white rounded-xl px-3 font-body-md text-body-md focus:outline-none focus:border-primary"
+                  type="date" value="2026-10-23">
+              </div>
+            </div>
+            <div class="flex flex-col gap-1">
+              <label class="font-label-md text-label-md text-zinc-300 font-medium">Bank Reference Number</label>
+              <input
+                class="w-full h-12 bg-[#1c1e2d] border border-white/10 text-white placeholder-zinc-500 rounded-xl px-3 font-body-md text-body-md focus:outline-none focus:border-primary"
+                placeholder="e.g. TRX-982348" type="text">
+            </div>
+            <!-- Drag & Drop Upload Simulator Box -->
+            <div class="flex flex-col gap-1">
+              <label class="font-label-md text-label-md text-zinc-300 font-medium">Receipt Attachment</label>
+              <div
+                class="w-full p-4 rounded-xl bg-[#1c1e2d]/60 border border-dashed border-white/20 flex flex-col items-center justify-center text-center gap-2 cursor-pointer hover:bg-white/[0.04] transition-colors">
+                <div
+                  class="w-12 h-12 rounded-xl bg-primary/20 border border-primary/30 text-primary flex items-center justify-center">
+                  <span class="material-symbols-outlined text-[24px]">cloud_upload</span>
+                </div>
+                <div>
+                  <p class="font-label-md text-label-md text-white font-semibold">Tap to take photo or choose slip</p>
+                  <p class="font-label-sm text-[11px] text-zinc-400 mt-0.5">PNG, JPG, PDF up to 10MB</p>
+                </div>
+              </div>
+            </div>
+            <button
+              class="w-full h-12 bg-gradient-to-r from-primary-container via-indigo-600 to-purple-600 border border-white/20 text-white rounded-xl font-label-lg text-label-lg mt-2 flex items-center justify-center gap-2 active:scale-[0.99] transition-transform"
+              type="submit">
+              <span class="material-symbols-outlined text-[20px]">send</span>
+              <span class="">Submit for Verification</span>
+            </button>
+          </form>
+        </div>
+      </div>
+      <!-- Toast Confirmation -->
+      <div
+        class="fixed bottom-24 inset-x-margin mx-auto max-w-sm bg-[#1c1e2d] border border-emerald-500/40 text-white p-3.5 rounded-2xl shadow-2xl shadow-black/80 flex items-center gap-2.5 transition-all opacity-0 translate-y-4 pointer-events-none z-50 backdrop-blur-xl"
+        id="toast-success">
+        <div
+          class="w-7 h-7 rounded-full bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center text-emerald-300 flex-shrink-0 shadow-[0_0_12px_rgba(16,185,129,0.3)]">
+          <span class="material-symbols-outlined text-[18px]">check</span>
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="font-label-md text-label-md font-bold text-white">Payment Proof Uploaded!</p>
+          <p class="font-label-sm text-[12px] text-zinc-400">Our management will verify within 24 hours.</p>
+        </div>
+      </div>
+    </div>
+    <script>
+      // Tab Switching Logic
+      const tabBills = document.getElementById('tab-btn-bills');
+      const tabProofs = document.getElementById('tab-btn-proofs');
+      const paneBills = document.getElementById('pane-bills');
+      const paneProofs = document.getElementById('pane-proofs');
+
+      function activateTab(tab) {
+        if (tab === 'bills') {
+          paneBills.classList.remove('hidden');
+          paneBills.classList.add('flex');
+          paneProofs.classList.add('hidden');
+          paneProofs.classList.remove('flex');
+
+          tabBills.className = "py-2.5 rounded-xl bg-gradient-to-b from-white/15 to-white/5 text-white font-semibold border border-white/10 shadow-sm transition-all flex items-center justify-center gap-1.5";
+          tabProofs.className = "py-2.5 rounded-xl text-zinc-400 hover:text-white transition-all flex items-center justify-center gap-1.5 border border-transparent";
+        } else {
+          paneProofs.classList.remove('hidden');
+          paneProofs.classList.add('flex');
+          paneBills.classList.add('hidden');
+          paneBills.classList.remove('flex');
+
+          tabProofs.className = "py-2.5 rounded-xl bg-gradient-to-b from-white/15 to-white/5 text-white font-semibold border border-white/10 shadow-sm transition-all flex items-center justify-center gap-1.5";
+          tabBills.className = "py-2.5 rounded-xl text-zinc-400 hover:text-white transition-all flex items-center justify-center gap-1.5 border border-transparent";
+        }
+      }
+
+      tabBills.addEventListener('click', () => activateTab('bills'));
+      tabProofs.addEventListener('click', () => activateTab('proofs'));
+
+      // Filter Chips toggle active state
+      document.querySelectorAll('.filter-chip').forEach(chip => {
+        chip.addEventListener('click', function () {
+          document.querySelectorAll('.filter-chip').forEach(c => {
+            c.className = "filter-chip px-3.5 py-1.5 rounded-full bg-[#181926] text-zinc-400 hover:text-white font-label-sm text-[12px] flex-shrink-0 border border-white/[0.06] transition-all";
+          });
+          this.className = "filter-chip px-3.5 py-1.5 rounded-full bg-gradient-to-r from-primary-container to-indigo-500 text-white font-label-sm text-[12px] font-semibold flex-shrink-0 border border-white/15 shadow-md shadow-purple-950/40 transition-all";
+        });
+      });
+
+      // Modal Handling
+      const modal = document.getElementById('upload-modal');
+      const openModalBtn = document.getElementById('open-upload-modal');
+      const closeModalBtn = document.getElementById('close-modal-btn');
+      const toast = document.getElementById('toast-success');
+
+      function openModal() {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      }
+
+      function closeModal() {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+
+      openModalBtn.addEventListener('click', openModal);
+      closeModalBtn.addEventListener('click', closeModal);
+
+      window.triggerProofModal = function (period, amount) {
+        document.getElementById('modal-period').value = period;
+        document.getElementById('modal-amount').value = amount;
+        openModal();
+      };
+
+      function handleFormSubmit() {
+        closeModal();
+        // Show Toast
+        toast.classList.remove('opacity-0', 'translate-y-4', 'pointer-events-none');
+        toast.classList.add('opacity-100', 'translate-y-0');
+
+        setTimeout(() => {
+          toast.classList.remove('opacity-100', 'translate-y-0');
+          toast.classList.add('opacity-0', 'translate-y-4', 'pointer-events-none');
+        }, 3500);
+      }
+    </script>
+  </main>
+  <!-- Bottom Nav Chrome -->
+  <nav
+    class="fixed bottom-0 inset-x-0 z-50 pb-safe bg-[#0d0e17]/85 backdrop-blur-2xl border-t border-white/[0.08] shadow-[0_-8px_30px_rgba(0,0,0,0.5)]">
+    <div class="grid grid-cols-4 items-center h-16 max-w-lg mx-auto px-space-xs">
+      <a class="flex flex-col items-center justify-center gap-0.5 min-h-[44px] py-1 text-zinc-400 transition-colors hover:text-white"
+        data-path="dashboard" href="#">
+        <span class="material-symbols-outlined text-[22px]">home</span>
+        <span class="font-label-sm text-[11px] tracking-tight text-center truncate max-w-full px-1">Home</span>
+      </a>
+      <a aria-current="page"
+        class="flex flex-col items-center justify-center gap-0.5 min-h-[44px] py-1 transition-colors text-primary font-bold relative"
+        data-path="billing-and-proofs" href="#">
+        <div class="w-10 h-8 rounded-full bg-primary/10 flex items-center justify-center absolute -top-0.5"></div>
+        <span class="material-symbols-outlined text-[22px] relative z-10 text-primary">receipt_long</span>
+        <span
+          class="font-label-sm text-[11px] tracking-tight text-center truncate max-w-full px-1 text-primary relative z-10 font-semibold">Billing</span>
+      </a>
+      <a class="flex flex-col items-center justify-center gap-0.5 min-h-[44px] py-1 text-zinc-400 transition-colors hover:text-white"
+        data-path="maintenance-and-complaints" href="#">
+        <span class="material-symbols-outlined text-[22px]">build</span>
+        <span class="font-label-sm text-[11px] tracking-tight text-center truncate max-w-full px-1">Services</span>
+      </a>
+      <a class="flex flex-col items-center justify-center gap-0.5 min-h-[44px] py-1 text-zinc-400 transition-colors hover:text-white"
+        data-path="property-and-lease" href="#">
+        <span class="material-symbols-outlined text-[22px]">apartment</span>
+        <span class="font-label-sm text-[11px] tracking-tight text-center truncate max-w-full px-1">My Home</span>
+      </a>
+    </div>
+  </nav>
+</body>
+
+</html>
