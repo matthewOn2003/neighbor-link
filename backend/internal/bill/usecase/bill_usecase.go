@@ -20,7 +20,9 @@ func (u *BillUsecase) List(f repository.BillFilter, p, n int) ([]repository.Bill
 	return u.repo.List(f, p, n)
 }
 func (u *BillUsecase) Detail(id uint) (*repository.BillListItem, error) { return u.repo.Detail(id) }
-func (u *BillUsecase) ActiveContracts() ([]map[string]any, error)       { return u.repo.ActiveContracts() }
+func (u *BillUsecase) ActiveContracts(page, perPage int) ([]map[string]any, int64, error) {
+	return u.repo.ActiveContracts(page, perPage)
+}
 func (u *BillUsecase) Create(b *repository.Bill) error {
 	if b.ContractID == 0 || !periodPattern.MatchString(b.BillingPeriod) {
 		return repository.ErrInvalidBill

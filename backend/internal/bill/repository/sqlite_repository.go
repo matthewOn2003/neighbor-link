@@ -168,12 +168,30 @@ func decorate(b *BillListItem, overdueDay int, now time.Time) {
 	b.IsOverdue = rules.IsOverdue(b.Status, b.BillingPeriod, overdueDay, now)
 	b.DisplayStatus = rules.DisplayStatus(b.Status, b.PendingProofCount, b.IsOverdue)
 }
-func (r *SQLiteRepository) ActiveContracts() ([]map[string]any, error) {
+// ActiveContracts returns active contracts. perPage <= 0 returns all rows without paging.
+func (r *SQLiteRepository) ActiveContracts(page, perPage int) ([]map[string]any, int64, error) {
+	base := func() *gorm.DB {
+		return r.db.Table("contracts").
+			Joins("JOIN tenants ON tenants.id = contracts.tenant_id").Joins("LEFT JOIN properties ON properties.id = contracts.property_id").Joins("LEFT JOIN units ON units.id = contracts.unit_id").
+			Where("contracts.status = ?", "active")
+	}
+	var total int64
+	if err := base().Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
 	rows := make([]map[string]any, 0)
-	err := r.db.Table("contracts").Select("contracts.id AS id, contracts.tenant_id AS tenant_id, tenants.name AS tenant_name, properties.name AS property_name, units.code AS unit_code, contracts.monthly_rent AS monthly_rent, contracts.billing_day AS billing_day").
-		Joins("JOIN tenants ON tenants.id = contracts.tenant_id").Joins("LEFT JOIN properties ON properties.id = contracts.property_id").Joins("LEFT JOIN units ON units.id = contracts.unit_id").
-		Where("contracts.status = ?", "active").Order("tenants.name ASC").Scan(&rows).Error
-	return rows, err
+	q := base().Select("contracts.id AS id, contracts.tenant_id AS tenant_id, tenants.name AS tenant_name, properties.name AS property_name, units.code AS unit_code, contracts.monthly_rent AS monthly_rent, contracts.billing_day AS billing_day").
+		Order("tenants.name ASC, contracts.id ASC")
+	if perPage > 0 {
+		q = q.Offset((page - 1) * perPage).Limit(perPage)
+	}
+	if err := q.Scan(&rows).Error; err != nil {
+		return nil, 0, err
+	}
+	if perPage <= 0 {
+		total = int64(len(rows))
+	}
+	return rows, total, nil
 }
 func (r *SQLiteRepository) Create(b *Bill) error {
 	return r.db.Transaction(func(tx *gorm.DB) error {
