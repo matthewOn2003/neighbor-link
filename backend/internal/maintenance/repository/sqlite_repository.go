@@ -38,12 +38,14 @@ type ListItem struct {
 	Status       string     `json:"status"`
 	Source       string     `json:"source"`
 	Assignee     string     `json:"assignee"`
+	Description  string     `json:"description"`
 	PropertyName *string    `json:"property_name"`
 	UnitCode     *string    `json:"unit_code"`
 	TenantName   *string    `json:"tenant_name"`
 	CreatedAt    time.Time  `json:"created_at"`
 	UpdatedAt    time.Time  `json:"updated_at"`
 	ResolvedAt   *time.Time `json:"resolved_at"`
+	ScheduledAt  *string    `json:"scheduled_at"`
 }
 
 type Detail struct {
@@ -51,7 +53,6 @@ type Detail struct {
 	PropertyID      *uint  `json:"property_id"`
 	UnitID          *uint  `json:"unit_id"`
 	TenantID        *uint  `json:"tenant_id"`
-	Description     string `json:"description"`
 	ResolutionNotes string `json:"resolution_notes"`
 }
 
@@ -121,9 +122,11 @@ func (r *SQLiteRepository) filtered(f Filter) *gorm.DB {
 
 const listSelect = `maintenance_requests.id, maintenance_requests.title, maintenance_requests.category,
 	maintenance_requests.priority, maintenance_requests.status, maintenance_requests.assignee,
+	maintenance_requests.description,
 	CASE WHEN maintenance_requests.tenant_id IS NULL THEN 'admin' ELSE 'tenant' END AS source,
 	properties.name AS property_name, units.code AS unit_code, tenants.name AS tenant_name,
-	maintenance_requests.created_at, maintenance_requests.updated_at, maintenance_requests.resolved_at`
+	maintenance_requests.created_at, maintenance_requests.updated_at, maintenance_requests.resolved_at,
+	maintenance_requests.scheduled_at`
 
 func (r *SQLiteRepository) List(f Filter, page, perPage int) ([]ListItem, int64, error) {
 	var total int64
@@ -141,6 +144,27 @@ func (r *SQLiteRepository) List(f Filter, page, perPage int) ([]ListItem, int64,
 	return rows, total, nil
 }
 
+// ListActiveForTenant returns the tenant's open and in-progress requests, newest first, up to limit rows.
+func (r *SQLiteRepository) ListActiveForTenant(tenantID uint, limit int) ([]ListItem, int64, error) {
+	base := r.filtered(Filter{TenantID: &tenantID}).
+		Where("maintenance_requests.status IN ?", []string{"open", "in_progress"})
+	var total int64
+	if err := base.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+	rows := make([]ListItem, 0)
+	err := r.filtered(Filter{TenantID: &tenantID}).
+		Where("maintenance_requests.status IN ?", []string{"open", "in_progress"}).
+		Select(listSelect).
+		Order("maintenance_requests.id DESC").
+		Limit(limit).
+		Scan(&rows).Error
+	if err != nil {
+		return nil, 0, err
+	}
+	return rows, total, nil
+}
+
 func (r *SQLiteRepository) FindDetail(id uint) (*Detail, error) {
 	var d Detail
 	err := r.db.Table("maintenance_requests").
@@ -148,7 +172,7 @@ func (r *SQLiteRepository) FindDetail(id uint) (*Detail, error) {
 		Joins("LEFT JOIN units ON units.id = maintenance_requests.unit_id").
 		Joins("LEFT JOIN tenants ON tenants.id = maintenance_requests.tenant_id").
 		Select(listSelect+`, maintenance_requests.property_id, maintenance_requests.unit_id, maintenance_requests.tenant_id,
-			maintenance_requests.description, maintenance_requests.resolution_notes`).
+			maintenance_requests.resolution_notes`).
 		Where("maintenance_requests.id = ?", id).
 		Scan(&d).Error
 	if err != nil {

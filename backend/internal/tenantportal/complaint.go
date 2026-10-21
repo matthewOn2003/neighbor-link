@@ -72,7 +72,12 @@ func (c *Controller) ComplaintList(w http.ResponseWriter, r *http.Request) {
 		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to list complaints")
 		return
 	}
-	response.WriteSuccess(w, http.StatusOK, response.NewListData(rows, page, perPage, total))
+	summary, err := c.complaintSummary(tenantID)
+	if err != nil {
+		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to summarise complaints")
+		return
+	}
+	response.WriteSuccess(w, http.StatusOK, response.NewListData(rows, page, perPage, total).WithSummary(summary))
 }
 
 // ComplaintDetail returns one complaint. Complaints belonging to other tenants report 404.
