@@ -9,7 +9,6 @@ import { Spinner } from "@/components/ui/Spinner";
 import { useDraftFilters } from "@/hooks/useDraftFilters";
 import { useDropdown } from "@/hooks/useDropdown";
 import { useRequest } from "@/hooks/useRequest";
-import { Link } from "@/i18n/navigation";
 import { useLocale } from "@/i18n";
 import { request } from "@/services/request";
 import { fdl } from "@/utils/date";
@@ -176,12 +175,6 @@ function ProofReviewTab() {
         )}
         resetFilters={reset}
         applyFilters={apply}
-        buttons={(
-          <Link className="btn btn-outline" href="/payments">
-            <Icon name="arrow_back" className="text-lg" />
-            <span>{t("back_to_payments")}</span>
-          </Link>
-        )}
         header={() => (
           <tr className="bg-accent text-subtle font-semibold">
             <th>{t("tenant_name")}</th>

@@ -100,10 +100,6 @@ function ReceiptsTab() {
         applyFilters={apply}
         buttons={(
           <>
-            <Link className="btn btn-primary" href="/payments/proofs">
-              <Icon name="fact_check" className="text-lg" />
-              <span>{t("payment_proofs")}</span>
-            </Link>
             <Link className="btn btn-outline" href="/payments/settings">
               <Icon name="settings" className="text-lg" />
               <span>{t("collection_settings")}</span>
