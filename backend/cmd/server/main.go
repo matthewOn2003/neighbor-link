@@ -14,6 +14,9 @@ import (
 	billdelivery "backend/internal/bill/delivery"
 	billrepository "backend/internal/bill/repository"
 	billusecase "backend/internal/bill/usecase"
+	complaintdelivery "backend/internal/complaint/delivery"
+	complaintrepository "backend/internal/complaint/repository"
+	complaintusecase "backend/internal/complaint/usecase"
 	contractdelivery "backend/internal/contract/delivery"
 	contractrepository "backend/internal/contract/repository"
 	contractusecase "backend/internal/contract/usecase"
@@ -124,6 +127,7 @@ func main() {
 	paymentUsecase := paymentusecase.NewPaymentUsecase(paymentrepository.NewSQLiteRepository(db))
 	dashboardUsecase := dashboardusecase.NewDashboardUsecase(dashboardrepository.NewSQLiteRepository(db), billRepo)
 	maintenanceUsecase := maintenanceusecase.NewMaintenanceUsecase(maintenancerepository.NewSQLiteRepository(db))
+	complaintUsecase := complaintusecase.NewComplaintUsecase(complaintrepository.NewSQLiteRepository(db))
 
 	serverAddress := requiredEnv("SERVER_ADDRESS")
 	tokenSecret := requiredEnv("AUTH_SECRET")
@@ -132,18 +136,20 @@ func main() {
 
 	// Controllers
 	userController := delivery.NewUserController(userUsecase, tokenSecret, cookieSecure)
+	uploader := storage.NewUploader(storage.LoadConfigFromEnv())
 	propertyController := propertydelivery.NewPropertyController(propertyUsecase).
-		WithStorage(storage.NewUploader(storage.LoadConfigFromEnv()))
+		WithStorage(uploader)
 	tenantController := tenantdelivery.NewTenantController(tenantUsecase)
 	dictionaryController := dictionarydelivery.NewDictionaryController(dictionaryUsecase)
 	staffController := staffdelivery.NewController(db)
-	tenantPortalController := tenantportal.NewController(db, tokenSecret)
+	tenantPortalController := tenantportal.NewController(db, tokenSecret).WithStorage(uploader)
 	contractController := contractdelivery.NewContractController(contractUsecase)
 	billController := billdelivery.NewBillController(billUsecase)
 	settingsController := settingsdelivery.NewSettingsController(settingsUsecase)
-	paymentController := paymentdelivery.NewPaymentController(paymentUsecase, tokenSecret)
+	paymentController := paymentdelivery.NewPaymentController(paymentUsecase, tokenSecret).WithStorage(uploader)
 	dashboardController := dashboarddelivery.NewDashboardController(dashboardUsecase)
 	maintenanceController := maintenancedelivery.NewMaintenanceController(maintenanceUsecase)
+	complaintController := complaintdelivery.NewComplaintController(complaintUsecase)
 
 	// Routers
 	mux := http.NewServeMux()
@@ -163,9 +169,7 @@ func main() {
 	mux.Handle("/api/v1/payment-proof/", paymentRouter)
 	mux.Handle("/api/v1/dashboard/", dashboarddelivery.NewDashboardRouter(dashboardController, tokenSecret, allowedOrigins))
 	mux.Handle("/api/v1/maintenance/", maintenancedelivery.NewMaintenanceRouter(maintenanceController, tokenSecret, allowedOrigins))
-	// Reserved for the tenant portal, not implemented yet:
-	//   /api/v1/tenant-portal/payment-proof/*
-	//   /api/v1/tenant-portal/maintenance/*
+	mux.Handle("/api/v1/complaint/", complaintdelivery.NewComplaintRouter(complaintController, tokenSecret, allowedOrigins))
 
 	log.Printf("API server listening on %s", serverAddress)
 	log.Fatal(http.ListenAndServe(serverAddress, middleware.Audit(mux, tokenSecret, delivery.VerifyToken)))

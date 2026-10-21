@@ -37,13 +37,22 @@ type Summary struct {
 	ContractsExpiring30d   int64   `json:"contractsExpiring30d"`
 	ContractsExpiring60d   int64   `json:"contractsExpiring60d"`
 	OpenComplaints         int64   `json:"openComplaints"`
-	UrgentComplaints       int64   `json:"urgentComplaints"`
+	OpenMaintenance        int64   `json:"openMaintenance"`
+	UrgentMaintenance      int64   `json:"urgentMaintenance"`
+	MaintenanceNewWeek     int64   `json:"maintenanceNewWeek"`
+	MaintenanceNewTenant   int64   `json:"maintenanceNewTenant"`
+	MaintenanceNewAdmin    int64   `json:"maintenanceNewAdmin"`
+	PendingProofCount      int64   `json:"pendingProofCount"`
+	PendingProofAmount     float64 `json:"pendingProofAmount"`
+	OpenBills              int64   `json:"openBills"`
+	VacantUnits            int64   `json:"vacantUnits"`
 }
 
 type Focus struct {
 	OverdueBills      int64 `json:"overdueBills"`
 	ExpiringContracts int64 `json:"expiringContracts"`
-	UrgentComplaints  int64 `json:"urgentComplaints"`
+	UrgentMaintenance int64 `json:"urgentMaintenance"`
+	PendingProofs     int64 `json:"pendingProofs"`
 }
 
 type PropertyStat struct {
@@ -251,16 +260,39 @@ func (uc *DashboardUsecase) Overview(now time.Time) (*Overview, error) {
 	}
 	out.Summary.ContractsExpiring60d = int64(len(out.ExpiringContracts))
 
-	// Complaints are open maintenance requests. The per-item complaints list stays empty until SLA data exists.
-	complaints, err := uc.repo.OpenComplaints()
+	// Complaints come from the complaints table; maintenance requests are counted separately.
+	openComplaints, err := uc.repo.OpenComplaints()
 	if err != nil {
 		return nil, err
 	}
-	out.Summary.OpenComplaints = complaints.Open
-	out.Summary.UrgentComplaints = complaints.Urgent
+	out.Summary.OpenComplaints = openComplaints
+
+	weekStart := today0.AddDate(0, 0, -((int(now.Weekday()) + 6) % 7)).Format("2006-01-02")
+	maintenance, err := uc.repo.MaintenanceStats(weekStart)
+	if err != nil {
+		return nil, err
+	}
+	out.Summary.OpenMaintenance = maintenance.Open
+	out.Summary.UrgentMaintenance = maintenance.Urgent
+	out.Summary.MaintenanceNewWeek = maintenance.NewThisWeek
+	out.Summary.MaintenanceNewTenant = maintenance.NewFromTenant
+	out.Summary.MaintenanceNewAdmin = maintenance.NewFromAdmin
+
+	proofs, err := uc.repo.PendingProofs()
+	if err != nil {
+		return nil, err
+	}
+	out.Summary.PendingProofCount = proofs.Pending
+	out.Summary.PendingProofAmount = proofs.PendingAmount
+
+	if out.Summary.OpenBills, err = uc.repo.OpenBills(); err != nil {
+		return nil, err
+	}
+	out.Summary.VacantUnits = out.Summary.TotalUnits - out.Summary.OccupiedUnits
 
 	out.Focus.ExpiringContracts = out.Summary.ContractsExpiring30d
-	out.Focus.UrgentComplaints = out.Summary.UrgentComplaints
+	out.Focus.UrgentMaintenance = out.Summary.UrgentMaintenance
+	out.Focus.PendingProofs = out.Summary.PendingProofCount
 
 	// Revenue for the last 12 months, oldest first. extra = late fees; rent = collected minus late fees.
 	since := time.Date(now.Year(), now.Month()-(revenueMonths-1), 1, 0, 0, 0, 0, now.Location())
