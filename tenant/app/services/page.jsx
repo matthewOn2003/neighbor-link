@@ -10,7 +10,7 @@ import { useDropdown } from "@/hooks/useDropdown";
 import { useOptionLabel, STATUS_FILTERS, STATUS_LABEL_KEY } from "@/components/portal/status";
 import { RepairCard, ComplaintCard } from "@/components/portal/RequestCards";
 import NewRequestSheet from "@/components/portal/NewRequestSheet";
-import { EmptyState, FilterChips, GlassCard, LoadingBlock, SegmentedTabs, inputClass } from "@/components/portal/primitives";
+import { EmptyState, FilterChips, LoadingBlock, SegmentedTabs, inputClass } from "@/components/portal/primitives";
 
 export default function ServicesPage() {
   return (
@@ -34,6 +34,7 @@ function ServicesContent() {
   const [kind, setKind] = useState(initialKind ?? "maintenance");
   const [status, setStatus] = useState("all");
   const [keyword, setKeyword] = useState("");
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const [sheet, setSheet] = useState(() => (initialKind ? { kind: initialKind } : null)); // null when closed; { kind } when open
   const debouncedKeyword = useDebouncedValue(keyword.trim(), 300);
 
@@ -45,19 +46,16 @@ function ServicesContent() {
   };
   const repairs = useRequest("/tenant-portal/maintenance/list", params);
   const complaints = useRequest("/tenant-portal/complaint/list", params);
-  const me = useRequest("/tenant-portal/me", {});
-  const dict = useDropdown(["maintenance_category", "complaint_category", "maintenance_priority"]);
+  const dict = useDropdown(["maintenance_category", "complaint_category"]);
 
-  const repairSummary = repairs.data?.summary ?? {};
-  const complaintSummary = complaints.data?.summary ?? {};
-  const summary = kind === "maintenance" ? repairSummary : complaintSummary;
   const current = kind === "maintenance" ? repairs : complaints;
   const list = current.data?.list ?? [];
-  const hotlinePhone = me.data?.property?.ops_desk_phone;
+  // Filters stay hidden until asked for; the count shows when a filter is active while they are closed.
+  const activeFilters = (status !== "all" ? 1 : 0) + (keyword.trim() ? 1 : 0);
 
   const statusItems = [
-    { key: "all", label: t("all_statuses"), count: summary.total ?? 0 },
-    ...STATUS_FILTERS.map((key) => ({ key, label: t(STATUS_LABEL_KEY[key]), count: summary[key] ?? 0 })),
+    { key: "all", label: t("all_statuses") },
+    ...STATUS_FILTERS.map((key) => ({ key, label: t(STATUS_LABEL_KEY[key]) })),
   ];
 
   function refresh() {
@@ -71,56 +69,41 @@ function ServicesContent() {
         value={kind}
         onChange={setKind}
         items={[
-          { key: "maintenance", label: t("portal_repairs"), icon: "build", count: repairSummary.total ?? 0 },
-          { key: "complaint", label: t("complaints"), icon: "campaign", count: complaintSummary.total ?? 0 },
+          { key: "maintenance", label: t("portal_repairs"), icon: "build" },
+          { key: "complaint", label: t("complaints"), icon: "campaign" },
         ]}
       />
 
-      <div className="grid grid-cols-3 gap-2.5">
-        {kind === "maintenance" ? (
-          <>
-            <SummaryTile value={repairSummary.open ?? 0} label={t("portal_action_needed")} tone="text-amber-200" />
-            <SummaryTile value={repairSummary.scheduled ?? 0} label={t("portal_scheduled_visits")} tone="text-cyan-300" />
-            <SummaryTile value={repairSummary.total ?? 0} label={t("portal_total_logged")} />
-          </>
-        ) : (
-          <>
-            <SummaryTile value={complaintSummary.open ?? 0} label={t("portal_action_needed")} tone="text-amber-200" />
-            <SummaryTile value={complaintSummary.in_progress ?? 0} label={t(STATUS_LABEL_KEY.in_progress)} tone="text-cyan-300" />
-            <SummaryTile value={complaintSummary.total ?? 0} label={t("portal_total_logged")} />
-          </>
-        )}
+      <div className="flex flex-col gap-3">
+        <button
+          type="button"
+          aria-expanded={filtersOpen}
+          onClick={() => setFiltersOpen((open) => !open)}
+          className="inline-flex w-fit items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-3.5 py-2 text-xs font-bold text-on-surface transition-colors hover:bg-white/[0.08]"
+        >
+          <Icon name="tune" className="text-[16px]" />
+          {t("portal_filters")}
+          {activeFilters > 0 ? (
+            <span className="rounded-full bg-primary/20 px-1.5 text-[10px] text-primary">{activeFilters}</span>
+          ) : null}
+        </button>
+        {filtersOpen ? (
+          <div className="flex flex-col gap-2.5">
+            <div className="relative">
+              <Icon name="search" className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[18px] text-on-surface-variant" />
+              <input
+                className={`${inputClass} pl-11`}
+                placeholder={t("portal_search_requests")}
+                value={keyword}
+                onChange={(e) => setKeyword(e.target.value)}
+              />
+            </div>
+            <FilterChips items={statusItems} value={status} onChange={setStatus} />
+          </div>
+        ) : null}
       </div>
 
-      <div className="flex flex-col gap-2.5">
-        <div className="relative">
-          <Icon name="search" className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[18px] text-on-surface-variant" />
-          <input
-            className={`${inputClass} pl-11`}
-            placeholder={t("portal_search_requests")}
-            value={keyword}
-            onChange={(e) => setKeyword(e.target.value)}
-          />
-        </div>
-        <FilterChips items={statusItems} value={status} onChange={setStatus} />
-      </div>
-
-      {hotlinePhone ? (
-        <GlassCard className="flex items-center gap-4 p-4">
-          <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl border border-primary/25 bg-gradient-to-br from-primary/25 to-primary/5">
-            <Icon name="support_agent" className="text-primary" />
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-sm font-bold text-on-surface">{t("portal_emergency_title")}</p>
-            <a href={`tel:${hotlinePhone}`} className="mt-1 inline-flex items-center gap-1 text-xs font-bold text-primary">
-              {t("portal_call_duty_desk", { phone: hotlinePhone })}
-              <Icon name="arrow_forward" className="text-[14px]" />
-            </a>
-          </div>
-        </GlassCard>
-      ) : null}
-
-      <section className="flex flex-col gap-3.5">
+      <section className="flex flex-col gap-3">
         {current.loading && !current.data ? <LoadingBlock /> : null}
         {!current.loading && list.length === 0 ? (
           <EmptyState
@@ -135,7 +118,6 @@ function ServicesContent() {
               key={item.id}
               item={item}
               categoryLabel={optionLabel("maintenance_category", dictOption(dict, "maintenance_category", item.category))}
-              priorityLabel={optionLabel("maintenance_priority", dictOption(dict, "maintenance_priority", item.priority))}
             />
           ) : (
             <ComplaintCard
@@ -172,13 +154,4 @@ function ServicesContent() {
 
 function dictOption(dict, slug, value) {
   return dict.optionsOf(slug).find((o) => o.value === value) ?? { value, label: value ?? "" };
-}
-
-function SummaryTile({ value, label, tone = "text-on-surface" }) {
-  return (
-    <GlassCard className="p-3">
-      <p className={`text-xl font-extrabold ${tone}`}>{value}</p>
-      <p className="mt-0.5 text-[10px] font-bold uppercase leading-tight tracking-wider text-on-surface-variant">{label}</p>
-    </GlassCard>
-  );
 }
