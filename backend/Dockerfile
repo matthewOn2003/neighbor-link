@@ -15,7 +15,5 @@ WORKDIR /app
 COPY --from=build /out/server ./server
 COPY migrations ./migrations
 COPY seeds ./seeds
-# godotenv reads .env at startup; variables set on the platform take precedence over it.
-COPY .env ./.env
 EXPOSE 10000
 CMD ["./server"]
