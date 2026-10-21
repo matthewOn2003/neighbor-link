@@ -300,3 +300,53 @@ h1 {
     scrollbar-color: var(--scrollbar-thumb) transparent;
   }
 }
+/* ---------- Motion ---------- */
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(-14px) scale(0.96); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes toast-out {
+  to { opacity: 0; transform: translateY(-8px) scale(0.98); }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.94); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes sheet-up {
+  from { transform: translateY(100%); }
+  to { transform: none; }
+}
+@keyframes bar-grow {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-6px); }
+  40%, 80% { transform: translateX(6px); }
+}
+
+.animate-toast-in { animation: toast-in 280ms cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.animate-toast-out { animation: toast-out 200ms ease-in both; }
+.animate-fade-in { animation: fade-in 320ms ease-out both; }
+.animate-fade-up { animation: fade-up 480ms cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.animate-scale-in { animation: scale-in 220ms cubic-bezier(0.2, 0.8, 0.2, 1) both; transform-origin: top right; }
+.animate-sheet-up { animation: sheet-up 380ms cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.animate-bar-grow { transform-origin: left center; animation: bar-grow 900ms cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.animate-shake { animation: shake 420ms ease-in-out; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 1ms !important;
+    animation-delay: 0ms !important;
+    transition-duration: 1ms !important;
+  }
+}
