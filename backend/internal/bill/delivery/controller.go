@@ -152,13 +152,27 @@ func (c *BillController) Void(w http.ResponseWriter, r *http.Request) {
 	}
 	response.WriteSuccess(w, 200, map[string]string{"message": "bill voided"})
 }
+// ActiveContracts returns a paginated {list, pagination} when the request sends current_page;
+// otherwise it returns the plain array that bills/new relies on.
 func (c *BillController) ActiveContracts(w http.ResponseWriter, r *http.Request) {
-	rows, err := c.uc.ActiveContracts()
+	var q listRequest
+	paged := json.NewDecoder(r.Body).Decode(&q) == nil && q.CurrentPage > 0
+	if !paged {
+		rows, _, err := c.uc.ActiveContracts(0, 0)
+		if err != nil {
+			response.WriteError(w, 500, "INTERNAL_ERROR", "failed to load active contracts")
+			return
+		}
+		response.WriteSuccess(w, 200, rows)
+		return
+	}
+	p, n := httpx.NormalizePagination(q.CurrentPage, q.PerPage)
+	rows, total, err := c.uc.ActiveContracts(p, n)
 	if err != nil {
 		response.WriteError(w, 500, "INTERNAL_ERROR", "failed to load active contracts")
 		return
 	}
-	response.WriteSuccess(w, 200, rows)
+	response.WriteSuccess(w, 200, response.NewListData(rows, p, n, total))
 }
 
 type updateRequest struct {
