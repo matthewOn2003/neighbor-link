@@ -3,9 +3,8 @@
 import { Link } from "@/i18n/navigation";
 import { useLocale } from "@/i18n";
 import { Icon } from "@/components/ui/Icon";
-import { money } from "@/components/payments/shared";
 import { useRequest } from "@/hooks/useRequest";
-import { ordinal } from "@/components/portal/format";
+import { ordinal, wholeMoney } from "@/components/portal/format";
 import { BILL_LABEL_KEY, MAINTENANCE_ICON, REQUEST_STAGE, REQUEST_STAGE_TOTAL, useDictLabel } from "@/components/portal/status";
 import { EmptyState, GlassCard, IconTile, LoadingBlock, Pill, ProgressBar } from "@/components/portal/primitives";
 
@@ -39,7 +38,7 @@ export default function DashboardPage() {
 
         <div>
           <p className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">{t("outstanding")}</p>
-          <p className="mt-1 text-3xl font-extrabold tracking-tight text-on-surface">{money(data.outstanding_balance, locale)}</p>
+          <p className="mt-1 text-3xl font-extrabold tracking-tight text-on-surface">{wholeMoney(data.outstanding_balance, locale)}</p>
           <div className="mt-2">
             {data.outstanding_balance > 0 ? (
               <Pill tone="amber">{t("portal_balance_due")}</Pill>
@@ -51,7 +50,7 @@ export default function DashboardPage() {
 
         {data.monthly_rent || billingDay ? (
           <p className="flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-white/[0.08] pt-3 text-xs text-on-surface-variant">
-            {data.monthly_rent ? <span>{t("monthly_rent")}: {money(data.monthly_rent, locale)}</span> : null}
+            {data.monthly_rent ? <span>{t("monthly_rent")}: {wholeMoney(data.monthly_rent, locale)}</span> : null}
             {billingDay ? (
               <span className="flex items-center gap-1">
                 <Icon name="event_repeat" className="text-[14px]" />
@@ -87,7 +86,7 @@ export default function DashboardPage() {
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-bold text-on-surface">{t("portal_notice_cycle", { period: bill.billing_period })}</p>
                   <p className="text-xs text-on-surface-variant">
-                    {money(bill.outstanding, locale)} · {t(BILL_LABEL_KEY[bill.display_status] ?? "bill_display_overdue")}
+                    {wholeMoney(bill.outstanding, locale)} · {t(BILL_LABEL_KEY[bill.display_status] ?? "bill_display_overdue")}
                   </p>
                 </div>
                 <Icon name="chevron_right" className="text-[18px] text-on-surface-variant" />

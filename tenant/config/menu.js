@@ -5,7 +5,6 @@ export const menu = [
     labelKey: "portal_nav_home",
     href: "/dashboard",
     icon: "home",
-    subtitleKey: "portal_header_home",
     paths: ["/dashboard"],
   },
   {
@@ -13,7 +12,6 @@ export const menu = [
     labelKey: "portal_nav_billing",
     href: "/billing",
     icon: "receipt_long",
-    subtitleKey: "portal_header_billing",
     paths: ["/billing"],
   },
   {
@@ -21,7 +19,6 @@ export const menu = [
     labelKey: "portal_nav_services",
     href: "/services",
     icon: "build",
-    subtitleKey: "portal_header_services",
     paths: ["/services", "/maintenance", "/complaints"],
   },
   {
@@ -29,7 +26,6 @@ export const menu = [
     labelKey: "portal_nav_my_home",
     href: "/my-home",
     icon: "apartment",
-    subtitleKey: "portal_header_my_home",
     paths: ["/my-home"],
   },
 ];

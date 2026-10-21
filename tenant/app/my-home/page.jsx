@@ -12,7 +12,8 @@ import { useDropdown } from "@/hooks/useDropdown";
 import { useLogoutMutation } from "@/store/authApi";
 import { formatBytes, formatDate, ordinal } from "@/components/portal/format";
 import { useOptionLabel } from "@/components/portal/status";
-import { EmptyState, GhostButton, GlassCard, IconTile, LoadingBlock, Pill, Sheet } from "@/components/portal/primitives";
+import { Disclosure, EmptyState, GhostButton, GlassCard, IconTile, LoadingBlock, Pill, Sheet } from "@/components/portal/primitives";
+import LangSelect from "@/components/LangSelect";
 
 export default function MyHomePage() {
   const { t, locale } = useLocale();
@@ -53,7 +54,7 @@ export default function MyHomePage() {
   const propertyType = property ? optionLabel("property_type", dict.optionsOf("property_type").find((o) => o.value === property.property_type) ?? { value: property.property_type, label: property.property_type }) : "";
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-5">
       {property ? (
         <section className="relative h-56 w-full overflow-hidden rounded-2xl border border-white/10">
           {property.cover_image ? (
@@ -94,9 +95,53 @@ export default function MyHomePage() {
         </GlassCard>
       )}
 
-      {property && wifi.data ? (
+      {property ? (
         <section className="flex flex-col gap-2.5">
-          <SectionTitle icon="wifi" title={t("portal_wifi_title")} trailing={property.wifi_speed} />
+          <SectionTitle icon="concierge" title={t("portal_utilities_title")} />
+          <GlassCard className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="grid h-11 w-11 place-items-center rounded-xl border border-primary/30 bg-gradient-to-tr from-secondary/25 to-primary/25 text-sm font-extrabold text-on-surface">
+                {(property.ops_desk_name || "NL").slice(0, 2).toUpperCase()}
+              </div>
+              <div className="min-w-0">
+                <p className="truncate text-sm font-bold text-on-surface">{property.ops_desk_name || t("portal_ops_desk")}</p>
+                <p className="text-[11px] text-on-surface-variant">{property.ops_desk_hours || t("portal_ops_desk_description")}</p>
+              </div>
+            </div>
+            {property.ops_desk_phone ? (
+              <div className="mt-4 grid grid-cols-2 gap-2.5">
+                <a href={`sms:${property.ops_desk_phone}`} className="flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] py-2.5 text-xs font-bold text-on-surface hover:bg-white/[0.08]">
+                  <Icon name="chat" className="text-[16px]" />
+                  {t("portal_message_ops")}
+                </a>
+                <a href={`tel:${property.ops_desk_phone}`} className="flex items-center justify-center gap-2 rounded-xl bg-primary-container py-2.5 text-xs font-bold text-white">
+                  <Icon name="call" className="text-[16px]" />
+                  {t("portal_emergency_call")}
+                </a>
+              </div>
+            ) : null}
+          </GlassCard>
+        </section>
+      ) : null}
+
+      <Disclosure icon="campaign" title={t("portal_announcements_title")} trailing={announcements.data?.list?.length ? String(announcements.data.list.length) : undefined}>
+        {announcements.data?.list?.length ? (
+          announcements.data.list.map((item) => (
+            <GlassCard key={item.id} className="flex flex-col gap-1 p-4">
+              <p className="text-sm font-bold text-on-surface">{item.title}</p>
+              {item.body ? <p className="line-clamp-2 text-xs text-on-surface-variant">{item.body}</p> : null}
+              <p className="mt-0.5 text-[10px] text-on-surface-variant/70">{formatDate(item.published_at, locale)}</p>
+            </GlassCard>
+          ))
+        ) : (
+          <GlassCard className="p-2">
+            <EmptyState icon="campaign" title={t("portal_no_announcements")} />
+          </GlassCard>
+        )}
+      </Disclosure>
+
+      {property && wifi.data ? (
+        <Disclosure icon="wifi" title={t("portal_wifi_title")} trailing={property.wifi_speed}>
           <GlassCard className="relative overflow-hidden p-4">
             <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-primary/10 blur-2xl" />
             <div className="relative grid grid-cols-2 gap-3">
@@ -114,12 +159,11 @@ export default function MyHomePage() {
               </GhostButton>
             </div>
           </GlassCard>
-        </section>
+        </Disclosure>
       ) : null}
 
       {contract ? (
-        <section className="flex flex-col gap-2.5">
-          <SectionTitle icon="description" title={t("portal_lease_title")} trailing={contract.status === "active" ? t("portal_active_contract") : t(`contract_status_${contract.status}`)} />
+        <Disclosure icon="description" title={t("portal_lease_title")} trailing={contract.status === "active" ? t("portal_active_contract") : t(`contract_status_${contract.status}`)}>
           <GlassCard className="flex flex-col gap-2.5 p-4">
             <div className="grid grid-cols-2 gap-2.5">
               <LeaseCell label={t("monthly_rent")} value={money(contract.monthly_rent, locale)} tone="text-primary" icon="payments" />
@@ -141,86 +185,45 @@ export default function MyHomePage() {
               </div>
             ) : null}
           </GlassCard>
-        </section>
+
+          {contract.agreement ? (
+            <GlassCard className="flex items-center gap-3 p-4">
+              <IconTile icon="picture_as_pdf" tone="neutral" size="sm" />
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-bold text-on-surface">{contract.agreement.name}</p>
+                <p className="truncate text-[11px] text-on-surface-variant">
+                  {[
+                    contract.agreement.signed_at && t("portal_signed_on", { date: formatDate(contract.agreement.signed_at, locale) }),
+                    formatBytes(contract.agreement.size_bytes),
+                  ]
+                    .filter(Boolean)
+                    .join(" • ")}
+                </p>
+              </div>
+              {contract.agreement.file_url ? (
+                <a
+                  href={contract.agreement.file_url}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label={t("portal_download_agreement")}
+                  className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-white/10 bg-surface-container-high text-on-surface hover:bg-white/[0.08]"
+                >
+                  <Icon name="download" className="text-[18px]" />
+                </a>
+              ) : (
+                <span className="shrink-0 text-[11px] text-on-surface-variant">{t("portal_agreement_pending")}</span>
+              )}
+            </GlassCard>
+          ) : null}
+        </Disclosure>
       ) : null}
 
       <section className="flex flex-col gap-2.5">
-        <SectionTitle icon="campaign" title={t("portal_announcements_title")} />
-        {announcements.data?.list?.length ? (
-          announcements.data.list.map((item) => (
-            <GlassCard key={item.id} className="flex flex-col gap-1 p-4">
-              <p className="text-sm font-bold text-on-surface">{item.title}</p>
-              {item.body ? <p className="line-clamp-2 text-xs text-on-surface-variant">{item.body}</p> : null}
-              <p className="mt-0.5 text-[10px] text-on-surface-variant/70">{formatDate(item.published_at, locale)}</p>
-            </GlassCard>
-          ))
-        ) : (
-          <GlassCard className="p-2">
-            <EmptyState icon="campaign" title={t("portal_no_announcements")} />
-          </GlassCard>
-        )}
-      </section>
-
-      <section className="flex flex-col gap-2.5">
-        <SectionTitle icon="concierge" title={t("portal_utilities_title")} />
-        {contract?.agreement ? (
-          <GlassCard className="flex items-center gap-3 p-4">
-            <IconTile icon="picture_as_pdf" tone="rose" />
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-bold text-on-surface">{contract.agreement.name}</p>
-              <p className="truncate text-[11px] text-on-surface-variant">
-                {[
-                  contract.agreement.signed_at && t("portal_signed_on", { date: formatDate(contract.agreement.signed_at, locale) }),
-                  formatBytes(contract.agreement.size_bytes),
-                  t("portal_legal_document"),
-                ]
-                  .filter(Boolean)
-                  .join(" • ")}
-              </p>
-            </div>
-            {contract.agreement.file_url ? (
-              <a
-                href={contract.agreement.file_url}
-                target="_blank"
-                rel="noreferrer"
-                aria-label={t("portal_download_agreement")}
-                className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-white/10 bg-surface-container-high text-on-surface hover:bg-white/[0.08]"
-              >
-                <Icon name="download" className="text-[18px]" />
-              </a>
-            ) : (
-              <span className="shrink-0 text-[11px] text-on-surface-variant">{t("portal_agreement_pending")}</span>
-            )}
-          </GlassCard>
-        ) : null}
-
-        {property ? (
-          <GlassCard className="p-4">
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-3">
-                <div className="grid h-11 w-11 place-items-center rounded-xl border border-primary/30 bg-gradient-to-tr from-secondary/25 to-primary/25 text-sm font-extrabold text-on-surface">
-                  {(property.ops_desk_name || "NL").slice(0, 2).toUpperCase()}
-                </div>
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-bold text-on-surface">{property.ops_desk_name || t("portal_ops_desk")}</p>
-                  <p className="text-[11px] text-on-surface-variant">{property.ops_desk_hours || t("portal_ops_desk_description")}</p>
-                </div>
-              </div>
-            </div>
-            {property.ops_desk_phone ? (
-              <div className="mt-4 grid grid-cols-2 gap-2.5">
-                <a href={`sms:${property.ops_desk_phone}`} className="flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] py-2.5 text-xs font-bold text-on-surface hover:bg-white/[0.08]">
-                  <Icon name="chat" className="text-[16px]" />
-                  {t("portal_message_ops")}
-                </a>
-                <a href={`tel:${property.ops_desk_phone}`} className="flex items-center justify-center gap-2 rounded-xl bg-primary-container py-2.5 text-xs font-bold text-white">
-                  <Icon name="call" className="text-[16px]" />
-                  {t("portal_emergency_call")}
-                </a>
-              </div>
-            ) : null}
-          </GlassCard>
-        ) : null}
+        <SectionTitle icon="settings" title={t("portal_settings")} />
+        <GlassCard className="flex items-center justify-between gap-3 p-4">
+          <span className="text-sm font-semibold text-on-surface">{t("portal_language")}</span>
+          <LangSelect />
+        </GlassCard>
       </section>
 
       <button

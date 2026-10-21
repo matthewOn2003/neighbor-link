@@ -20,6 +20,8 @@ type notificationItem struct {
 
 type notificationSummary struct {
 	UnreadCount int64 `json:"unread_count"`
+	// ActionCount is the unread notifications that ask the tenant to do something. Announcements are not counted.
+	ActionCount int64 `json:"action_count"`
 }
 
 type notificationReadRequest struct {
@@ -27,10 +29,14 @@ type notificationReadRequest struct {
 	All bool `json:"all"`
 }
 
-func (c *Controller) unreadCount(tenantID uint) (int64, error) {
-	var n int64
-	err := c.db.Raw(`SELECT COUNT(*) FROM tenant_notifications WHERE tenant_id = ? AND read_at IS NULL`, tenantID).Scan(&n).Error
-	return n, err
+func (c *Controller) notificationSummaryOf(tenantID uint) (notificationSummary, error) {
+	var s notificationSummary
+	err := c.db.Raw(`
+		SELECT COUNT(*) AS unread_count,
+		       COALESCE(SUM(CASE WHEN kind <> 'announcement' THEN 1 ELSE 0 END), 0) AS action_count
+		FROM tenant_notifications
+		WHERE tenant_id = ? AND read_at IS NULL`, tenantID).Scan(&s).Error
+	return s, err
 }
 
 // NotificationList returns the tenant's notifications, newest first, with the unread count in the summary.
@@ -61,12 +67,12 @@ func (c *Controller) NotificationList(w http.ResponseWriter, r *http.Request) {
 		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to load notifications")
 		return
 	}
-	unread, err := c.unreadCount(tenantID)
+	summary, err := c.notificationSummaryOf(tenantID)
 	if err != nil {
 		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to load notifications")
 		return
 	}
-	list := response.NewListData(rows, page, perPage, total).WithSummary(notificationSummary{UnreadCount: unread})
+	list := response.NewListData(rows, page, perPage, total).WithSummary(summary)
 	response.WriteSuccess(w, http.StatusOK, list)
 }
 
@@ -93,10 +99,10 @@ func (c *Controller) NotificationRead(w http.ResponseWriter, r *http.Request) {
 		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to update notifications")
 		return
 	}
-	unread, err := c.unreadCount(tenantID)
+	summary, err := c.notificationSummaryOf(tenantID)
 	if err != nil {
 		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to update notifications")
 		return
 	}
-	response.WriteSuccess(w, http.StatusOK, notificationSummary{UnreadCount: unread})
+	response.WriteSuccess(w, http.StatusOK, summary)
 }

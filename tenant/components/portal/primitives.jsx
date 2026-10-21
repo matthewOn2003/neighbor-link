@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Icon } from "@/components/ui/Icon";
 import { useLocale } from "@/i18n";
 
@@ -224,5 +224,32 @@ export function GhostButton({ children, className = "", ...rest }) {
     >
       {children}
     </button>
+  );
+}
+
+/** A section that starts collapsed (or open) and shows a one-line summary while closed. */
+export function Disclosure({ icon, title, trailing, defaultOpen = false, children }) {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <section className="flex flex-col gap-2.5">
+      <button
+        type="button"
+        aria-expanded={open}
+        onClick={() => setOpen((value) => !value)}
+        className="flex w-full items-center justify-between gap-3 rounded-2xl border border-white/[0.08] bg-surface-container-low px-4 py-3 text-left transition-colors hover:bg-white/[0.04]"
+      >
+        <span className="flex min-w-0 items-center gap-2.5">
+          <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg border border-primary/20 bg-primary/20">
+            <Icon name={icon} className="text-[15px] text-primary" />
+          </span>
+          <span className="truncate text-sm font-bold text-on-surface">{title}</span>
+        </span>
+        <span className="flex shrink-0 items-center gap-1.5">
+          {trailing ? <span className="max-w-[9rem] truncate text-[11px] font-bold text-on-surface-variant">{trailing}</span> : null}
+          <Icon name={open ? "expand_less" : "expand_more"} className="text-[20px] text-on-surface-variant" />
+        </span>
+      </button>
+      {open ? <div className="flex flex-col gap-2.5">{children}</div> : null}
+    </section>
   );
 }

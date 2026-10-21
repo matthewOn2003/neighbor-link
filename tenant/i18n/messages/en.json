@@ -512,10 +512,6 @@
   "portal_nav_billing": "Billing",
   "portal_nav_services": "Services",
   "portal_nav_my_home": "My Home",
-  "portal_header_home": "Resident Luxury Portal",
-  "portal_header_billing": "Billing & Proofs",
-  "portal_header_services": "Services & Repairs",
-  "portal_header_my_home": "My Home & Lease",
   "portal_hello": "Hello, {name}",
   "portal_primary_residence": "Primary residence",
   "portal_copy_key": "Copy key",
@@ -666,5 +662,7 @@
   "portal_needs_attention": "Needs your attention",
   "portal_nothing_pending": "Nothing needs your attention right now.",
   "portal_announcements_title": "Building announcements",
-  "portal_no_announcements": "No announcements yet."
+  "portal_no_announcements": "No announcements yet.",
+  "portal_settings": "Settings",
+  "portal_language": "Language"
 }

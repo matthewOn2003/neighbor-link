@@ -512,10 +512,6 @@
   "portal_nav_billing": "账单",
   "portal_nav_services": "服务",
   "portal_nav_my_home": "我的家",
-  "portal_header_home": "住户尊享门户",
-  "portal_header_billing": "账单与凭证",
-  "portal_header_services": "服务与报修",
-  "portal_header_my_home": "我的家与租约",
   "portal_hello": "您好，{name}",
   "portal_primary_residence": "主要住所",
   "portal_copy_key": "复制密码",
@@ -666,5 +662,7 @@
   "portal_needs_attention": "需要你处理",
   "portal_nothing_pending": "目前没有需要你处理的事项。",
   "portal_announcements_title": "物业公告",
-  "portal_no_announcements": "暂无公告。"
+  "portal_no_announcements": "暂无公告。",
+  "portal_settings": "设置",
+  "portal_language": "语言"
 }
