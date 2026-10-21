@@ -664,5 +664,8 @@
   "portal_announcements_title": "Building announcements",
   "portal_no_announcements": "No announcements yet.",
   "portal_settings": "Settings",
-  "portal_language": "Language"
+  "portal_language": "Language",
+  "portal_login_title": "Welcome home",
+  "portal_login_subtitle": "Sign in to manage your residence, bills and requests.",
+  "portal_login_help": "Trouble signing in? Contact the rental office."
 }
