@@ -10,11 +10,11 @@
 **/build/
 **/dist/
 
-# Environment variables (TODO: open back when need publish to real environment)
-# .env
-# .env.*
-# !.env.example
-# !.env.*.example
+# Environment variables
+.env
+.env.*
+!.env.example
+!.env.*.example
 
 # Local databases and runtime data
 *.db
