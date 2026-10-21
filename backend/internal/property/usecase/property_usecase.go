@@ -1,8 +1,41 @@
 package usecase
 
 import (
+	"errors"
+	"strings"
+	"time"
+
 	"backend/internal/property/repository"
+
+	"gorm.io/gorm"
 )
+
+var (
+	ErrUnitNotFound        = errors.New("unit not found")
+	ErrUnitInvalid         = errors.New("invalid unit")
+	ErrUnitFloorMismatch   = errors.New("floor does not belong to block")
+	ErrUnitCodeExists      = errors.New("unit code already exists in block")
+	ErrUnitStatusInvalid   = errors.New("invalid unit status")
+	ErrUnitHasActiveTenant = errors.New("unit has an active tenant")
+)
+
+// UnitCreate is the input for creating a unit.
+type UnitCreate struct {
+	BlockID  uint
+	FloorID  uint
+	Code     string
+	Bedrooms int
+	SizeSqft int
+	Status   string
+}
+
+// UnitUpdate holds optional changes. A nil field is left unchanged.
+type UnitUpdate struct {
+	Code     *string
+	Bedrooms *int
+	SizeSqft *int
+	Status   *string
+}
 
 type PropertyUsecase struct {
 	repo *repository.SQLiteRepository
@@ -75,4 +108,120 @@ func (uc *PropertyUsecase) SeedProperties(properties []repository.Property) erro
 		}
 	}
 	return nil
+}
+
+// CreateUnit validates the unit against its block and floor, then stores it. An empty status defaults to vacant.
+func (uc *PropertyUsecase) CreateUnit(in UnitCreate) (*repository.Unit, error) {
+	code := strings.TrimSpace(in.Code)
+	if in.BlockID == 0 || in.FloorID == 0 || code == "" || in.Bedrooms < 0 || in.SizeSqft < 0 {
+		return nil, ErrUnitInvalid
+	}
+	status := strings.TrimSpace(in.Status)
+	if status == "" {
+		status = "vacant"
+	}
+	ok, err := uc.repo.IsUnitStatus(status)
+	if err != nil {
+		return nil, err
+	}
+	if !ok {
+		return nil, ErrUnitStatusInvalid
+	}
+	inBlock, err := uc.repo.FloorBelongsToBlock(in.FloorID, in.BlockID)
+	if err != nil {
+		return nil, err
+	}
+	if !inBlock {
+		return nil, ErrUnitFloorMismatch
+	}
+	taken, err := uc.repo.UnitCodeTaken(in.BlockID, code, 0)
+	if err != nil {
+		return nil, err
+	}
+	if taken {
+		return nil, ErrUnitCodeExists
+	}
+	unit := &repository.Unit{
+		BlockID:  in.BlockID,
+		FloorID:  in.FloorID,
+		Code:     code,
+		Bedrooms: in.Bedrooms,
+		SizeSqft: in.SizeSqft,
+		Status:   status,
+	}
+	if err := uc.repo.CreateUnit(unit); err != nil {
+		if strings.Contains(strings.ToLower(err.Error()), "unique constraint") {
+			return nil, ErrUnitCodeExists
+		}
+		return nil, err
+	}
+	return unit, nil
+}
+
+// UpdateUnit applies the provided fields. Setting status to vacant is rejected while an active tenant is assigned.
+func (uc *PropertyUsecase) UpdateUnit(id uint, in UnitUpdate) (*repository.Unit, error) {
+	existing, err := uc.repo.FindUnit(id)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, ErrUnitNotFound
+		}
+		return nil, err
+	}
+	updates := map[string]any{}
+	if in.Code != nil {
+		code := strings.TrimSpace(*in.Code)
+		if code == "" {
+			return nil, ErrUnitInvalid
+		}
+		if code != existing.Code {
+			taken, err := uc.repo.UnitCodeTaken(existing.BlockID, code, id)
+			if err != nil {
+				return nil, err
+			}
+			if taken {
+				return nil, ErrUnitCodeExists
+			}
+		}
+		updates["code"] = code
+	}
+	if in.Bedrooms != nil {
+		if *in.Bedrooms < 0 {
+			return nil, ErrUnitInvalid
+		}
+		updates["bedrooms"] = *in.Bedrooms
+	}
+	if in.SizeSqft != nil {
+		if *in.SizeSqft < 0 {
+			return nil, ErrUnitInvalid
+		}
+		updates["size_sqft"] = *in.SizeSqft
+	}
+	if in.Status != nil {
+		status := strings.TrimSpace(*in.Status)
+		ok, err := uc.repo.IsUnitStatus(status)
+		if err != nil {
+			return nil, err
+		}
+		if !ok {
+			return nil, ErrUnitStatusInvalid
+		}
+		if status == "vacant" {
+			hasTenant, err := uc.repo.HasActiveTenant(id)
+			if err != nil {
+				return nil, err
+			}
+			if hasTenant {
+				return nil, ErrUnitHasActiveTenant
+			}
+		}
+		updates["status"] = status
+	}
+	updates["updated_at"] = time.Now()
+	if err := uc.repo.UpdateUnit(id, updates); err != nil {
+		if strings.Contains(strings.ToLower(err.Error()), "unique constraint") {
+			return nil, ErrUnitCodeExists
+		}
+		return nil, err
+	}
+	return uc.repo.FindUnit(id)
 }

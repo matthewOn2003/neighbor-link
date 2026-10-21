@@ -62,3 +62,11 @@ SELECT c.id, c.tenant_id,
        'Demo bill data', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
 FROM contracts c CROSS JOIN months
 WHERE c.status = 'active';
+
+-- Payment records for demo bills that already carry a paid amount (idempotent; runs on every development start).
+INSERT INTO payments (bill_id, tenant_id, amount, method, reference, paid_at, created_at)
+SELECT b.id, b.tenant_id, b.amount_paid, COALESCE(b.payment_method, ''), COALESCE(b.payment_reference, ''),
+       COALESCE(b.paid_at, b.issued_at, date('now')), CURRENT_TIMESTAMP
+FROM bills b
+WHERE b.amount_paid > 0
+  AND NOT EXISTS (SELECT 1 FROM payments p WHERE p.bill_id = b.id);
