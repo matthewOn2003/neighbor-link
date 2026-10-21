@@ -8,7 +8,65 @@
 body {
   background: var(--scene);
   color: var(--foreground);
-  font-family: Inter, sans-serif;
+  font-family: "Plus Jakarta Sans", sans-serif;
+  overscroll-behavior: none;
+}
+
+.pb-safe {
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
+}
+
+.pt-safe {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Stitch glass surfaces used across the tenant portal */
+.glass-panel {
+  background: linear-gradient(135deg, rgba(32, 33, 49, 0.72) 0%, rgba(19, 20, 31, 0.85) 100%);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(208, 188, 255, 0.12);
+}
+
+.luxury-glass {
+  background: rgba(26, 27, 38, 0.72);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.luxury-violet-glow {
+  box-shadow: 0 0 35px -6px rgba(160, 120, 255, 0.35);
+}
+
+.gold-glow {
+  box-shadow: 0 0 25px -4px rgba(233, 195, 73, 0.3);
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(200%);
+  }
+}
+
+.shimmer-effect::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.18), transparent);
+  animation: shimmer 3.5s infinite;
 }
 
 .content-container {

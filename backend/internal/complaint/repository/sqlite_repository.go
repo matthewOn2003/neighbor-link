@@ -36,6 +36,7 @@ type ListItem struct {
 	Category     string     `json:"category"`
 	Status       string     `json:"status"`
 	Assignee     string     `json:"assignee"`
+	Description  string     `json:"description"`
 	TenantName   *string    `json:"tenant_name"`
 	PropertyName *string    `json:"property_name"`
 	UnitCode     *string    `json:"unit_code"`
@@ -48,7 +49,6 @@ type Detail struct {
 	ListItem
 	PropertyID      *uint  `json:"property_id"`
 	UnitID          *uint  `json:"unit_id"`
-	Description     string `json:"description"`
 	ResolutionNotes string `json:"resolution_notes"`
 }
 
@@ -90,7 +90,7 @@ func (r *SQLiteRepository) filtered(f Filter) *gorm.DB {
 }
 
 const listSelect = `complaints.id, complaints.tenant_id, complaints.title, complaints.category, complaints.status,
-	complaints.assignee, tenants.name AS tenant_name, properties.name AS property_name, units.code AS unit_code,
+	complaints.assignee, complaints.description, tenants.name AS tenant_name, properties.name AS property_name, units.code AS unit_code,
 	complaints.created_at, complaints.updated_at, complaints.resolved_at`
 
 func (r *SQLiteRepository) List(f Filter, page, perPage int) ([]ListItem, int64, error) {
@@ -115,7 +115,7 @@ func (r *SQLiteRepository) FindDetail(id uint) (*Detail, error) {
 		Joins("LEFT JOIN tenants ON tenants.id = complaints.tenant_id").
 		Joins("LEFT JOIN properties ON properties.id = complaints.property_id").
 		Joins("LEFT JOIN units ON units.id = complaints.unit_id").
-		Select(listSelect+`, complaints.property_id, complaints.unit_id, complaints.description, complaints.resolution_notes`).
+		Select(listSelect+`, complaints.property_id, complaints.unit_id, complaints.resolution_notes`).
 		Where("complaints.id = ?", id).
 		Take(&d).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {

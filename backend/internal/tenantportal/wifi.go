@@ -7,23 +7,24 @@ import (
 )
 
 type wifiResponse struct {
-	PropertyName string `json:"property_name" gorm:"column:property_name"`
-	WifiSSID     string `json:"wifi_ssid" gorm:"column:wifi_ssid"`
-	WifiPassword string `json:"wifi_password" gorm:"column:wifi_password"`
+	PropertyName string `json:"property_name"`
+	WifiSSID     string `json:"wifi_ssid"`
+	WifiPassword string `json:"wifi_password"`
+	WifiSpeed    string `json:"wifi_speed"`
 }
 
 // WiFi returns the Wi-Fi credentials of the property the tenant lives in.
 func (c *Controller) WiFi(w http.ResponseWriter, r *http.Request) {
-	tenantID, err := c.currentTenantID(r)
-	if err != nil {
-		response.WriteError(w, http.StatusNotFound, "TENANT_NOT_LINKED", "no tenant profile is linked to this account")
+	tenantID, ok := c.tenantOr404(w, r)
+	if !ok {
 		return
 	}
 	var out wifiResponse
 	res := c.db.Raw(`
 		SELECT COALESCE(p.name, '') AS property_name,
 		       COALESCE(p.wifi_ssid, '') AS wifi_ssid,
-		       COALESCE(p.wifi_password, '') AS wifi_password
+		       COALESCE(p.wifi_password, '') AS wifi_password,
+		       p.wifi_speed AS wifi_speed
 		FROM tenants t
 		JOIN properties p ON p.id = t.property_id
 		WHERE t.id = ?`, tenantID).Scan(&out)

@@ -1,19 +1,25 @@
 :root {
-  --scene: #f8fafc;
-  --scene-content: #0f172a;
-  --subtle: #64748b;
-  --primary: #4f46e5;
-  --primary-dark: #3525cd;
+  /* Stitch dark palette (tenant-design). Shared ui components read these variables. */
+  --scene: #0d0e17;
+  --scene-content: #f3f2fa;
+  --subtle: #a7a0b5;
+  --primary: #d0bcff;
+  --primary-dark: #7c3aed;
   --primary-content: #ffffff;
-  --accent: #ffffff;
-  --accent-content: #0f172a;
-  --highlight: #b45309;
-  --line: #cbd5e1;
-  --success: #28a745;
-  --danger: #be123c;
-  --warning: #b45309;
-  --info: #2563eb;
-  --error: #be123c;
+  --accent: #161722;
+  --accent-content: #f3f2fa;
+  --highlight: #e9c349;
+  --line: #2f303e;
+  --success: #34d399;
+  --danger: #ffb4ab;
+  --warning: #e9c349;
+  --info: #67e8f9;
+  --error: #ffb4ab;
+  --foreground: #f3f2fa;
+  --panel-background: #161722;
+  --panel-border: rgba(255, 255, 255, 0.08);
+  --panel-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.4);
+  --control-background: #1c1d29;
 
   /* Layout */
   --gutter: 1rem;
@@ -39,7 +45,6 @@
   /* Motion and focus */
   --transition-duration: 160ms;
   --focus-ring-width: 3px;
-
 }
 
 /* sm breakpoint (Tailwind default: 40rem) */

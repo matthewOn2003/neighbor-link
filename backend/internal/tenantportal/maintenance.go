@@ -13,7 +13,7 @@ import (
 )
 
 // tenantPriorities are the priorities a tenant may choose. Urgent is reserved for admins.
-var tenantPriorities = map[string]bool{"normal": true, "high": true}
+var tenantPriorities = map[string]bool{"low": true, "normal": true, "high": true}
 
 type maintenanceCreateRequest struct {
 	Title       string `json:"title"`
@@ -61,7 +61,7 @@ func (c *Controller) MaintenanceCreate(w http.ResponseWriter, r *http.Request) {
 		priority = "normal"
 	}
 	if !tenantPriorities[priority] {
-		response.WriteError(w, http.StatusBadRequest, "INVALID_PRIORITY", "priority must be normal or high")
+		response.WriteError(w, http.StatusBadRequest, "INVALID_PRIORITY", "priority must be low, normal or high")
 		return
 	}
 	unitID, found, err := c.tenantUnitID(tenantID)
@@ -115,7 +115,12 @@ func (c *Controller) MaintenanceList(w http.ResponseWriter, r *http.Request) {
 		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to list requests")
 		return
 	}
-	response.WriteSuccess(w, http.StatusOK, response.NewListData(rows, page, perPage, total))
+	summary, err := c.maintenanceSummary(tenantID)
+	if err != nil {
+		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to summarise requests")
+		return
+	}
+	response.WriteSuccess(w, http.StatusOK, response.NewListData(rows, page, perPage, total).WithSummary(summary))
 }
 
 // MaintenanceDetail returns one repair request. Requests belonging to other tenants report 404.

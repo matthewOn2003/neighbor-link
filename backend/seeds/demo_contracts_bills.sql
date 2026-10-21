@@ -187,3 +187,7 @@ SELECT t.id, t.property_id, t.unit_id, k.category, k.title, k.description, k.sta
 FROM tenants t JOIN auth_users u ON u.id = t.user_id CROSS JOIN k
 WHERE u.username = 'tenant' AND u.role = 'tenant' AND t.unit_id IS NOT NULL
   AND NOT EXISTS (SELECT 1 FROM complaints c WHERE c.tenant_id = t.id AND c.title = k.title);
+
+-- Demo tenancy agreement for active leases created above (the migration only covers leases that existed then).
+UPDATE contracts SET agreement_name = 'Tenancy Agreement.pdf', agreement_size = 4404019, signed_at = start_date
+WHERE agreement_name = '' AND status = 'active';
