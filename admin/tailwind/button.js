@@ -8,8 +8,8 @@ export default plugin(function ({ addComponents }) {
       alignItems: "center",
       justifyContent: "center",
       gap: "0.5rem",
-      height: "3rem",
-      padding: "0 1rem",
+      height: "40px",
+      padding: "0 12px",
       borderRadius: "var(--button-radius)",
       fontWeight: "600",
       fontSize: "14px",
@@ -27,6 +27,10 @@ export default plugin(function ({ addComponents }) {
       "&:focus-visible": {
         outline: "var(--focus-ring-width) solid var(--primary)",
         outlineOffset: "2px",
+      },
+      "@media (min-width: 640px)": {
+        height: "3rem",
+        padding: "0 1rem",
       },
     },
 
