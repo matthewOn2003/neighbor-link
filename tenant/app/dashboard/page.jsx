@@ -123,8 +123,8 @@ export default function DashboardPage() {
       <section className="flex flex-col gap-2.5">
         <span className="px-1 text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">{t("quick_actions")}</span>
         <div className="grid grid-cols-2 gap-3">
-          <QuickAction href="/billing?sheet=proof" icon="upload_file" tone="gold" label={t("submit_payment_proof")} />
-          <QuickAction href="/services?new=maintenance" icon="handyman" tone="rose" label={t("portal_action_repair")} />
+          <QuickAction href="/billing?sheet=proof" icon="upload_file" tone="neutral" label={t("submit_payment_proof")} />
+          <QuickAction href="/services?new=maintenance" icon="handyman" tone="neutral" label={t("portal_action_repair")} />
         </div>
       </section>
     </div>
