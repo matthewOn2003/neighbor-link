@@ -2,14 +2,12 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { useRouter } from "@/i18n/navigation";
 import { useLocale } from "@/i18n";
 import { Icon } from "@/components/ui/Icon";
 import { useToast } from "@/components/ui/Toast";
 import { money } from "@/components/payments/shared";
 import { useRequest } from "@/hooks/useRequest";
 import { useDropdown } from "@/hooks/useDropdown";
-import { useLogoutMutation } from "@/store/authApi";
 import { formatBytes, formatDate, ordinal } from "@/components/portal/format";
 import { useOptionLabel } from "@/components/portal/status";
 import { Disclosure, EmptyState, GhostButton, GlassCard, IconTile, LoadingBlock, Pill, Sheet } from "@/components/portal/primitives";
@@ -17,14 +15,12 @@ import LangSelect from "@/components/LangSelect";
 
 export default function MyHomePage() {
   const { t, locale } = useLocale();
-  const router = useRouter();
   const toast = useToast();
   const optionLabel = useOptionLabel();
   const me = useRequest("/tenant-portal/me", {});
   const wifi = useRequest("/tenant-portal/wifi", {});
   const announcements = useRequest("/tenant-portal/announcement/list", { current_page: 1, per_page: 3 });
   const dict = useDropdown(["property_type"]);
-  const [logout] = useLogoutMutation();
   const [showQr, setShowQr] = useState(false);
 
   async function copyPassword() {
@@ -34,15 +30,6 @@ export default function MyHomePage() {
     } catch {
       toast.show(t("portal_copy_failed"), "error");
     }
-  }
-
-  async function signOut() {
-    try {
-      await logout().unwrap();
-    } catch {
-      // Clear the local view even when the request fails; the cookie check still gates pages.
-    }
-    router.replace("/");
   }
 
   if (me.loading && !me.data) return <LoadingBlock rows={4} />;
@@ -225,15 +212,6 @@ export default function MyHomePage() {
           <LangSelect />
         </GlassCard>
       </section>
-
-      <button
-        type="button"
-        onClick={signOut}
-        className="flex items-center justify-center gap-2 rounded-2xl border border-white/10 py-3 text-sm font-bold text-on-surface-variant hover:bg-white/[0.04]"
-      >
-        <Icon name="logout" className="text-[18px]" />
-        {t("sign_out")}
-      </button>
 
       <QrSheet open={showQr} onClose={() => setShowQr(false)} ssid={wifi.data?.wifi_ssid} password={wifi.data?.wifi_password} />
     </div>
