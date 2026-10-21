@@ -9,6 +9,7 @@ import { useRequest } from "@/hooks/useRequest";
 import BillCard from "@/components/portal/BillCard";
 import ProofCard from "@/components/portal/ProofCard";
 import PaymentProofSheet from "@/components/portal/PaymentProofSheet";
+import InvoiceSheet from "@/components/portal/InvoiceSheet";
 import { EmptyState, FilterChips, GlassCard, LoadingBlock, SegmentedTabs } from "@/components/portal/primitives";
 
 export default function BillingPage() {
@@ -24,6 +25,7 @@ function BillingContent() {
   const searchParams = useSearchParams();
   const [tab, setTab] = useState("bills");
   const [filter, setFilter] = useState("all");
+  const [invoiceBillId, setInvoiceBillId] = useState(null);
   // The home screen's "Submit Proof" action opens this sheet with ?sheet=proof.
   const [sheet, setSheet] = useState(() => (searchParams.get("sheet") === "proof" ? { billId: null } : null)); // null when closed; { billId } when open
   const bills = useRequest("/tenant-portal/bills", { current_page: 1, per_page: 100 });
@@ -125,7 +127,12 @@ function BillingContent() {
         ) : (
           <div className="flex flex-col gap-3">
             {visibleBills.map((bill) => (
-              <BillCard key={bill.id} bill={bill} onUpload={(billId) => setSheet({ billId })} />
+              <BillCard
+                key={bill.id}
+                bill={bill}
+                onUpload={(billId) => setSheet({ billId })}
+                onInvoice={(billId) => setInvoiceBillId(billId)}
+              />
             ))}
           </div>
         )
@@ -147,6 +154,8 @@ function BillingContent() {
           </div>
         )
       ) : null}
+
+      {invoiceBillId ? <InvoiceSheet billId={invoiceBillId} onClose={() => setInvoiceBillId(null)} /> : null}
 
       {sheet ? (
         <PaymentProofSheet

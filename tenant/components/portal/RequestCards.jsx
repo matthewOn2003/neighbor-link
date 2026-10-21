@@ -44,7 +44,10 @@ export function RepairCard({ item, categoryLabel, priorityLabel }) {
               {item.assignee || t("portal_unassigned")}
             </span>
           </div>
-          <span className="shrink-0 text-[11px] text-on-surface-variant">{formatDate(item.created_at, locale)}</span>
+          <div className="flex shrink-0 items-center gap-2">
+            {item.note_count > 0 ? <Pill icon="visibility">{t("portal_note_count", { count: item.note_count })}</Pill> : null}
+            <span className="text-[11px] text-on-surface-variant">{formatDate(item.created_at, locale)}</span>
+          </div>
         </div>
       </GlassCard>
     </Link>
@@ -78,7 +81,10 @@ export function ComplaintCard({ item, categoryLabel }) {
               ? t("portal_resolved_by", { name: item.assignee })
               : item.assignee || t("portal_unassigned")}
           </span>
-          <span className="shrink-0 text-[11px] text-on-surface-variant">{formatDate(item.created_at, locale)}</span>
+          <div className="flex shrink-0 items-center gap-2">
+            {item.note_count > 0 ? <Pill icon="visibility">{t("portal_note_count", { count: item.note_count })}</Pill> : null}
+            <span className="text-[11px] text-on-surface-variant">{formatDate(item.created_at, locale)}</span>
+          </div>
         </div>
       </GlassCard>
     </Link>

@@ -43,6 +43,7 @@ type ListItem struct {
 	CreatedAt    time.Time  `json:"created_at"`
 	UpdatedAt    time.Time  `json:"updated_at"`
 	ResolvedAt   *time.Time `json:"resolved_at"`
+	NoteCount    int64      `json:"note_count"`
 }
 
 type Detail struct {
@@ -91,7 +92,8 @@ func (r *SQLiteRepository) filtered(f Filter) *gorm.DB {
 
 const listSelect = `complaints.id, complaints.tenant_id, complaints.title, complaints.category, complaints.status,
 	complaints.assignee, complaints.description, tenants.name AS tenant_name, properties.name AS property_name, units.code AS unit_code,
-	complaints.created_at, complaints.updated_at, complaints.resolved_at`
+	complaints.created_at, complaints.updated_at, complaints.resolved_at,
+	(SELECT COUNT(*) FROM request_notes WHERE request_notes.kind = 'complaint' AND request_notes.request_id = complaints.id) AS note_count`
 
 func (r *SQLiteRepository) List(f Filter, page, perPage int) ([]ListItem, int64, error) {
 	var total int64

@@ -24,6 +24,7 @@ export default function MaintenanceDetailPage({ params }) {
       rows={[
         [t("category"), data ? label("maintenance_category", data.category) : ""],
         [t("priority"), data ? label("maintenance_priority", data.priority) : ""],
+        [t("portal_work_order"), data ? `M-${data.id}` : ""],
         [t("unit"), data?.unit_code],
         [t("assignee"), data?.assignee || t("portal_unassigned")],
         [t("created_at"), data ? formatDateTime(data.created_at, locale) : ""],

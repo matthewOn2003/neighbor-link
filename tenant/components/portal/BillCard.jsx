@@ -5,9 +5,9 @@ import { Icon } from "@/components/ui/Icon";
 import { money } from "@/components/payments/shared";
 import { formatDate, monthOf } from "./format";
 import { BILL_LABEL_KEY, BILL_TONE } from "./status";
-import { GlassCard, PrimaryButton, Pill, TILE_CLASSES } from "./primitives";
+import { GhostButton, GlassCard, PrimaryButton, Pill, TILE_CLASSES } from "./primitives";
 
-export default function BillCard({ bill, onUpload }) {
+export default function BillCard({ bill, onUpload, onInvoice }) {
   const { t, locale } = useLocale();
   const status = bill.display_status;
   const tone = BILL_TONE[status] ?? "neutral";
@@ -44,14 +44,18 @@ export default function BillCard({ bill, onUpload }) {
         <LedgerCell label={t("outstanding")} value={money(bill.outstanding, locale)} />
       </div>
 
-      {payable ? (
-        <div className="mt-4 flex justify-end">
+      <div className="mt-4 flex items-center justify-end gap-2.5">
+        <GhostButton onClick={() => onInvoice(bill.id)}>
+          <Icon name="receipt" className="text-[18px] text-on-surface-variant" />
+          {t("portal_invoice")}
+        </GhostButton>
+        {payable ? (
           <PrimaryButton onClick={() => onUpload(bill.id)}>
             <Icon name="upload_file" className="text-[18px]" />
             {t("portal_upload_proof")}
           </PrimaryButton>
-        </div>
-      ) : null}
+        ) : null}
+      </div>
     </GlassCard>
   );
 }

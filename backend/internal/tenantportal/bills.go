@@ -2,6 +2,7 @@ package tenantportal
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -117,4 +118,95 @@ func (c *Controller) Bills(w http.ResponseWriter, r *http.Request) {
 	page, perPage := httpx.NormalizePagination(req.CurrentPage, req.PerPage)
 	list := response.NewListData(paginate(filtered, page, perPage), page, perPage, int64(len(filtered)))
 	response.WriteSuccess(w, http.StatusOK, list.WithSummary(summarizeBills(rows)))
+}
+
+type invoiceLine struct {
+	Kind   string  `json:"kind"`
+	Amount float64 `json:"amount"`
+}
+
+// invoiceView is the printable statement of one bill, addressed to the tenant.
+type invoiceView struct {
+	Number          string        `json:"number"`
+	BillingPeriod   string        `json:"billing_period"`
+	DueDate         string        `json:"due_date"`
+	Status          string        `json:"status"`
+	TenantName      string        `json:"tenant_name"`
+	PropertyName    string        `json:"property_name"`
+	PropertyAddress string        `json:"property_address"`
+	UnitCode        string        `json:"unit_code"`
+	Lines           []invoiceLine `json:"lines"`
+	Total           float64       `json:"total"`
+	Paid            float64       `json:"paid"`
+	Outstanding     float64       `json:"outstanding"`
+	PaidAt          *string       `json:"paid_at"`
+}
+
+// BillDetail returns the invoice for one of the tenant's bills. Bills of other tenants report 404.
+func (c *Controller) BillDetail(w http.ResponseWriter, r *http.Request) {
+	tenantID, ok := c.tenantOr404(w, r)
+	if !ok {
+		return
+	}
+	id, err := httpx.ParseIDParam(r)
+	if err != nil {
+		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid id")
+		return
+	}
+	rows, err := c.loadBills(tenantID)
+	if err != nil {
+		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to load bill")
+		return
+	}
+	var b *bill
+	for i := range rows {
+		if rows[i].ID == id {
+			b = &rows[i]
+			break
+		}
+	}
+	if b == nil {
+		response.WriteError(w, http.StatusNotFound, "BILL_NOT_FOUND", "bill not found")
+		return
+	}
+
+	t, err := c.loadTenant(tenantID)
+	if err != nil {
+		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to load bill")
+		return
+	}
+	prop, err := c.loadProperty(t.PropertyID)
+	if err != nil {
+		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to load bill")
+		return
+	}
+	unit, err := c.loadUnit(t.UnitID)
+	if err != nil {
+		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to load bill")
+		return
+	}
+
+	view := invoiceView{
+		Number:        fmt.Sprintf("INV-%s-%05d", strings.ReplaceAll(b.BillingPeriod, "-", ""), b.ID),
+		BillingPeriod: b.BillingPeriod,
+		DueDate:       b.DueDate,
+		Status:        b.DisplayStatus,
+		TenantName:    t.Name,
+		Lines:         []invoiceLine{{Kind: "rent", Amount: b.Amount}},
+		Total:         b.Amount + b.LateFee,
+		Paid:          b.AmountPaid,
+		Outstanding:   b.Outstanding,
+		PaidAt:        b.PaidAt,
+	}
+	if b.LateFee > 0 {
+		view.Lines = append(view.Lines, invoiceLine{Kind: "late_fee", Amount: b.LateFee})
+	}
+	if prop != nil {
+		view.PropertyName = prop.Name
+		view.PropertyAddress = strings.TrimSpace(prop.Address + " " + prop.City)
+	}
+	if unit != nil {
+		view.UnitCode = unit.Code
+	}
+	response.WriteSuccess(w, http.StatusOK, view)
 }

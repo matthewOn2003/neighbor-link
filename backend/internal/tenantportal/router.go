@@ -14,9 +14,12 @@ func NewRouter(c *Controller, tokenSecret string, allowedOrigins []string) http.
 
 	mux.HandleFunc("POST /api/v1/tenant-portal/me", tenantOnly(c.Me))
 	mux.HandleFunc("POST /api/v1/tenant-portal/bills", tenantOnly(c.Bills))
+	mux.HandleFunc("POST /api/v1/tenant-portal/bills/detail/{id}", tenantOnly(c.BillDetail))
 	mux.HandleFunc("POST /api/v1/tenant-portal/home", tenantOnly(c.Home))
 	mux.HandleFunc("POST /api/v1/tenant-portal/announcement/list", tenantOnly(c.AnnouncementList))
 	mux.HandleFunc("POST /api/v1/tenant-portal/wifi", tenantOnly(c.WiFi))
+	mux.HandleFunc("POST /api/v1/tenant-portal/notification/list", tenantOnly(c.NotificationList))
+	mux.HandleFunc("POST /api/v1/tenant-portal/notification/read", tenantOnly(c.NotificationRead))
 
 	mux.HandleFunc("POST /api/v1/tenant-portal/payment-proof/create", tenantOnly(c.ProofCreate))
 	mux.HandleFunc("POST /api/v1/tenant-portal/payment-proof/list", tenantOnly(c.ProofList))
