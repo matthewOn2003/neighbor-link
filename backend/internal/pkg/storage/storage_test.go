@@ -95,3 +95,34 @@ func TestPutRejectsOversizedObject(t *testing.T) {
 		t.Fatalf("err = %v, want ErrObjectTooLarge", err)
 	}
 }
+
+// Reference example from the AWS S3 documentation (query string authentication, 86400 second expiry).
+func TestPresignedQueryMatchesAWSDocumentedExample(t *testing.T) {
+	when := time.Date(2013, 5, 24, 0, 0, 0, 0, time.UTC)
+	query := presignedQuery(
+		credentials{accessKey: "AKIAIOSFODNN7EXAMPLE", secret: "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY", region: "us-east-1"},
+		"examplebucket.s3.amazonaws.com",
+		"/test.txt",
+		86400,
+		when,
+	)
+	want := "X-Amz-Algorithm=AWS4-HMAC-SHA256" +
+		"&X-Amz-Credential=AKIAIOSFODNN7EXAMPLE%2F20130524%2Fus-east-1%2Fs3%2Faws4_request" +
+		"&X-Amz-Date=20130524T000000Z" +
+		"&X-Amz-Expires=86400" +
+		"&X-Amz-SignedHeaders=host" +
+		"&X-Amz-Signature=aeeed9bbccd4d02ee5c0109b86d86835f995330da4c265957d157751f604d404"
+	if query != want {
+		t.Fatalf("presigned query mismatch\n got: %s\nwant: %s", query, want)
+	}
+}
+
+func TestPresignRejectsInvalidTTL(t *testing.T) {
+	uploader := NewUploader(Config{Endpoint: "https://example.invalid", Bucket: "b", AccessKeyID: "a", SecretAccessKey: "s", Region: "auto"})
+	if _, err := uploader.Presign("a.jpg", 0); err != ErrInvalidTTL {
+		t.Fatalf("err = %v, want ErrInvalidTTL", err)
+	}
+	if _, err := uploader.Presign("a.jpg", 8*24*time.Hour); err != ErrInvalidTTL {
+		t.Fatalf("err = %v, want ErrInvalidTTL", err)
+	}
+}

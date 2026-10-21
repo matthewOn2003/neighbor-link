@@ -34,6 +34,8 @@ type PropertyFilter struct {
 
 type PropertyListItem struct {
 	Property
+	// CoverImageURL is a browser-loadable address for the cover; filled by the delivery layer.
+	CoverImageURL string  `gorm:"-" json:"cover_image_url"`
 	DeveloperName *string `json:"developer_name"`
 	BlockCount    int64   `json:"block_count"`
 	UnitCount     int64   `json:"unit_count"`

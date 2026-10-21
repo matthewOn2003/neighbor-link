@@ -23,6 +23,7 @@ import (
 	"net/url"
 	"os"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -34,7 +35,12 @@ var (
 	ErrObjectTooLarge = errors.New("object is too large")
 	// ErrInvalidKey is returned for an empty object key.
 	ErrInvalidKey = errors.New("object key is empty")
+	// ErrInvalidTTL is returned when a presigned URL lifetime is outside 1 second to 7 days.
+	ErrInvalidTTL = errors.New("presigned URL lifetime must be between 1 second and 7 days")
 )
+
+// maxPresignTTL is the longest lifetime SigV4 query signing allows.
+const maxPresignTTL = 7 * 24 * time.Hour
 
 // MaxObjectSize limits a single upload (10 MiB), enough for payment proof images.
 const MaxObjectSize = 10 << 20
@@ -71,6 +77,8 @@ func (c Config) Configured() bool {
 // Uploader stores an object and returns its URL.
 type Uploader interface {
 	Put(ctx context.Context, key, contentType string, body io.Reader) (url string, err error)
+	// Presign returns a GET URL for key that is valid for ttl.
+	Presign(key string, ttl time.Duration) (string, error)
 }
 
 type r2Uploader struct {
@@ -183,6 +191,13 @@ func signV4(method, canonicalPath, query string, headers map[string]string, payl
 		payloadHash,
 	}, "\n")
 
+	scope, sig := computeSignature(c, t, canonicalRequest)
+	return "AWS4-HMAC-SHA256 Credential=" + c.accessKey + "/" + scope +
+		", SignedHeaders=" + signedHeaders + ", Signature=" + sig
+}
+
+// computeSignature returns the credential scope and the hex signature for a canonical request.
+func computeSignature(c credentials, t time.Time, canonicalRequest string) (string, string) {
 	dateStamp := t.Format("20060102")
 	scope := dateStamp + "/" + c.region + "/s3/aws4_request"
 	stringToSign := strings.Join([]string{
@@ -196,10 +211,69 @@ func signV4(method, canonicalPath, query string, headers map[string]string, payl
 	kRegion := hmacSHA256(kDate, c.region)
 	kService := hmacSHA256(kRegion, "s3")
 	kSigning := hmacSHA256(kService, "aws4_request")
-	signature := hex.EncodeToString(hmacSHA256(kSigning, stringToSign))
+	return scope, hex.EncodeToString(hmacSHA256(kSigning, stringToSign))
+}
 
-	return "AWS4-HMAC-SHA256 Credential=" + c.accessKey + "/" + scope +
-		", SignedHeaders=" + signedHeaders + ", Signature=" + signature
+// presignedQuery builds the signed query string for a GET request with a single signed host header.
+// It returns the canonical query (without the signature) and the full query including the signature.
+func presignedQuery(c credentials, host, canonicalPath string, ttlSeconds int, t time.Time) string {
+	scope := t.Format("20060102") + "/" + c.region + "/s3/aws4_request"
+	query := map[string]string{
+		"X-Amz-Algorithm":     "AWS4-HMAC-SHA256",
+		"X-Amz-Credential":    c.accessKey + "/" + scope,
+		"X-Amz-Date":          t.Format("20060102T150405Z"),
+		"X-Amz-Expires":       strconv.Itoa(ttlSeconds),
+		"X-Amz-SignedHeaders": "host",
+	}
+	keys := make([]string, 0, len(query))
+	for k := range query {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	pairs := make([]string, 0, len(keys))
+	for _, k := range keys {
+		pairs = append(pairs, escapeQuery(k)+"="+escapeQuery(query[k]))
+	}
+	canonicalQuery := strings.Join(pairs, "&")
+
+	canonicalRequest := strings.Join([]string{
+		http.MethodGet,
+		canonicalPath,
+		canonicalQuery,
+		"host:" + host + "\n",
+		"host",
+		"UNSIGNED-PAYLOAD",
+	}, "\n")
+	_, sig := computeSignature(c, t, canonicalRequest)
+	return canonicalQuery + "&X-Amz-Signature=" + sig
+}
+
+// Presign returns a GET URL for key that stays valid for ttl. R2 buckets stay private, so the
+// frontend loads files through these short-lived links.
+func (u *r2Uploader) Presign(key string, ttl time.Duration) (string, error) {
+	if !u.cfg.Configured() {
+		return "", ErrNotConfigured
+	}
+	key = strings.TrimLeft(strings.TrimSpace(key), "/")
+	if key == "" {
+		return "", ErrInvalidKey
+	}
+	if ttl < time.Second || ttl > maxPresignTTL {
+		return "", ErrInvalidTTL
+	}
+	endpoint, err := url.Parse(u.cfg.Endpoint)
+	if err != nil || endpoint.Scheme == "" || endpoint.Host == "" {
+		return "", fmt.Errorf("invalid R2_ENDPOINT: %q", u.cfg.Endpoint)
+	}
+	canonicalPath := "/" + escapePath(u.cfg.Bucket) + "/" + escapePath(key)
+	query := presignedQuery(
+		credentials{accessKey: u.cfg.AccessKeyID, secret: u.cfg.SecretAccessKey, region: u.cfg.Region},
+		endpoint.Host,
+		canonicalPath,
+		int(ttl/time.Second),
+		u.now().UTC(),
+	)
+	return endpoint.Scheme + "://" + endpoint.Host + canonicalPath + "?" + query, nil
 }
 
 func hmacSHA256(key []byte, data string) []byte {
@@ -211,6 +285,22 @@ func hmacSHA256(key []byte, data string) []byte {
 func sha256Hex(data []byte) string {
 	sum := sha256.Sum256(data)
 	return hex.EncodeToString(sum[:])
+}
+
+// escapeQuery percent-encodes a query component per RFC 3986 (every byte outside the unreserved set).
+func escapeQuery(v string) string {
+	var b strings.Builder
+	for i := 0; i < len(v); i++ {
+		c := v[i]
+		switch {
+		case c >= 'A' && c <= 'Z', c >= 'a' && c <= 'z', c >= '0' && c <= '9',
+			c == '-', c == '_', c == '.', c == '~':
+			b.WriteByte(c)
+		default:
+			fmt.Fprintf(&b, "%%%02X", c)
+		}
+	}
+	return b.String()
 }
 
 // escapePath percent-encodes a path segment per RFC 3986, keeping "/" between segments.

@@ -1,18 +1,20 @@
 "use client";
 
-import { use } from "react";
+import { use, useState } from "react";
 import { Link } from "@/i18n/navigation";
 import { Icon } from "@/components/ui/Icon";
 import { Spinner } from "@/components/ui/Spinner";
 import { OccupancyBar, PropertyCover, StatBlock } from "@/components/property/parts";
 import { useRequest } from "@/hooks/useRequest";
+import { CoverUploadModal } from "@/components/property/CoverUploadModal";
 import { useDropdown } from "@/hooks/useDropdown";
 import { useLocale } from "@/i18n";
 
 export default function PropertyDetailPage({ params }) {
   const { id } = use(params);
   const { t } = useLocale();
-  const { data: property, loading, error } = useRequest(`/property/detail/${id}`);
+  const { data: property, loading, error, reload } = useRequest(`/property/detail/${id}`);
+  const [coverOpen, setCoverOpen] = useState(false);
   const { data: blockData } = useRequest("/property/block/list", { property_id: id, per_page: 100 });
   const blocks = blockData?.list ?? [];
   const { labelOf } = useDropdown(["property_type"]);
@@ -36,7 +38,17 @@ export default function PropertyDetailPage({ params }) {
         </Link>
 
         <div className="rounded-xl bg-accent shadow overflow-hidden">
-          <PropertyCover id={property.id} coverImage={property.cover_image} className="h-56" />
+          <div className="relative">
+            <PropertyCover id={property.id} coverImage={property.cover_image_url} className="h-56" />
+            <button
+              type="button"
+              className="btn btn-outline absolute right-4 top-4 z-10 bg-accent/90"
+              onClick={() => setCoverOpen(true)}
+            >
+              <Icon name="image" className="text-lg" />
+              <span>{t("change_cover")}</span>
+            </button>
+          </div>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 p-6">
             <div className="lg:col-span-2 space-y-3">
               <div className="flex items-center gap-3">
@@ -64,6 +76,13 @@ export default function PropertyDetailPage({ params }) {
             </div>
           </div>
         </div>
+
+        <CoverUploadModal
+          open={coverOpen}
+          onClose={() => setCoverOpen(false)}
+          propertyId={property.id}
+          onUploaded={() => reload()}
+        />
 
         <section className="p-6 rounded-xl bg-accent shadow space-y-4">
           <h2 className="text-lg font-semibold text-scene-content">{t("blocks")}</h2>

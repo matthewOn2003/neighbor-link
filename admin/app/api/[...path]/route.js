@@ -22,7 +22,8 @@ async function proxyRequest(request, method, path) {
   const init = { method, headers, cache: "no-store" };
 
   if (BODY_METHODS.has(method)) {
-    init.body = await request.text();
+    // Read raw bytes so binary uploads (multipart) are forwarded unchanged.
+    init.body = await request.arrayBuffer();
     headers["Content-Type"] = request.headers.get("Content-Type") ?? "application/json";
   }
 

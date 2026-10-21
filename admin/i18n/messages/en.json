@@ -444,5 +444,13 @@
   "menu_label": "Menu",
   "profile": "Profile",
   "breadcrumb": "Breadcrumb",
-  "saving_label": "Saving"
+  "saving_label": "Saving",
+  "change_cover": "Change cover",
+  "save_cover": "Save cover",
+  "cover_upload_hint": "JPG, PNG or WebP, up to 5 MB",
+  "cover_invalid_type": "Only JPG, PNG or WebP images are supported",
+  "cover_too_large": "Image must be 5 MB or smaller",
+  "cover_uploaded": "Cover updated",
+  "cover_upload_failed": "Failed to upload cover",
+  "cover_storage_not_configured": "Image storage is not configured on the server"
 }

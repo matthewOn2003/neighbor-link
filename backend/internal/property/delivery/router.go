@@ -30,6 +30,7 @@ func NewPropertyRouter(controller *PropertyController, tokenSecret string, allow
 	mux.HandleFunc("POST /api/v1/property/create", adminMiddleware(controller.Create))
 	mux.HandleFunc("POST /api/v1/property/update/{id}", adminMiddleware(controller.Update))
 	mux.HandleFunc("POST /api/v1/property/delete/{id}", adminMiddleware(controller.Delete))
+	mux.HandleFunc("POST /api/v1/property/cover/upload/{id}", adminMiddleware(controller.UploadCover))
 
 	return middleware.WithCORS(mux, allowedOrigins)
 }

@@ -444,5 +444,13 @@
   "menu_label": "菜单",
   "profile": "个人资料",
   "breadcrumb": "面包屑导航",
-  "saving_label": "保存中"
+  "saving_label": "保存中",
+  "change_cover": "更换封面",
+  "save_cover": "保存封面",
+  "cover_upload_hint": "支持 JPG、PNG、WebP，最大 5 MB",
+  "cover_invalid_type": "仅支持 JPG、PNG、WebP 图片",
+  "cover_too_large": "图片需不超过 5 MB",
+  "cover_uploaded": "封面已更新",
+  "cover_upload_failed": "封面上传失败",
+  "cover_storage_not_configured": "服务器未配置图片存储"
 }
