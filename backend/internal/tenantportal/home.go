@@ -5,7 +5,7 @@ import (
 
 	"backend/internal/bill/rules"
 	maintenancerepo "backend/internal/maintenance/repository"
-	"backend/internal/pkg/response"
+	"backend/internal/pkg/httpx"
 )
 
 const (
@@ -37,32 +37,32 @@ func (c *Controller) Home(w http.ResponseWriter, r *http.Request) {
 	}
 	t, err := c.loadTenant(tenantID)
 	if err != nil {
-		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to load profile")
+		httpx.WriteInternalError(w, "failed to load profile")
 		return
 	}
 	property, err := c.loadProperty(t.PropertyID)
 	if err != nil {
-		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to load property")
+		httpx.WriteInternalError(w, "failed to load property")
 		return
 	}
 	unit, err := c.loadUnit(t.UnitID)
 	if err != nil {
-		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to load unit")
+		httpx.WriteInternalError(w, "failed to load unit")
 		return
 	}
 	contract, err := c.loadContract(tenantID)
 	if err != nil {
-		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to load contract")
+		httpx.WriteInternalError(w, "failed to load contract")
 		return
 	}
 	bills, err := c.loadBills(tenantID)
 	if err != nil {
-		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to load bills")
+		httpx.WriteInternalError(w, "failed to load bills")
 		return
 	}
 	active, activeTotal, err := maintenancerepo.NewSQLiteRepository(c.db).ListActiveForTenant(tenantID, homeActiveRequestLimit)
 	if err != nil {
-		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to load requests")
+		httpx.WriteInternalError(w, "failed to load requests")
 		return
 	}
 	announcements := []announcementItem{}
@@ -70,7 +70,7 @@ func (c *Controller) Home(w http.ResponseWriter, r *http.Request) {
 	if t.PropertyID != nil {
 		announcements, announcementCount, err = c.propertyAnnouncements(*t.PropertyID, homeAnnouncementLimit)
 		if err != nil {
-			response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to load announcements")
+			httpx.WriteInternalError(w, "failed to load announcements")
 			return
 		}
 	}
@@ -100,5 +100,5 @@ func (c *Controller) Home(w http.ResponseWriter, r *http.Request) {
 		out.BillingDay = contract.BillingDay
 		out.MonthlyRent = contract.MonthlyRent
 	}
-	response.WriteSuccess(w, http.StatusOK, out)
+	httpx.WriteOK(w, out)
 }

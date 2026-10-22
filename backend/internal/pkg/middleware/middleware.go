@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"backend/internal/pkg/response"
+	"backend/internal/pkg/httpx"
 	"log"
 	"net/http"
 	"net/http/httputil"
@@ -15,11 +15,11 @@ func RequireAuth(tokenSecret string, verifyToken func(string, string) (string, s
 		return func(w http.ResponseWriter, r *http.Request) {
 			cookie, err := r.Cookie(AuthCookieName)
 			if err != nil {
-				response.WriteError(w, http.StatusUnauthorized, "UNAUTHENTICATED", "authentication required")
+				httpx.WriteUnauthorized(w, "authentication required")
 				return
 			}
 			if _, _, ok := verifyToken(cookie.Value, tokenSecret); !ok {
-				response.WriteError(w, http.StatusUnauthorized, "UNAUTHENTICATED", "authentication required")
+				httpx.WriteUnauthorized(w, "authentication required")
 				return
 			}
 			next(w, r)
@@ -42,16 +42,16 @@ func RequireRole(tokenSecret string, verifyToken func(string, string) (string, s
 			cookie, err := r.Cookie(AuthCookieName) // cookie = read the Cookie value, like in the dumped request above
 			// dGVuYW50OnRlbmFudDoxNzkyNjY3MDYx.dtDcl1Qgqc5VsHjDRTJDq10NQLchiZdodmbx33dwX14
 			if err != nil {
-				response.WriteError(w, http.StatusUnauthorized, "UNAUTHENTICATED", "authentication required")
+				httpx.WriteUnauthorized(w, "authentication required")
 				return
 			}
 			_, role, ok := verifyToken(cookie.Value, tokenSecret)
 			if !ok {
-				response.WriteError(w, http.StatusUnauthorized, "UNAUTHENTICATED", "authentication required")
+				httpx.WriteUnauthorized(w, "authentication required")
 				return
 			}
 			if _, ok := allowed[role]; !ok {
-				response.WriteError(w, http.StatusForbidden, "FORBIDDEN", "insufficient permissions")
+				httpx.WriteForbidden(w, "insufficient permissions")
 				return
 			}
 			next(w, r)

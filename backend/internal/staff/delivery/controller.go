@@ -1,8 +1,8 @@
 package delivery
 
 import (
+	"backend/internal/pkg/httpx"
 	"backend/internal/pkg/middleware"
-	"backend/internal/pkg/response"
 	userdelivery "backend/internal/user/delivery"
 	"encoding/json"
 	"net/http"
@@ -81,7 +81,7 @@ func id(r *http.Request) (uint, bool) {
 func (c *Controller) SaveDepartment(w http.ResponseWriter, r *http.Request) {
 	var v Department
 	if !decode(r, &v) || strings.TrimSpace(v.Name) == "" || strings.TrimSpace(v.Code) == "" {
-		response.WriteError(w, 400, "INVALID_INPUT", "name and code required")
+		httpx.WriteInvalidInput(w, "name and code required")
 		return
 	}
 	if v.Status == "" {
@@ -89,18 +89,18 @@ func (c *Controller) SaveDepartment(w http.ResponseWriter, r *http.Request) {
 	}
 	if n, ok := id(r); ok {
 		if e := c.db.Model(&Department{}).Where("id=?", n).Updates(map[string]any{"name": v.Name, "code": v.Code, "description": v.Description, "manager_name": v.ManagerName, "location": v.Location, "phone": v.Phone, "status": v.Status, "updated_at": time.Now()}).Error; e != nil {
-			response.WriteError(w, 409, "DUPLICATE", "name or code exists")
+			httpx.WriteConflict(w, "name or code exists")
 			return
 		}
 		v.ID = n
-		response.WriteSuccess(w, 200, v)
+		httpx.WriteOK(w, v)
 		return
 	}
 	if e := c.db.Create(&v).Error; e != nil {
-		response.WriteError(w, 409, "DUPLICATE", "name or code exists")
+		httpx.WriteConflict(w, "name or code exists")
 		return
 	}
-	response.WriteSuccess(w, 201, v)
+	httpx.WriteCreated(w, v)
 }
 func (c *Controller) SavePosition(w http.ResponseWriter, r *http.Request) {
 	var v struct {
@@ -114,12 +114,12 @@ func (c *Controller) SavePosition(w http.ResponseWriter, r *http.Request) {
 		Status         string   `json:"status"`
 	}
 	if !decode(r, &v) || v.DepartmentID == 0 || v.Name == "" || v.Code == "" {
-		response.WriteError(w, 400, "INVALID_INPUT", "department, name and code required")
+		httpx.WriteInvalidInput(w, "department, name and code required")
 		return
 	}
 	var d Department
 	if c.db.First(&d, v.DepartmentID).Error != nil {
-		response.WriteError(w, 400, "INVALID_DEPARTMENT", "department not found")
+		httpx.WriteInvalidInput(w, "department not found")
 		return
 	}
 	b, _ := json.Marshal(v.PermissionIDs)
@@ -136,14 +136,14 @@ func (c *Controller) SavePosition(w http.ResponseWriter, r *http.Request) {
 	if n, ok := id(r); ok {
 		p.ID = n
 		if e := c.db.Model(&Position{}).Where("id=?", n).Updates(map[string]any{"department_id": p.DepartmentID, "name": p.Name, "code": p.Code, "description": p.Description, "level": p.Level, "employment_type": p.EmploymentType, "permission_ids": p.PermissionIDs, "status": p.Status, "updated_at": time.Now()}).Error; e != nil {
-			response.WriteError(w, 409, "DUPLICATE", "position code exists")
+			httpx.WriteConflict(w, "position code exists")
 			return
 		}
 	} else if e := c.db.Create(&p).Error; e != nil {
-		response.WriteError(w, 409, "DUPLICATE", "position code exists")
+		httpx.WriteConflict(w, "position code exists")
 		return
 	}
-	response.WriteSuccess(w, 200, p)
+	httpx.WriteOK(w, p)
 }
 func (c *Controller) SaveAccount(w http.ResponseWriter, r *http.Request) {
 	var v struct {
@@ -158,16 +158,16 @@ func (c *Controller) SaveAccount(w http.ResponseWriter, r *http.Request) {
 		Status     string `json:"status"`
 	}
 	if !decode(r, &v) || v.Username == "" || v.Name == "" || v.PositionID == 0 {
-		response.WriteError(w, 400, "INVALID_INPUT", "username, name and position required")
+		httpx.WriteInvalidInput(w, "username, name and position required")
 		return
 	}
 	if !validDateOrEmpty(v.HireDate) {
-		response.WriteError(w, 400, "INVALID_INPUT", "hire_date must be YYYY-MM-DD")
+		httpx.WriteInvalidInput(w, "hire_date must be YYYY-MM-DD")
 		return
 	}
 	var p Position
 	if c.db.First(&p, v.PositionID).Error != nil {
-		response.WriteError(w, 400, "INVALID_POSITION", "position not found")
+		httpx.WriteInvalidInput(w, "position not found")
 		return
 	}
 	if v.Status == "" {
@@ -178,44 +178,44 @@ func (c *Controller) SaveAccount(w http.ResponseWriter, r *http.Request) {
 		if v.Password != "" {
 			h, e := bcrypt.GenerateFromPassword([]byte(v.Password), bcrypt.DefaultCost)
 			if e != nil {
-				response.WriteError(w, 500, "INTERNAL_ERROR", "password hash failed")
+				httpx.WriteInternalError(w, "password hash failed")
 				return
 			}
 			values["password_hash"] = string(h)
 		}
 		res := c.db.Model(&Account{}).Where("id=?", n).Updates(values)
 		if res.Error != nil {
-			response.WriteError(w, 409, "DUPLICATE", "account exists")
+			httpx.WriteConflict(w, "account exists")
 			return
 		}
 		if res.RowsAffected == 0 {
-			response.WriteError(w, 404, "NOT_FOUND", "account not found")
+			httpx.WriteNotFound(w, "account not found")
 			return
 		}
-		response.WriteSuccess(w, 200, map[string]any{"id": n, "username": v.Username, "name": v.Name, "phone": v.Phone, "email": v.Email, "employee_no": v.EmployeeNo, "hire_date": v.HireDate, "position_id": v.PositionID, "position_name": p.Name, "status": v.Status})
+		httpx.WriteOK(w, map[string]any{"id": n, "username": v.Username, "name": v.Name, "phone": v.Phone, "email": v.Email, "employee_no": v.EmployeeNo, "hire_date": v.HireDate, "position_id": v.PositionID, "position_name": p.Name, "status": v.Status})
 		return
 	}
 	if v.Password == "" {
-		response.WriteError(w, 400, "INVALID_INPUT", "password required")
+		httpx.WriteInvalidInput(w, "password required")
 		return
 	}
 	h, e := bcrypt.GenerateFromPassword([]byte(v.Password), bcrypt.DefaultCost)
 	if e != nil {
-		response.WriteError(w, 500, "INTERNAL_ERROR", "password hash failed")
+		httpx.WriteInternalError(w, "password hash failed")
 		return
 	}
 	a := Account{Username: v.Username, PasswordHash: string(h), Name: v.Name, Phone: v.Phone, Email: v.Email, EmployeeNo: v.EmployeeNo, HireDate: v.HireDate, PositionID: v.PositionID, Status: v.Status}
 	if e := c.db.Create(&a).Error; e != nil {
-		response.WriteError(w, 409, "DUPLICATE", "account exists")
+		httpx.WriteConflict(w, "account exists")
 		return
 	}
 	a.PositionName = p.Name
-	response.WriteSuccess(w, 201, a)
+	httpx.WriteCreated(w, a)
 }
 func (c *Controller) Delete(w http.ResponseWriter, r *http.Request) {
 	n, ok := id(r)
 	if !ok {
-		response.WriteError(w, 400, "INVALID_INPUT", "invalid id")
+		httpx.WriteInvalidInput(w, "invalid id")
 		return
 	}
 	path := r.URL.Path
@@ -227,7 +227,7 @@ func (c *Controller) Delete(w http.ResponseWriter, r *http.Request) {
 		var count int64
 		c.db.Model(&Account{}).Where("position_id=?", n).Count(&count)
 		if count > 0 {
-			response.WriteError(w, 409, "IN_USE", "position assigned to accounts")
+			httpx.WriteConflict(w, "position assigned to accounts")
 			return
 		}
 		e = c.db.Delete(&Position{}, n).Error
@@ -235,16 +235,16 @@ func (c *Controller) Delete(w http.ResponseWriter, r *http.Request) {
 		var count int64
 		c.db.Model(&Position{}).Where("department_id=?", n).Count(&count)
 		if count > 0 {
-			response.WriteError(w, 409, "IN_USE", "department has positions")
+			httpx.WriteConflict(w, "department has positions")
 			return
 		}
 		e = c.db.Delete(&Department{}, n).Error
 	}
 	if e != nil {
-		response.WriteError(w, 500, "INTERNAL_ERROR", "delete failed")
+		httpx.WriteInternalError(w, "delete failed")
 		return
 	}
-	response.WriteSuccess(w, 200, map[string]bool{"success": true})
+	httpx.WriteOK(w, map[string]bool{"success": true})
 }
 func NewRouter(c *Controller, secret string, origins []string) http.Handler {
 	mux := http.NewServeMux()

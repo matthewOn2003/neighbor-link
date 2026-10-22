@@ -36,17 +36,17 @@ type listRequest struct {
 func (c *MaintenanceController) List(w http.ResponseWriter, r *http.Request) {
 	var req listRequest
 	if json.NewDecoder(r.Body).Decode(&req) != nil {
-		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid request body")
+		httpx.WriteInvalidInput(w, "invalid request body")
 		return
 	}
 	propertyID, err := httpx.ParseOptionalID(req.PropertyID)
 	if err != nil {
-		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid property_id")
+		httpx.WriteInvalidInput(w, "invalid property_id")
 		return
 	}
 	unitID, err := httpx.ParseOptionalID(req.UnitID)
 	if err != nil {
-		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid unit_id")
+		httpx.WriteInvalidInput(w, "invalid unit_id")
 		return
 	}
 	filter := repository.Filter{
@@ -60,34 +60,34 @@ func (c *MaintenanceController) List(w http.ResponseWriter, r *http.Request) {
 		CreatedTo:   strings.TrimSpace(req.CreatedTo),
 	}
 	if err := usecase.ValidateFilter(filter); err != nil {
-		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "check created_from and created_to")
+		httpx.WriteInvalidInput(w, "check created_from and created_to")
 		return
 	}
 	page, perPage := httpx.NormalizePagination(req.CurrentPage, req.PerPage)
 	rows, total, err := c.uc.List(filter, page, perPage)
 	if err != nil {
-		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to list maintenance requests")
+		httpx.WriteInternalError(w, "failed to list maintenance requests")
 		return
 	}
-	response.WriteSuccess(w, http.StatusOK, response.NewListData(rows, page, perPage, total))
+	httpx.WriteOK(w, response.NewListData(rows, page, perPage, total))
 }
 
 func (c *MaintenanceController) Detail(w http.ResponseWriter, r *http.Request) {
 	id, err := httpx.ParseIDParam(r)
 	if err != nil {
-		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid id")
+		httpx.WriteInvalidInput(w, "invalid id")
 		return
 	}
 	detail, err := c.uc.Detail(id)
 	if err != nil {
 		if errors.Is(err, repository.ErrNotFound) {
-			response.WriteError(w, http.StatusNotFound, "NOT_FOUND", "maintenance request not found")
+			httpx.WriteNotFound(w, "maintenance request not found")
 			return
 		}
-		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to load maintenance request")
+		httpx.WriteInternalError(w, "failed to load maintenance request")
 		return
 	}
-	response.WriteSuccess(w, http.StatusOK, detail)
+	httpx.WriteOK(w, detail)
 }
 
 type createRequest struct {
@@ -104,25 +104,25 @@ type createRequest struct {
 func writeMaintenanceError(w http.ResponseWriter, err error) {
 	switch {
 	case errors.Is(err, repository.ErrNotFound):
-		response.WriteError(w, http.StatusNotFound, "NOT_FOUND", "maintenance request not found")
+		httpx.WriteNotFound(w, "maintenance request not found")
 	case errors.Is(err, usecase.ErrUnitNotFound):
-		response.WriteError(w, http.StatusBadRequest, "UNIT_NOT_FOUND", "unit does not exist")
+		httpx.WriteInvalidInput(w, "unit does not exist")
 	case errors.Is(err, usecase.ErrInvalidInput):
-		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "check title, unit, category, priority and status")
+		httpx.WriteInvalidInput(w, "check title, unit, category, priority and status")
 	default:
-		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to save maintenance request")
+		httpx.WriteInternalError(w, "failed to save maintenance request")
 	}
 }
 
 func (c *MaintenanceController) Create(w http.ResponseWriter, r *http.Request) {
 	var req createRequest
 	if json.NewDecoder(r.Body).Decode(&req) != nil {
-		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid request body")
+		httpx.WriteInvalidInput(w, "invalid request body")
 		return
 	}
 	unitID, err := httpx.ParseID(strings.TrimSpace(req.UnitID))
 	if err != nil {
-		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "unit_id is required")
+		httpx.WriteInvalidInput(w, "unit_id is required")
 		return
 	}
 	detail, err := c.uc.Create(usecase.CreateInput{
@@ -137,7 +137,7 @@ func (c *MaintenanceController) Create(w http.ResponseWriter, r *http.Request) {
 		writeMaintenanceError(w, err)
 		return
 	}
-	response.WriteSuccess(w, http.StatusCreated, detail)
+	httpx.WriteCreated(w, detail)
 }
 
 type updateRequest struct {
@@ -153,12 +153,12 @@ type updateRequest struct {
 func (c *MaintenanceController) Update(w http.ResponseWriter, r *http.Request) {
 	id, err := httpx.ParseIDParam(r)
 	if err != nil {
-		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid id")
+		httpx.WriteInvalidInput(w, "invalid id")
 		return
 	}
 	var req updateRequest
 	if json.NewDecoder(r.Body).Decode(&req) != nil {
-		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid request body")
+		httpx.WriteInvalidInput(w, "invalid request body")
 		return
 	}
 	detail, err := c.uc.Update(id, usecase.UpdateInput{
@@ -174,5 +174,5 @@ func (c *MaintenanceController) Update(w http.ResponseWriter, r *http.Request) {
 		writeMaintenanceError(w, err)
 		return
 	}
-	response.WriteSuccess(w, http.StatusOK, detail)
+	httpx.WriteOK(w, detail)
 }

@@ -44,15 +44,15 @@ func (c *Controller) presignProof(p *paymentrepo.PaymentProof) {
 func writeProofError(w http.ResponseWriter, err error) {
 	switch {
 	case errors.Is(err, paymentrepo.ErrBillNotFound):
-		response.WriteError(w, http.StatusNotFound, "BILL_NOT_FOUND", "bill not found")
+		httpx.WriteNotFound(w, "bill not found")
 	case errors.Is(err, paymentrepo.ErrBillNotPayable):
-		response.WriteError(w, http.StatusConflict, "BILL_NOT_PAYABLE", "bill is already settled or void")
+		httpx.WriteConflict(w, "bill is already settled or void")
 	case errors.Is(err, paymentrepo.ErrInvalidAmount):
-		response.WriteError(w, http.StatusBadRequest, "INVALID_AMOUNT", "amount must be above zero and no more than the outstanding balance")
+		httpx.WriteInvalidInput(w, "amount must be above zero and no more than the outstanding balance")
 	case errors.Is(err, paymentrepo.ErrProofAlreadyOpen):
-		response.WriteError(w, http.StatusConflict, "PROOF_ALREADY_OPEN", "a payment proof for this bill is already awaiting review")
+		httpx.WriteConflict(w, "a payment proof for this bill is already awaiting review")
 	default:
-		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to save payment proof")
+		httpx.WriteInternalError(w, "failed to save payment proof")
 	}
 }
 
@@ -61,60 +61,60 @@ func writeProofError(w http.ResponseWriter, err error) {
 func (c *Controller) ProofCreate(w http.ResponseWriter, r *http.Request) {
 	tenantID, err := c.currentTenantID(r)
 	if err != nil {
-		response.WriteError(w, http.StatusNotFound, "TENANT_NOT_LINKED", "no tenant profile is linked to this account")
+		httpx.WriteNotFound(w, "no tenant profile is linked to this account")
 		return
 	}
 	if c.store == nil {
-		response.WriteError(w, http.StatusServiceUnavailable, "STORAGE_NOT_CONFIGURED", "file storage is not configured")
+		httpx.WriteServiceUnavailable(w, "file storage is not configured")
 		return
 	}
 
 	r.Body = http.MaxBytesReader(w, r.Body, storage.MaxObjectSize+(1<<20))
 	if err := r.ParseMultipartForm(storage.MaxObjectSize); err != nil {
-		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid form or file too large")
+		httpx.WriteInvalidInput(w, "invalid form or file too large")
 		return
 	}
 
 	billID, err := strconv.ParseUint(strings.TrimSpace(r.FormValue("bill_id")), 10, 64)
 	if err != nil || billID == 0 {
-		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "bill_id is required")
+		httpx.WriteInvalidInput(w, "bill_id is required")
 		return
 	}
 	amount, err := strconv.ParseFloat(strings.TrimSpace(r.FormValue("amount")), 64)
 	if err != nil || math.IsNaN(amount) || math.IsInf(amount, 0) {
-		response.WriteError(w, http.StatusBadRequest, "INVALID_AMOUNT", "amount must be a number")
+		httpx.WriteInvalidInput(w, "amount must be a number")
 		return
 	}
 	paidAt := strings.TrimSpace(r.FormValue("paid_at"))
 	if _, err := time.Parse("2006-01-02", paidAt); err != nil {
-		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "paid_at must be YYYY-MM-DD")
+		httpx.WriteInvalidInput(w, "paid_at must be YYYY-MM-DD")
 		return
 	}
 	reference := strings.TrimSpace(r.FormValue("reference"))
 	if utf8.RuneCountInString(reference) > maxReferenceLength {
-		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "reference is too long")
+		httpx.WriteInvalidInput(w, "reference is too long")
 		return
 	}
 
 	file, _, err := r.FormFile("file")
 	if err != nil {
-		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "file is required")
+		httpx.WriteInvalidInput(w, "file is required")
 		return
 	}
 	defer file.Close()
 	data, err := io.ReadAll(io.LimitReader(file, storage.MaxObjectSize+1))
 	if err != nil {
-		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "failed to read file")
+		httpx.WriteInvalidInput(w, "failed to read file")
 		return
 	}
 	if len(data) > storage.MaxObjectSize {
-		response.WriteError(w, http.StatusBadRequest, "FILE_TOO_LARGE", "file exceeds 10 MiB")
+		httpx.WriteInvalidInput(w, "file exceeds 10 MiB")
 		return
 	}
 	contentType := http.DetectContentType(data)
 	ext, ok := proofExtensions[contentType]
 	if !ok {
-		response.WriteError(w, http.StatusBadRequest, "UNSUPPORTED_FILE_TYPE", "only JPEG, PNG and WebP images are accepted")
+		httpx.WriteInvalidInput(w, "only JPEG, PNG and WebP images are accepted")
 		return
 	}
 
@@ -126,11 +126,11 @@ func (c *Controller) ProofCreate(w http.ResponseWriter, r *http.Request) {
 	key := fmt.Sprintf("payment-proofs/%d/%d%s", tenantID, time.Now().UnixNano(), ext)
 	fileURL, err := c.store.Put(r.Context(), key, contentType, bytes.NewReader(data))
 	if errors.Is(err, storage.ErrNotConfigured) {
-		response.WriteError(w, http.StatusServiceUnavailable, "STORAGE_NOT_CONFIGURED", "file storage is not configured")
+		httpx.WriteServiceUnavailable(w, "file storage is not configured")
 		return
 	}
 	if err != nil {
-		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to upload file")
+		httpx.WriteInternalError(w, "failed to upload file")
 		return
 	}
 
@@ -149,24 +149,24 @@ func (c *Controller) ProofCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	c.presignProof(proof)
-	response.WriteSuccess(w, http.StatusOK, proof)
+	httpx.WriteOK(w, proof)
 }
 
 // ProofList returns the tenant's own payment proofs, newest first, with fresh image links.
 func (c *Controller) ProofList(w http.ResponseWriter, r *http.Request) {
 	tenantID, err := c.currentTenantID(r)
 	if err != nil {
-		response.WriteError(w, http.StatusNotFound, "TENANT_NOT_LINKED", "no tenant profile is linked to this account")
+		httpx.WriteNotFound(w, "no tenant profile is linked to this account")
 		return
 	}
 	var req tenantListRequest
 	if json.NewDecoder(r.Body).Decode(&req) != nil {
-		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid request body")
+		httpx.WriteInvalidInput(w, "invalid request body")
 		return
 	}
 	rows, err := c.payments.ListTenantProofs(tenantID)
 	if err != nil {
-		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to load payment proofs")
+		httpx.WriteInternalError(w, "failed to load payment proofs")
 		return
 	}
 	status := strings.TrimSpace(req.Status)
@@ -182,5 +182,5 @@ func (c *Controller) ProofList(w http.ResponseWriter, r *http.Request) {
 	for i := range pageRows {
 		c.presignProof(&pageRows[i])
 	}
-	response.WriteSuccess(w, http.StatusOK, response.NewListData(pageRows, page, perPage, int64(len(filtered))))
+	httpx.WriteOK(w, response.NewListData(pageRows, page, perPage, int64(len(filtered))))
 }

@@ -32,12 +32,13 @@ type listRequest struct {
 func (c *ComplaintController) List(w http.ResponseWriter, r *http.Request) {
 	var req listRequest
 	if json.NewDecoder(r.Body).Decode(&req) != nil {
-		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid request body")
+		httpx.WriteInvalidInput(w, "invalid request body")
+
 		return
 	}
 	tenantID, err := httpx.ParseOptionalID(req.TenantID)
 	if err != nil {
-		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid tenant_id")
+		httpx.WriteInvalidInput(w, "invalid tenant_id")
 		return
 	}
 	page, perPage := httpx.NormalizePagination(req.CurrentPage, req.PerPage)
@@ -48,28 +49,28 @@ func (c *ComplaintController) List(w http.ResponseWriter, r *http.Request) {
 		TenantID: tenantID,
 	}, page, perPage)
 	if err != nil {
-		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to list complaints")
+		httpx.WriteInternalError(w, "failed to list complaints")
 		return
 	}
-	response.WriteSuccess(w, http.StatusOK, response.NewListData(rows, page, perPage, total))
+	httpx.WriteOK(w, response.NewListData(rows, page, perPage, total))
 }
 
 func (c *ComplaintController) Detail(w http.ResponseWriter, r *http.Request) {
 	id, err := httpx.ParseIDParam(r)
 	if err != nil {
-		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid id")
+		httpx.WriteInvalidInput(w, "invalid id")
 		return
 	}
 	d, err := c.uc.Detail(id)
 	if errors.Is(err, repository.ErrNotFound) {
-		response.WriteError(w, http.StatusNotFound, "NOT_FOUND", "complaint not found")
+		httpx.WriteNotFound(w, "complaint not found")
 		return
 	}
 	if err != nil {
-		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to load complaint")
+		httpx.WriteInternalError(w, "failed to load complaint")
 		return
 	}
-	response.WriteSuccess(w, http.StatusOK, d)
+	httpx.WriteOK(w, d)
 }
 
 type updateRequest struct {
@@ -81,12 +82,12 @@ type updateRequest struct {
 func (c *ComplaintController) Update(w http.ResponseWriter, r *http.Request) {
 	id, err := httpx.ParseIDParam(r)
 	if err != nil {
-		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid id")
+		httpx.WriteInvalidInput(w, "invalid id")
 		return
 	}
 	var req updateRequest
 	if json.NewDecoder(r.Body).Decode(&req) != nil {
-		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid request body")
+		httpx.WriteInvalidInput(w, "invalid request body")
 		return
 	}
 	d, err := c.uc.Update(id, usecase.UpdateInput{
@@ -96,14 +97,14 @@ func (c *ComplaintController) Update(w http.ResponseWriter, r *http.Request) {
 	})
 	switch {
 	case errors.Is(err, repository.ErrNotFound):
-		response.WriteError(w, http.StatusNotFound, "NOT_FOUND", "complaint not found")
+		httpx.WriteNotFound(w, "complaint not found")
 		return
 	case errors.Is(err, usecase.ErrInvalidInput):
-		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid status")
+		httpx.WriteInvalidInput(w, "invalid status")
 		return
 	case err != nil:
-		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to update complaint")
+		httpx.WriteInternalError(w, "failed to update complaint")
 		return
 	}
-	response.WriteSuccess(w, http.StatusOK, d)
+	httpx.WriteOK(w, d)
 }

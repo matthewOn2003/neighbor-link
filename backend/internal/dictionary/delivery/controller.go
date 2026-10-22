@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"backend/internal/dictionary/usecase"
-	"backend/internal/pkg/response"
+	"backend/internal/pkg/httpx"
 )
 
 type DictionaryController struct {
@@ -22,7 +22,7 @@ func (c *DictionaryController) Dropdown(w http.ResponseWriter, r *http.Request) 
 		Keys []string `json:"keys"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid request body")
+		httpx.WriteInvalidInput(w, "invalid request body")
 		return
 	}
 	keys := make([]string, 0)
@@ -36,13 +36,13 @@ func (c *DictionaryController) Dropdown(w http.ResponseWriter, r *http.Request) 
 		keys = append(keys, k)
 	}
 	if len(keys) == 0 {
-		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "keys is required")
+		httpx.WriteInvalidInput(w, "keys is required")
 		return
 	}
 	dropdown, err := c.usecase.Dropdown(keys)
 	if err != nil {
-		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to load dropdown")
+		httpx.WriteInternalError(w, "failed to load dropdown")
 		return
 	}
-	response.WriteSuccess(w, http.StatusOK, map[string]any{"dropdown": dropdown})
+	httpx.WriteOK(w, map[string]any{"dropdown": dropdown})
 }

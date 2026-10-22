@@ -134,13 +134,13 @@ func fileNameOf(name string) string {
 func writePhotoError(w http.ResponseWriter, err error) {
 	switch {
 	case errors.Is(err, errTooManyPhotos):
-		response.WriteError(w, http.StatusBadRequest, "TOO_MANY_FILES", "up to 5 photos can be attached")
+		httpx.WriteInvalidInput(w, "up to 5 photos can be attached")
 	case errors.Is(err, errPhotoTooLarge):
-		response.WriteError(w, http.StatusBadRequest, "FILE_TOO_LARGE", "each photo must be 10 MiB or smaller")
+		httpx.WriteInvalidInput(w, "each photo must be 10 MiB or smaller")
 	case errors.Is(err, errPhotoType):
-		response.WriteError(w, http.StatusBadRequest, "UNSUPPORTED_FILE_TYPE", "only JPEG, PNG and WebP images are accepted")
+		httpx.WriteInvalidInput(w, "only JPEG, PNG and WebP images are accepted")
 	default:
-		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "failed to read attached photos")
+		httpx.WriteInvalidInput(w, "failed to read attached photos")
 	}
 }
 
@@ -149,7 +149,7 @@ func parseMaintenanceCreate(w http.ResponseWriter, r *http.Request) (maintenance
 	if strings.HasPrefix(r.Header.Get("Content-Type"), "multipart/form-data") {
 		r.Body = http.MaxBytesReader(w, r.Body, maxRepairPhotos*storage.MaxObjectSize+(1<<20))
 		if err := r.ParseMultipartForm(storage.MaxObjectSize); err != nil {
-			response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid form or photos too large")
+			httpx.WriteInvalidInput(w, "invalid form or photos too large")
 			return maintenanceCreateRequest{}, nil, false
 		}
 		req := maintenanceCreateRequest{
@@ -167,7 +167,7 @@ func parseMaintenanceCreate(w http.ResponseWriter, r *http.Request) (maintenance
 	}
 	var req maintenanceCreateRequest
 	if json.NewDecoder(r.Body).Decode(&req) != nil {
-		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid request body")
+		httpx.WriteInvalidInput(w, "invalid request body")
 		return maintenanceCreateRequest{}, nil, false
 	}
 	return req, nil, true
@@ -207,7 +207,7 @@ func (c *Controller) maintenanceView(d *maintenancerepo.Detail) (maintenanceDeta
 func (c *Controller) MaintenanceCreate(w http.ResponseWriter, r *http.Request) {
 	tenantID, err := c.currentTenantID(r)
 	if err != nil {
-		response.WriteError(w, http.StatusNotFound, "TENANT_NOT_LINKED", "no tenant profile is linked to this account")
+		httpx.WriteNotFound(w, "no tenant profile is linked to this account")
 		return
 	}
 	req, photos, ok := parseMaintenanceCreate(w, r)
@@ -219,20 +219,20 @@ func (c *Controller) MaintenanceCreate(w http.ResponseWriter, r *http.Request) {
 		priority = "normal"
 	}
 	if !tenantPriorities[priority] {
-		response.WriteError(w, http.StatusBadRequest, "INVALID_PRIORITY", "priority must be low, normal or high")
+		httpx.WriteInvalidInput(w, "priority must be low, normal or high")
 		return
 	}
 	unitID, found, err := c.tenantUnitID(tenantID)
 	if err != nil {
-		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to load unit")
+		httpx.WriteInternalError(w, "failed to load unit")
 		return
 	}
 	if !found {
-		response.WriteError(w, http.StatusBadRequest, "NO_UNIT", "no unit is assigned to this tenant")
+		httpx.WriteInvalidInput(w, "no unit is assigned to this tenant")
 		return
 	}
 	if len(photos) > 0 && c.store == nil {
-		response.WriteError(w, http.StatusServiceUnavailable, "STORAGE_NOT_CONFIGURED", "file storage is not configured")
+		httpx.WriteServiceUnavailable(w, "file storage is not configured")
 		return
 	}
 
@@ -240,7 +240,7 @@ func (c *Controller) MaintenanceCreate(w http.ResponseWriter, r *http.Request) {
 	for i, p := range photos {
 		key := fmt.Sprintf("maintenance/%d/%d-%d%s", tenantID, time.Now().UnixNano(), i, p.ext)
 		if _, err := c.store.Put(r.Context(), key, p.contentType, bytes.NewReader(p.data)); err != nil {
-			response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to upload photo")
+			httpx.WriteInternalError(w, "failed to upload photo")
 			return
 		}
 		keys[i] = key
@@ -256,10 +256,10 @@ func (c *Controller) MaintenanceCreate(w http.ResponseWriter, r *http.Request) {
 	})
 	switch {
 	case errors.Is(err, maintenanceusecase.ErrInvalidInput), errors.Is(err, maintenanceusecase.ErrUnitNotFound):
-		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "title and a valid category are required")
+		httpx.WriteInvalidInput(w, "title and a valid category are required")
 		return
 	case err != nil:
-		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to create request")
+		httpx.WriteInternalError(w, "failed to create request")
 		return
 	}
 
@@ -272,29 +272,29 @@ func (c *Controller) MaintenanceCreate(w http.ResponseWriter, r *http.Request) {
 			SizeBytes:   int64(len(p.data)),
 		})
 		if err != nil {
-			response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to save photo")
+			httpx.WriteInternalError(w, "failed to save photo")
 			return
 		}
 	}
 
 	view, err := c.maintenanceView(d)
 	if err != nil {
-		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to load request")
+		httpx.WriteInternalError(w, "failed to load request")
 		return
 	}
-	response.WriteSuccess(w, http.StatusOK, view)
+	httpx.WriteOK(w, view)
 }
 
 // MaintenanceList returns only the tenant's own repair requests.
 func (c *Controller) MaintenanceList(w http.ResponseWriter, r *http.Request) {
 	tenantID, err := c.currentTenantID(r)
 	if err != nil {
-		response.WriteError(w, http.StatusNotFound, "TENANT_NOT_LINKED", "no tenant profile is linked to this account")
+		httpx.WriteNotFound(w, "no tenant profile is linked to this account")
 		return
 	}
 	var req tenantListRequest
 	if json.NewDecoder(r.Body).Decode(&req) != nil {
-		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid request body")
+		httpx.WriteInvalidInput(w, "invalid request body")
 		return
 	}
 	page, perPage := httpx.NormalizePagination(req.CurrentPage, req.PerPage)
@@ -304,42 +304,42 @@ func (c *Controller) MaintenanceList(w http.ResponseWriter, r *http.Request) {
 		TenantID: &tenantID,
 	}, page, perPage)
 	if err != nil {
-		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to list requests")
+		httpx.WriteInternalError(w, "failed to list requests")
 		return
 	}
 	summary, err := c.maintenanceSummary(tenantID)
 	if err != nil {
-		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to summarise requests")
+		httpx.WriteInternalError(w, "failed to summarise requests")
 		return
 	}
-	response.WriteSuccess(w, http.StatusOK, response.NewListData(rows, page, perPage, total).WithSummary(summary))
+	httpx.WriteOK(w, response.NewListData(rows, page, perPage, total).WithSummary(summary))
 }
 
 // MaintenanceDetail returns one repair request. Requests belonging to other tenants report 404.
 func (c *Controller) MaintenanceDetail(w http.ResponseWriter, r *http.Request) {
 	tenantID, err := c.currentTenantID(r)
 	if err != nil {
-		response.WriteError(w, http.StatusNotFound, "TENANT_NOT_LINKED", "no tenant profile is linked to this account")
+		httpx.WriteNotFound(w, "no tenant profile is linked to this account")
 		return
 	}
 	id, err := httpx.ParseIDParam(r)
 	if err != nil {
-		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid id")
+		httpx.WriteInvalidInput(w, "invalid id")
 		return
 	}
 	d, err := c.maintenance.Detail(id)
 	if errors.Is(err, maintenancerepo.ErrNotFound) || (err == nil && (d.TenantID == nil || *d.TenantID != tenantID)) {
-		response.WriteError(w, http.StatusNotFound, "NOT_FOUND", "request not found")
+		httpx.WriteNotFound(w, "request not found")
 		return
 	}
 	if err != nil {
-		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to load request")
+		httpx.WriteInternalError(w, "failed to load request")
 		return
 	}
 	view, err := c.maintenanceView(d)
 	if err != nil {
-		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to load request")
+		httpx.WriteInternalError(w, "failed to load request")
 		return
 	}
-	response.WriteSuccess(w, http.StatusOK, view)
+	httpx.WriteOK(w, view)
 }

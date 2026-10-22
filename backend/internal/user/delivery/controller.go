@@ -1,8 +1,8 @@
 package delivery
 
 import (
+	"backend/internal/pkg/httpx"
 	"backend/internal/pkg/middleware"
-	"backend/internal/pkg/response"
 	"backend/internal/user/repository"
 	"backend/internal/user/usecase"
 	"encoding/json"
@@ -44,7 +44,7 @@ func newLoginResponse(user *repository.User) loginResponse {
 }
 
 func writeUnauthenticated(w http.ResponseWriter) {
-	response.WriteError(w, http.StatusUnauthorized, "UNAUTHENTICATED", "authentication required")
+	httpx.WriteUnauthorized(w, "authentication required")
 }
 
 func setAuthCookie(w http.ResponseWriter, value string, maxAge int, secure bool) {
@@ -60,24 +60,24 @@ func setAuthCookie(w http.ResponseWriter, value string, maxAge int, secure bool)
 }
 
 func (c *UserController) Health(w http.ResponseWriter, _ *http.Request) {
-	response.WriteSuccess(w, http.StatusOK, map[string]string{"status": "ok"})
+	httpx.WriteOK(w, map[string]string{"status": "ok"})
 }
 
 func (c *UserController) Login(w http.ResponseWriter, r *http.Request) {
 	var request loginRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil || request.Username == "" || request.Password == "" || request.Role == "" {
-		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "username, password and role are required")
+		httpx.WriteInvalidInput(w, "username, password and role are required")
 		return
 	}
 
 	user, err := c.usecase.Login(request.Username, request.Password, request.Role)
 	if err != nil {
-		response.WriteError(w, http.StatusUnauthorized, "INVALID_CREDENTIALS", "invalid username, password or role")
+		httpx.WriteUnauthorized(w, "invalid username, password or role")
 		return
 	}
 
 	setAuthCookie(w, CreateToken(user.Username, user.Role, c.secret), 60*60*8, c.cookieSecure)
-	response.WriteSuccess(w, http.StatusOK, newLoginResponse(user))
+	httpx.WriteOK(w, newLoginResponse(user))
 }
 
 func (c *UserController) Session(w http.ResponseWriter, r *http.Request) {
@@ -96,7 +96,7 @@ func (c *UserController) Session(w http.ResponseWriter, r *http.Request) {
 		writeUnauthenticated(w)
 		return
 	}
-	response.WriteSuccess(w, http.StatusOK, newLoginResponse(user))
+	httpx.WriteOK(w, newLoginResponse(user))
 }
 
 // Logout intentionally skips requireAuth so an expired session can still be cleared.
