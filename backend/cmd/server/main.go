@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/joho/godotenv"
 
@@ -113,6 +114,8 @@ func main() {
 
 	contractRepo := contractrepository.NewSQLiteRepository(db)
 	contractUsecase := contractusecase.NewContractUsecase(contractRepo)
+	// Contracts that pass their end date are expired and their tenants released. Checked at start-up, then hourly.
+	go contractUsecase.RunExpiryLoop(time.Hour)
 
 	billRepo := billrepository.NewSQLiteRepository(db)
 	billUsecase := billusecase.NewBillUsecase(billRepo)

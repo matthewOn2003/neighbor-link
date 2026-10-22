@@ -118,6 +118,8 @@ func writeUnitError(w http.ResponseWriter, err error, fallback string) {
 		response.WriteError(w, http.StatusBadRequest, "UNIT_NOT_FOUND", "unit not found")
 	case errors.Is(err, repository.ErrUnitNotVacant):
 		response.WriteError(w, http.StatusConflict, "UNIT_NOT_VACANT", "unit is not vacant")
+	case errors.Is(err, repository.ErrTenantHasActiveContract):
+		response.WriteError(w, http.StatusConflict, "TENANT_HAS_ACTIVE_CONTRACT", "end the tenant's active contract before marking them former")
 	default:
 		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", fallback)
 	}

@@ -2,10 +2,12 @@ package repository
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 
 	billrepo "backend/internal/bill/repository"
+	"backend/internal/pkg/notify"
 
 	"gorm.io/gorm"
 )
@@ -238,7 +240,15 @@ func (r *SQLiteRepository) Approve(id uint, reviewer string, now time.Time) (*Pa
 		if result.RowsAffected == 0 {
 			return ErrProofNotPending
 		}
-		return billrepo.ApplyPayment(tx, p.BillID, p.Amount, "bank_transfer", p.Reference, p.PaidAt, &p.ID)
+		if err := billrepo.ApplyPayment(tx, p.BillID, p.Amount, "bank_transfer", p.Reference, p.PaidAt, &p.ID); err != nil {
+			return err
+		}
+		return notify.Send(tx, notify.Notice{
+			TenantID: p.TenantID,
+			Kind:     notify.KindBilling,
+			Title:    "Payment confirmed",
+			Body:     fmt.Sprintf("Your payment of RM %.2f has been confirmed.", p.Amount),
+		})
 	})
 	if err != nil {
 		return nil, err
@@ -246,23 +256,38 @@ func (r *SQLiteRepository) Approve(id uint, reviewer string, now time.Time) (*Pa
 	return r.FindProof(id)
 }
 
-// Reject marks a pending proof rejected with a reason. No payment is recorded.
+// Reject marks a pending proof rejected with a reason and tells the tenant. No payment is recorded.
 func (r *SQLiteRepository) Reject(id uint, reviewer, reason string, now time.Time) (*PaymentProof, error) {
-	result := r.db.Model(&PaymentProof{}).Where("id = ? AND status = 'pending'", id).Updates(map[string]any{
-		"status":        "rejected",
-		"reject_reason": reason,
-		"reviewed_by":   reviewer,
-		"reviewed_at":   now,
-		"updated_at":    now,
-	})
-	if result.Error != nil {
-		return nil, result.Error
-	}
-	if result.RowsAffected == 0 {
-		if _, err := r.FindProof(id); err != nil {
-			return nil, err
+	err := r.db.Transaction(func(tx *gorm.DB) error {
+		var p PaymentProof
+		if err := tx.First(&p, id).Error; err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return ErrProofNotFound
+			}
+			return err
 		}
-		return nil, ErrProofNotPending
+		result := tx.Model(&PaymentProof{}).Where("id = ? AND status = 'pending'", id).Updates(map[string]any{
+			"status":        "rejected",
+			"reject_reason": reason,
+			"reviewed_by":   reviewer,
+			"reviewed_at":   now,
+			"updated_at":    now,
+		})
+		if result.Error != nil {
+			return result.Error
+		}
+		if result.RowsAffected == 0 {
+			return ErrProofNotPending
+		}
+		return notify.Send(tx, notify.Notice{
+			TenantID: p.TenantID,
+			Kind:     notify.KindBilling,
+			Title:    "Payment proof rejected",
+			Body:     "Reason: " + reason,
+		})
+	})
+	if err != nil {
+		return nil, err
 	}
 	return r.FindProof(id)
 }

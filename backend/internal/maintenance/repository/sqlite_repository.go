@@ -5,6 +5,8 @@ import (
 	"strings"
 	"time"
 
+	"backend/internal/pkg/notify"
+
 	"gorm.io/gorm"
 )
 
@@ -236,8 +238,17 @@ func (r *SQLiteRepository) FindRequest(id uint) (*Request, error) {
 	return &m, nil
 }
 
-func (r *SQLiteRepository) Update(id uint, updates map[string]any) error {
-	return r.db.Model(&Request{}).Where("id = ?", id).Updates(updates).Error
+// Update applies updates to a request. When notice is set, the tenant is told in the same transaction.
+func (r *SQLiteRepository) Update(id uint, updates map[string]any, notice *notify.Notice) error {
+	return r.db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Model(&Request{}).Where("id = ?", id).Updates(updates).Error; err != nil {
+			return err
+		}
+		if notice == nil {
+			return nil
+		}
+		return notify.Send(tx, *notice)
+	})
 }
 
 // AddAttachment records a photo uploaded for a repair request.

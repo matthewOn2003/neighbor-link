@@ -2,11 +2,13 @@ package usecase
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 
 	"backend/internal/complaint/repository"
 	"backend/internal/pkg/httpx"
+	"backend/internal/pkg/notify"
 )
 
 var (
@@ -126,12 +128,21 @@ func (uc *ComplaintUsecase) Update(id uint, in UpdateInput) (*repository.Detail,
 		updates["resolution_notes"] = strings.TrimSpace(*in.ResolutionNotes)
 	}
 	now := time.Now()
+	var notice *notify.Notice
 	if in.Status != nil {
 		status := strings.TrimSpace(*in.Status)
 		if err := uc.validateOption(slugStatus, status); err != nil {
 			return nil, err
 		}
 		updates["status"] = status
+		if status != existing.Status {
+			notice = &notify.Notice{
+				TenantID: existing.TenantID,
+				Kind:     notify.KindComplaint,
+				Title:    "Complaint updated",
+				Body:     fmt.Sprintf("%q is now %s.", existing.Title, status),
+			}
+		}
 		wasClosed := existing.Status == "resolved" || existing.Status == "closed"
 		switch status {
 		case "resolved", "closed":
@@ -143,7 +154,7 @@ func (uc *ComplaintUsecase) Update(id uint, in UpdateInput) (*repository.Detail,
 		}
 	}
 	updates["updated_at"] = now
-	if err := uc.repo.Update(id, updates); err != nil {
+	if err := uc.repo.Update(id, updates, notice); err != nil {
 		return nil, err
 	}
 	return uc.repo.FindDetail(id)

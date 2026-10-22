@@ -85,6 +85,18 @@ func (r *SQLiteRepository) Update(t *Tenant) error {
 		if err := tx.First(&previous, t.ID).Error; err != nil {
 			return err
 		}
+		if t.Status == "former" {
+			// A former tenant must not hold a unit; end any running contract first.
+			var active int64
+			if err := tx.Table("contracts").Where("tenant_id = ? AND status = 'active'", t.ID).Count(&active).Error; err != nil {
+				return err
+			}
+			if active > 0 {
+				return ErrTenantHasActiveContract
+			}
+			t.UnitID = nil
+			t.PropertyID = nil
+		}
 		if !sameUnit(previous.UnitID, t.UnitID) {
 			if err := vacateUnit(tx, previous.UnitID); err != nil {
 				return err
@@ -113,8 +125,9 @@ func (r *SQLiteRepository) Delete(id uint) error {
 }
 
 var (
-	ErrUnitNotFound  = errors.New("unit not found")
-	ErrUnitNotVacant = errors.New("unit is not vacant")
+	ErrUnitNotFound            = errors.New("unit not found")
+	ErrUnitNotVacant           = errors.New("unit is not vacant")
+	ErrTenantHasActiveContract = errors.New("tenant has an active contract")
 )
 
 // occupyUnit checks the tenant's unit is vacant, marks it occupied, and sets the tenant's property from the unit.
