@@ -92,7 +92,7 @@ func readPhotos(headers []*multipart.FileHeader) ([]photoUpload, error) {
 	if len(headers) > maxRepairPhotos {
 		return nil, errTooManyPhotos
 	}
-	photos := make([]photoUpload, 0, len(headers))
+	photos := make([]photoUpload, 0)
 	for _, h := range headers {
 		if h.Size > storage.MaxObjectSize {
 			return nil, errPhotoTooLarge
@@ -179,7 +179,7 @@ func (c *Controller) maintenanceView(d *maintenancerepo.Detail) (maintenanceDeta
 	if err != nil {
 		return maintenanceDetailView{}, err
 	}
-	items := make([]attachmentItem, 0, len(rows))
+	items := make([]attachmentItem, 0)
 	for _, a := range rows {
 		item := attachmentItem{
 			ID:          a.ID,

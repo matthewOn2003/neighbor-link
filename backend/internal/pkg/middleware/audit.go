@@ -61,7 +61,7 @@ func Audit(next http.Handler, tokenSecret string, verifyToken func(string, strin
 		if status == 0 {
 			status = http.StatusOK
 		}
-		log.Printf("audit time=%s actor=%s method=%s path=%s ip=%s status=%d duration_ms=%d",
+		log.Printf("[LOG] audit time=%s actor=%s method=%s path=%s ip=%s status=%d duration_ms=%d",
 			start.Format(time.RFC3339),
 			auditActor(r, tokenSecret, verifyToken),
 			r.Method,

@@ -5,12 +5,13 @@ import (
 	"backend/internal/pkg/response"
 	userdelivery "backend/internal/user/delivery"
 	"encoding/json"
-	"golang.org/x/crypto/bcrypt"
-	"gorm.io/gorm"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
+
+	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
 )
 
 type Controller struct{ db *gorm.DB }
@@ -246,19 +247,19 @@ func (c *Controller) Delete(w http.ResponseWriter, r *http.Request) {
 	response.WriteSuccess(w, 200, map[string]bool{"success": true})
 }
 func NewRouter(c *Controller, secret string, origins []string) http.Handler {
-	m := http.NewServeMux()
-	a := middleware.RequireRole(secret, userdelivery.VerifyToken, "admin")
-	m.HandleFunc("POST /api/v1/staff-account/list", a(c.ListAccounts))
-	m.HandleFunc("POST /api/v1/staff-account/create", a(c.SaveAccount))
-	m.HandleFunc("POST /api/v1/staff-account/update/{id}", a(c.SaveAccount))
-	m.HandleFunc("POST /api/v1/staff-account/delete/{id}", a(c.Delete))
-	m.HandleFunc("POST /api/v1/staff-department/list", a(c.ListDepartments))
-	m.HandleFunc("POST /api/v1/staff-department/create", a(c.SaveDepartment))
-	m.HandleFunc("POST /api/v1/staff-department/update/{id}", a(c.SaveDepartment))
-	m.HandleFunc("POST /api/v1/staff-department/delete/{id}", a(c.Delete))
-	m.HandleFunc("POST /api/v1/staff-position/list", a(c.ListPositions))
-	m.HandleFunc("POST /api/v1/staff-position/create", a(c.SavePosition))
-	m.HandleFunc("POST /api/v1/staff-position/update/{id}", a(c.SavePosition))
-	m.HandleFunc("POST /api/v1/staff-position/delete/{id}", a(c.Delete))
-	return middleware.WithCORS(m, origins)
+	mux := http.NewServeMux()
+	adminMiddleware := middleware.RequireRole(secret, userdelivery.VerifyToken, "admin")
+	mux.HandleFunc("POST /api/v1/staff-account/list", adminMiddleware(c.ListAccounts))
+	mux.HandleFunc("POST /api/v1/staff-account/create", adminMiddleware(c.SaveAccount))
+	mux.HandleFunc("POST /api/v1/staff-account/update/{id}", adminMiddleware(c.SaveAccount))
+	mux.HandleFunc("POST /api/v1/staff-account/delete/{id}", adminMiddleware(c.Delete))
+	mux.HandleFunc("POST /api/v1/staff-department/list", adminMiddleware(c.ListDepartments))
+	mux.HandleFunc("POST /api/v1/staff-department/create", adminMiddleware(c.SaveDepartment))
+	mux.HandleFunc("POST /api/v1/staff-department/update/{id}", adminMiddleware(c.SaveDepartment))
+	mux.HandleFunc("POST /api/v1/staff-department/delete/{id}", adminMiddleware(c.Delete))
+	mux.HandleFunc("POST /api/v1/staff-position/list", adminMiddleware(c.ListPositions))
+	mux.HandleFunc("POST /api/v1/staff-position/create", adminMiddleware(c.SavePosition))
+	mux.HandleFunc("POST /api/v1/staff-position/update/{id}", adminMiddleware(c.SavePosition))
+	mux.HandleFunc("POST /api/v1/staff-position/delete/{id}", adminMiddleware(c.Delete))
+	return middleware.WithCORS(mux, origins)
 }

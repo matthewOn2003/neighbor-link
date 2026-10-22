@@ -304,11 +304,11 @@ func (uc *DashboardUsecase) Overview(now time.Time) (*Overview, error) {
 	if err != nil {
 		return nil, err
 	}
-	collectedBy := make(map[string]float64, len(collected))
+	collectedBy := make(map[string]float64)
 	for _, row := range collected {
 		collectedBy[row.Month] = row.Total
 	}
-	lateFeeBy := make(map[string]float64, len(lateFees))
+	lateFeeBy := make(map[string]float64)
 	for _, row := range lateFees {
 		lateFeeBy[row.Month] = row.Total
 	}

@@ -117,12 +117,6 @@ export default function PropertiesPage() {
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
-              {/* <SearchBar
-                value={keywordInput}
-                onChange={setKeywordInput}
-                placeholder={t("search_properties")}
-              /> */}
-
               <select
                 className="dropdown w-auto min-w-[160px]"
                 aria-label={t("region")}

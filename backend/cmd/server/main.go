@@ -174,7 +174,7 @@ func main() {
 	mux.Handle("/api/v1/maintenance/", maintenancedelivery.NewMaintenanceRouter(maintenanceController, tokenSecret, allowedOrigins))
 	mux.Handle("/api/v1/complaint/", complaintdelivery.NewComplaintRouter(complaintController, tokenSecret, allowedOrigins))
 
-	log.Printf("API server listening on %s", serverAddress)
+	log.Printf("[LOG] API server listening on %s", serverAddress)
 	log.Fatal(http.ListenAndServe(serverAddress, middleware.Audit(mux, tokenSecret, delivery.VerifyToken)))
 }
 
@@ -188,7 +188,7 @@ func requiredEnv(name string) string {
 
 func splitEnv(value string) []string {
 	parts := strings.Split(value, ",")
-	result := make([]string, 0, len(parts))
+	result := make([]string, 0)
 	for _, part := range parts {
 		if trimmed := strings.TrimSpace(part); trimmed != "" {
 			result = append(result, trimmed)

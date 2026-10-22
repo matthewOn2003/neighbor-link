@@ -14,7 +14,7 @@ func NewDictionaryUsecase(repo *repository.SQLiteRepository) *DictionaryUsecase 
 // The id and <slug>_display aliases remain for compatibility with older consumers.
 // Unknown slugs come back as empty arrays.
 func (uc *DictionaryUsecase) Dropdown(slugs []string) (map[string][]map[string]any, error) {
-	result := make(map[string][]map[string]any, len(slugs))
+	result := make(map[string][]map[string]any)
 	for _, slug := range slugs {
 		result[slug] = []map[string]any{}
 	}

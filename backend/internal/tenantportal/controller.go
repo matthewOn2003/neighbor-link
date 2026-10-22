@@ -86,5 +86,5 @@ func paginate[T any](rows []T, page, perPage int) []T {
 	if start >= len(rows) {
 		return []T{}
 	}
-	return rows[start:min(start+perPage, len(rows))]
+	return rows[start:min(start+perPage)]
 }

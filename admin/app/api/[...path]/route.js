@@ -29,6 +29,7 @@ async function proxyRequest(request, method, path) {
 
   const search = new URL(request.url).search;
   const backendResponse = await fetch(`${backendUrl}/${path.join("/")}${search}`, init);
+  // console.log('backendResponse: ', backendResponse)
 
   const response = new NextResponse(await backendResponse.text(), {
     status: backendResponse.status,

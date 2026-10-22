@@ -25,8 +25,8 @@ func (c *DictionaryController) Dropdown(w http.ResponseWriter, r *http.Request) 
 		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid request body")
 		return
 	}
-	keys := make([]string, 0, len(req.Keys))
-	seen := make(map[string]bool, len(req.Keys))
+	keys := make([]string, 0)
+	seen := make(map[string]bool)
 	for _, k := range req.Keys {
 		k = strings.TrimSpace(k)
 		if k == "" || seen[k] {

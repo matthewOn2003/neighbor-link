@@ -170,7 +170,7 @@ type credentials struct {
 // signV4 builds the Authorization header for a request with an empty query string.
 // headers must include "host" and "x-amz-date"; names are lower case.
 func signV4(method, canonicalPath, query string, headers map[string]string, payloadHash string, t time.Time, c credentials) string {
-	names := make([]string, 0, len(headers))
+	names := make([]string, 0)
 	for name := range headers {
 		names = append(names, name)
 	}
@@ -225,12 +225,12 @@ func presignedQuery(c credentials, host, canonicalPath string, ttlSeconds int, t
 		"X-Amz-Expires":       strconv.Itoa(ttlSeconds),
 		"X-Amz-SignedHeaders": "host",
 	}
-	keys := make([]string, 0, len(query))
+	keys := make([]string, 0)
 	for k := range query {
 		keys = append(keys, k)
 	}
 	sort.Strings(keys)
-	pairs := make([]string, 0, len(keys))
+	pairs := make([]string, 0)
 	for _, k := range keys {
 		pairs = append(pairs, escapeQuery(k)+"="+escapeQuery(query[k]))
 	}

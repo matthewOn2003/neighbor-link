@@ -108,7 +108,7 @@ func (c *Controller) Bills(w http.ResponseWriter, r *http.Request) {
 	}
 
 	status := strings.TrimSpace(req.Status)
-	filtered := make([]bill, 0, len(rows))
+	filtered := make([]bill, 0)
 	for _, b := range rows {
 		if status != "" && b.DisplayStatus != status {
 			continue

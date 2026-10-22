@@ -6,6 +6,7 @@ import (
 	"crypto/subtle"
 	"encoding/base64"
 	"fmt"
+	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -27,6 +28,9 @@ func createToken(username, role, configuredSecret string) string {
 
 // verifyToken checks the signature (constant-time) and the token's age against tokenTTL.
 func verifyToken(token, secret string) (username, role string, ok bool) {
+	// token = dGVuYW50OnRlbmFudDoxNzkyNjY3MDYx.dtDcl1Qgqc5VsHjDRTJDq10NQLchiZdodmbx33dwX14 (cookie value from AuthCookieName)
+	// rawPayload = dGVuYW50OnRlbmFudDoxNzkyNjY3MDYx
+	log.Printf("[LOG] token: %v", token) //
 	rawPayload, signature, found := strings.Cut(token, ".")
 	if !found {
 		return "", "", false
@@ -54,7 +58,8 @@ func verifyToken(token, secret string) (username, role string, ok bool) {
 	if time.Since(time.Unix(issuedAt, 0)) > tokenTTL {
 		return "", "", false
 	}
-
+	log.Printf("[LOG] verifyToken: parts=%v issuedAt=%d", parts, issuedAt)
+	// parts[1] = tenant
 	return parts[0], parts[1], true
 }
 
