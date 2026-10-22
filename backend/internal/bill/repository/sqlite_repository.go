@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"backend/internal/bill/rules"
+	"backend/internal/pkg/notify"
 
 	"gorm.io/gorm"
 )
@@ -231,7 +232,12 @@ func (r *SQLiteRepository) Create(b *Bill) error {
 			}
 			return err
 		}
-		return nil
+		return notify.Send(tx, notify.Notice{
+			TenantID: b.TenantID,
+			Kind:     notify.KindBilling,
+			Title:    "New bill issued",
+			Body:     "Your bill for " + b.BillingPeriod + " is ready to view.",
+		})
 	})
 }
 func twoDigit(day int) string {
@@ -328,15 +334,41 @@ func (r *SQLiteRepository) Void(id uint) error {
 	return nil
 }
 
+// Generate issues one bill per active contract whose term covers the billing period, and tells each tenant
+// who receives a new bill. Contracts that have not started yet or have already ended are skipped.
 func (r *SQLiteRepository) Generate(period string) (int64, error) {
 	firstDay := period + "-01"
-	result := r.db.Exec(`INSERT OR IGNORE INTO bills
+	start, err := time.Parse("2006-01-02", firstDay)
+	if err != nil {
+		return 0, ErrInvalidBill
+	}
+	lastDay := start.AddDate(0, 1, -1).Format("2006-01-02")
+
+	var issued int64
+	err = r.db.Transaction(func(tx *gorm.DB) error {
+		// Notify first: the NOT EXISTS check only matches contracts that still have no bill for this period.
+		if err := tx.Exec(`INSERT INTO tenant_notifications (tenant_id, kind, title, body, created_at)
+  SELECT c.tenant_id, ?, 'New bill issued', 'Your bill for ' || ? || ' is ready to view.', ?
+  FROM contracts c
+  WHERE c.status = 'active' AND c.start_date <= ? AND c.end_date >= ?
+    AND NOT EXISTS (SELECT 1 FROM bills b WHERE b.contract_id = c.id AND b.billing_period = ?)`,
+			notify.KindBilling, period, time.Now(), lastDay, firstDay, period).Error; err != nil {
+			return err
+		}
+		result := tx.Exec(`INSERT OR IGNORE INTO bills
   (contract_id, tenant_id, billing_period, due_date, amount, late_fee, amount_paid, status, issued_at, notes, created_at, updated_at)
   SELECT c.id, c.tenant_id, ?, date(?, printf('+%d days', c.billing_day - 1)),
    c.monthly_rent, 0, 0,
    CASE WHEN date(?, printf('+%d days', c.billing_day - 1)) < date('now') THEN 'overdue' ELSE 'unpaid' END,
    date('now'), 'Generated monthly bill', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
-  FROM contracts c WHERE c.status = 'active'`,
-		period, firstDay, firstDay)
-	return result.RowsAffected, result.Error
+  FROM contracts c
+  WHERE c.status = 'active' AND c.start_date <= ? AND c.end_date >= ?`,
+			period, firstDay, firstDay, lastDay, firstDay)
+		if result.Error != nil {
+			return result.Error
+		}
+		issued = result.RowsAffected
+		return nil
+	})
+	return issued, err
 }

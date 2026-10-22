@@ -8,7 +8,7 @@ import { notificationRead } from "@/services/tenant-portal/notification";
 import { formatDateTime } from "./format";
 import { EmptyState, GhostButton, LoadingBlock, Sheet } from "./primitives";
 
-const KIND_ICON = { billing: "receipt", announcement: "campaign" };
+const KIND_ICON = { billing: "receipt", announcement: "campaign", maintenance: "build", complaint: "report" };
 
 /** The notification bell's list. Opening an item marks it read; "mark all" clears the badge. */
 export default function NotificationSheet({ onClose, onChanged }) {
