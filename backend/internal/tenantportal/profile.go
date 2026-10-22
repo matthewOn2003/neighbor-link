@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"time"
 
-	"backend/internal/pkg/response"
+	"backend/internal/pkg/httpx"
 )
 
 // tenantRecord is the tenant row linked to the session.
@@ -196,31 +196,31 @@ func (c *Controller) Me(w http.ResponseWriter, r *http.Request) {
 	}
 	t, err := c.loadTenant(tenantID)
 	if err != nil {
-		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to load profile")
+		httpx.WriteInternalError(w, "failed to load profile")
 		return
 	}
 	property, err := c.loadProperty(t.PropertyID)
 	if err != nil {
-		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to load property")
+		httpx.WriteInternalError(w, "failed to load property")
 		return
 	}
 	unit, err := c.loadUnit(t.UnitID)
 	if err != nil {
-		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to load unit")
+		httpx.WriteInternalError(w, "failed to load unit")
 		return
 	}
 	contract, err := c.loadContract(tenantID)
 	if err != nil {
-		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to load contract")
+		httpx.WriteInternalError(w, "failed to load contract")
 		return
 	}
 	bills, err := c.loadBills(tenantID)
 	if err != nil {
-		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to load bills")
+		httpx.WriteInternalError(w, "failed to load bills")
 		return
 	}
 
-	response.WriteSuccess(w, http.StatusOK, meResponse{
+	httpx.WriteOK(w, meResponse{
 		TenantID:           t.ID,
 		Name:               t.Name,
 		Email:              t.Email,

@@ -97,13 +97,13 @@ func (c *Controller) Bills(w http.ResponseWriter, r *http.Request) {
 	}
 	var req tenantListRequest
 	if json.NewDecoder(r.Body).Decode(&req) != nil {
-		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid request body")
+		httpx.WriteInvalidInput(w, "invalid request body")
 		return
 	}
 
 	rows, err := c.loadBills(tenantID)
 	if err != nil {
-		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to load bills")
+		httpx.WriteInternalError(w, "failed to load bills")
 		return
 	}
 
@@ -117,7 +117,7 @@ func (c *Controller) Bills(w http.ResponseWriter, r *http.Request) {
 	}
 	page, perPage := httpx.NormalizePagination(req.CurrentPage, req.PerPage)
 	list := response.NewListData(paginate(filtered, page, perPage), page, perPage, int64(len(filtered)))
-	response.WriteSuccess(w, http.StatusOK, list.WithSummary(summarizeBills(rows)))
+	httpx.WriteOK(w, list.WithSummary(summarizeBills(rows)))
 }
 
 type invoiceLine struct {
@@ -150,12 +150,12 @@ func (c *Controller) BillDetail(w http.ResponseWriter, r *http.Request) {
 	}
 	id, err := httpx.ParseIDParam(r)
 	if err != nil {
-		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid id")
+		httpx.WriteInvalidInput(w, "invalid id")
 		return
 	}
 	rows, err := c.loadBills(tenantID)
 	if err != nil {
-		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to load bill")
+		httpx.WriteInternalError(w, "failed to load bill")
 		return
 	}
 	var b *bill
@@ -166,23 +166,23 @@ func (c *Controller) BillDetail(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	if b == nil {
-		response.WriteError(w, http.StatusNotFound, "BILL_NOT_FOUND", "bill not found")
+		httpx.WriteNotFound(w, "bill not found")
 		return
 	}
 
 	t, err := c.loadTenant(tenantID)
 	if err != nil {
-		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to load bill")
+		httpx.WriteInternalError(w, "failed to load bill")
 		return
 	}
 	prop, err := c.loadProperty(t.PropertyID)
 	if err != nil {
-		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to load bill")
+		httpx.WriteInternalError(w, "failed to load bill")
 		return
 	}
 	unit, err := c.loadUnit(t.UnitID)
 	if err != nil {
-		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to load bill")
+		httpx.WriteInternalError(w, "failed to load bill")
 		return
 	}
 
@@ -208,5 +208,5 @@ func (c *Controller) BillDetail(w http.ResponseWriter, r *http.Request) {
 	if unit != nil {
 		view.UnitCode = unit.Code
 	}
-	response.WriteSuccess(w, http.StatusOK, view)
+	httpx.WriteOK(w, view)
 }

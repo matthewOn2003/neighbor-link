@@ -51,34 +51,34 @@ func parseTenantFilter(req tenantListRequest) repository.TenantFilter {
 func (c *TenantController) List(w http.ResponseWriter, r *http.Request) {
 	var req tenantListRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid request body")
+		httpx.WriteInvalidInput(w, "invalid request body")
 		return
 	}
 	currentPage, perPage := httpx.NormalizePagination(req.CurrentPage, req.PerPage)
 	tenants, total, err := c.usecase.List(parseTenantFilter(req), currentPage, perPage)
 	if err != nil {
-		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to list tenants")
+		httpx.WriteInternalError(w, "failed to list tenants")
 		return
 	}
-	response.WriteSuccess(w, http.StatusOK, response.NewListData(tenants, currentPage, perPage, total))
+	httpx.WriteOK(w, response.NewListData(tenants, currentPage, perPage, total))
 }
 
 func (c *TenantController) Detail(w http.ResponseWriter, r *http.Request) {
 	id, err := httpx.ParseIDParam(r)
 	if err != nil {
-		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid id")
+		httpx.WriteInvalidInput(w, "invalid id")
 		return
 	}
 	tenant, err := c.usecase.FindByID(id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			response.WriteError(w, http.StatusNotFound, "NOT_FOUND", "tenant not found")
+			httpx.WriteNotFound(w, "tenant not found")
 			return
 		}
-		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to load tenant")
+		httpx.WriteInternalError(w, "failed to load tenant")
 		return
 	}
-	response.WriteSuccess(w, http.StatusOK, tenant)
+	httpx.WriteOK(w, tenant)
 }
 
 type tenantCreateRequest struct {
@@ -100,7 +100,7 @@ type tenantCreateResponse struct {
 func (c *TenantController) Create(w http.ResponseWriter, r *http.Request) {
 	var req tenantCreateRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil || req.Username == "" || req.Name == "" || req.Phone == "" {
-		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "username, name and phone are required")
+		httpx.WriteInvalidInput(w, "username, name and phone are required")
 		return
 	}
 	tenant, generatedPassword, err := c.usecase.CreateTenant(req.Username, req.Name, req.Phone, req.Email, req.PropertyID, req.UnitID, req.Status)
@@ -108,20 +108,20 @@ func (c *TenantController) Create(w http.ResponseWriter, r *http.Request) {
 		writeUnitError(w, err, "failed to create tenant")
 		return
 	}
-	response.WriteSuccess(w, http.StatusCreated, tenantCreateResponse{Tenant: *tenant, Username: req.Username, GeneratedPassword: generatedPassword})
+	httpx.WriteCreated(w, tenantCreateResponse{Tenant: *tenant, Username: req.Username, GeneratedPassword: generatedPassword})
 }
 
 // writeUnitError maps unit assignment failures to client errors; anything else becomes a 500.
 func writeUnitError(w http.ResponseWriter, err error, fallback string) {
 	switch {
 	case errors.Is(err, repository.ErrUnitNotFound):
-		response.WriteError(w, http.StatusBadRequest, "UNIT_NOT_FOUND", "unit not found")
+		httpx.WriteInvalidInput(w, "unit not found")
 	case errors.Is(err, repository.ErrUnitNotVacant):
-		response.WriteError(w, http.StatusConflict, "UNIT_NOT_VACANT", "unit is not vacant")
+		httpx.WriteConflict(w, "unit is not vacant")
 	case errors.Is(err, repository.ErrTenantHasActiveContract):
-		response.WriteError(w, http.StatusConflict, "TENANT_HAS_ACTIVE_CONTRACT", "end the tenant's active contract before marking them former")
+		httpx.WriteConflict(w, "end the tenant's active contract before marking them former")
 	default:
-		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", fallback)
+		httpx.WriteInternalError(w, fallback)
 	}
 }
 
@@ -137,21 +137,21 @@ type tenantUpdateRequest struct {
 func (c *TenantController) Update(w http.ResponseWriter, r *http.Request) {
 	id, err := httpx.ParseIDParam(r)
 	if err != nil {
-		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid id")
+		httpx.WriteInvalidInput(w, "invalid id")
 		return
 	}
 	tenant, err := c.usecase.FindByID(id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			response.WriteError(w, http.StatusNotFound, "NOT_FOUND", "tenant not found")
+			httpx.WriteNotFound(w, "tenant not found")
 			return
 		}
-		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to load tenant")
+		httpx.WriteInternalError(w, "failed to load tenant")
 		return
 	}
 	var req tenantUpdateRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid request body")
+		httpx.WriteInvalidInput(w, "invalid request body")
 		return
 	}
 	if req.Name != "" {
@@ -170,18 +170,18 @@ func (c *TenantController) Update(w http.ResponseWriter, r *http.Request) {
 		writeUnitError(w, err, "failed to update tenant")
 		return
 	}
-	response.WriteSuccess(w, http.StatusOK, tenant)
+	httpx.WriteOK(w, tenant)
 }
 
 func (c *TenantController) Delete(w http.ResponseWriter, r *http.Request) {
 	id, err := httpx.ParseIDParam(r)
 	if err != nil {
-		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid id")
+		httpx.WriteInvalidInput(w, "invalid id")
 		return
 	}
 	if err := c.usecase.Delete(id); err != nil {
-		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to delete tenant")
+		httpx.WriteInternalError(w, "failed to delete tenant")
 		return
 	}
-	response.WriteSuccess(w, http.StatusOK, map[string]uint{"id": id})
+	httpx.WriteOK(w, map[string]uint{"id": id})
 }

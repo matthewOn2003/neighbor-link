@@ -3,7 +3,7 @@ package tenantportal
 import (
 	"net/http"
 
-	"backend/internal/pkg/response"
+	"backend/internal/pkg/httpx"
 )
 
 type wifiResponse struct {
@@ -29,12 +29,12 @@ func (c *Controller) WiFi(w http.ResponseWriter, r *http.Request) {
 		JOIN properties p ON p.id = t.property_id
 		WHERE t.id = ?`, tenantID).Scan(&out)
 	if res.Error != nil {
-		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to load wifi")
+		httpx.WriteInternalError(w, "failed to load wifi")
 		return
 	}
 	if res.RowsAffected == 0 {
-		response.WriteError(w, http.StatusNotFound, "NO_PROPERTY", "no property is linked to this tenant")
+		httpx.WriteNotFound(w, "no property is linked to this tenant")
 		return
 	}
-	response.WriteSuccess(w, http.StatusOK, out)
+	httpx.WriteOK(w, out)
 }

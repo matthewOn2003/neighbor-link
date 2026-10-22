@@ -47,14 +47,14 @@ func (c *Controller) NotificationList(w http.ResponseWriter, r *http.Request) {
 	}
 	var req tenantListRequest
 	if json.NewDecoder(r.Body).Decode(&req) != nil {
-		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid request body")
+		httpx.WriteInvalidInput(w, "invalid request body")
 		return
 	}
 	page, perPage := httpx.NormalizePagination(req.CurrentPage, req.PerPage)
 
 	var total int64
 	if err := c.db.Raw(`SELECT COUNT(*) FROM tenant_notifications WHERE tenant_id = ?`, tenantID).Scan(&total).Error; err != nil {
-		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to load notifications")
+		httpx.WriteInternalError(w, "failed to load notifications")
 		return
 	}
 	rows := []notificationItem{}
@@ -64,16 +64,16 @@ func (c *Controller) NotificationList(w http.ResponseWriter, r *http.Request) {
 		ORDER BY created_at DESC, id DESC
 		LIMIT ? OFFSET ?`, tenantID, perPage, (page-1)*perPage).Scan(&rows).Error
 	if err != nil {
-		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to load notifications")
+		httpx.WriteInternalError(w, "failed to load notifications")
 		return
 	}
 	summary, err := c.notificationSummaryOf(tenantID)
 	if err != nil {
-		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to load notifications")
+		httpx.WriteInternalError(w, "failed to load notifications")
 		return
 	}
 	list := response.NewListData(rows, page, perPage, total).WithSummary(summary)
-	response.WriteSuccess(w, http.StatusOK, list)
+	httpx.WriteOK(w, list)
 }
 
 // NotificationRead marks one notification (id) or all of them (all) as read, and returns the new unread count.
@@ -84,11 +84,11 @@ func (c *Controller) NotificationRead(w http.ResponseWriter, r *http.Request) {
 	}
 	var req notificationReadRequest
 	if json.NewDecoder(r.Body).Decode(&req) != nil {
-		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid request body")
+		httpx.WriteInvalidInput(w, "invalid request body")
 		return
 	}
 	if !req.All && req.ID == 0 {
-		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "id or all is required")
+		httpx.WriteInvalidInput(w, "id or all is required")
 		return
 	}
 	err := c.db.Exec(`
@@ -96,13 +96,13 @@ func (c *Controller) NotificationRead(w http.ResponseWriter, r *http.Request) {
 		WHERE tenant_id = ? AND read_at IS NULL AND (? OR id = ?)`,
 		time.Now(), tenantID, req.All, req.ID).Error
 	if err != nil {
-		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to update notifications")
+		httpx.WriteInternalError(w, "failed to update notifications")
 		return
 	}
 	summary, err := c.notificationSummaryOf(tenantID)
 	if err != nil {
-		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to update notifications")
+		httpx.WriteInternalError(w, "failed to update notifications")
 		return
 	}
-	response.WriteSuccess(w, http.StatusOK, summary)
+	httpx.WriteOK(w, summary)
 }

@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"backend/internal/dashboard/usecase"
-	"backend/internal/pkg/response"
+	"backend/internal/pkg/httpx"
 )
 
 type DashboardController struct {
@@ -19,8 +19,8 @@ func NewDashboardController(uc *usecase.DashboardUsecase) *DashboardController {
 func (c *DashboardController) Overview(w http.ResponseWriter, r *http.Request) {
 	overview, err := c.uc.Overview(time.Now())
 	if err != nil {
-		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to load dashboard overview")
+		httpx.WriteInternalError(w, "failed to load dashboard overview")
 		return
 	}
-	response.WriteSuccess(w, http.StatusOK, overview)
+	httpx.WriteOK(w, overview)
 }

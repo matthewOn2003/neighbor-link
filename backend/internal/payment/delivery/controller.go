@@ -118,56 +118,56 @@ func buildFilter(req filterRequest) (repository.ProofFilter, string) {
 func (c *PaymentController) ProofList(w http.ResponseWriter, r *http.Request) {
 	var req filterRequest
 	if json.NewDecoder(r.Body).Decode(&req) != nil {
-		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid request body")
+		httpx.WriteInvalidInput(w, "invalid request body")
 		return
 	}
 	switch req.Status {
 	case "", "pending", "approved", "rejected":
 	default:
-		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid status")
+		httpx.WriteInvalidInput(w, "invalid status")
 		return
 	}
 	filter, msg := buildFilter(req)
 	if msg != "" {
-		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", msg)
+		httpx.WriteInvalidInput(w, msg)
 		return
 	}
 	if err := usecase.ValidateFilter(filter); err != nil {
-		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "check paid_from, paid_to and amount range")
+		httpx.WriteInvalidInput(w, "check paid_from, paid_to and amount range")
 		return
 	}
 	page, perPage := httpx.NormalizePagination(req.CurrentPage, req.PerPage)
 	rows, total, err := c.uc.ListProofs(filter, page, perPage)
 	if err != nil {
-		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to list payment proofs")
+		httpx.WriteInternalError(w, "failed to list payment proofs")
 		return
 	}
 	c.fillProofURLs(rows)
-	response.WriteSuccess(w, http.StatusOK, response.NewListData(rows, page, perPage, total))
+	httpx.WriteOK(w, response.NewListData(rows, page, perPage, total))
 }
 
 func (c *PaymentController) PaymentList(w http.ResponseWriter, r *http.Request) {
 	var req filterRequest
 	if json.NewDecoder(r.Body).Decode(&req) != nil {
-		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid request body")
+		httpx.WriteInvalidInput(w, "invalid request body")
 		return
 	}
 	filter, msg := buildFilter(req)
 	if msg != "" {
-		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", msg)
+		httpx.WriteInvalidInput(w, msg)
 		return
 	}
 	if err := usecase.ValidateFilter(filter); err != nil {
-		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "check paid_from, paid_to and amount range")
+		httpx.WriteInvalidInput(w, "check paid_from, paid_to and amount range")
 		return
 	}
 	page, perPage := httpx.NormalizePagination(req.CurrentPage, req.PerPage)
 	rows, total, err := c.uc.ListPayments(filter, page, perPage)
 	if err != nil {
-		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to list payments")
+		httpx.WriteInternalError(w, "failed to list payments")
 		return
 	}
-	response.WriteSuccess(w, http.StatusOK, response.NewListData(rows, page, perPage, total))
+	httpx.WriteOK(w, response.NewListData(rows, page, perPage, total))
 }
 
 // reviewer returns the username of the signed-in admin, or "admin" if the token cannot be read.
@@ -186,26 +186,26 @@ func (c *PaymentController) reviewer(r *http.Request) string {
 func writeProofError(w http.ResponseWriter, err error, action string) {
 	switch {
 	case errors.Is(err, repository.ErrProofNotFound):
-		response.WriteError(w, http.StatusNotFound, "NOT_FOUND", "payment proof not found")
+		httpx.WriteNotFound(w, "payment proof not found")
 	case errors.Is(err, repository.ErrProofNotPending):
-		response.WriteError(w, http.StatusConflict, "INVALID_STATE", "only pending payment proofs can be reviewed")
+		httpx.WriteConflict(w, "only pending payment proofs can be reviewed")
 	case errors.Is(err, billrepo.ErrNotFound):
-		response.WriteError(w, http.StatusNotFound, "NOT_FOUND", "bill not found")
+		httpx.WriteNotFound(w, "bill not found")
 	case errors.Is(err, billrepo.ErrAlreadyVoided):
-		response.WriteError(w, http.StatusConflict, "BILL_VOID", "void bills cannot receive payments")
+		httpx.WriteConflict(w, "void bills cannot receive payments")
 	case errors.Is(err, billrepo.ErrInvalidBill):
-		response.WriteError(w, http.StatusBadRequest, "INVALID_PAYMENT", "proof amount exceeds the outstanding balance")
+		httpx.WriteInvalidInput(w, "proof amount exceeds the outstanding balance")
 	case errors.Is(err, usecase.ErrInvalidInput):
-		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "reject reason is required")
+		httpx.WriteInvalidInput(w, "reject reason is required")
 	default:
-		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to "+action+" payment proof")
+		httpx.WriteInternalError(w, "failed to "+action+" payment proof")
 	}
 }
 
 func (c *PaymentController) Approve(w http.ResponseWriter, r *http.Request) {
 	id, err := httpx.ParseIDParam(r)
 	if err != nil {
-		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid id")
+		httpx.WriteInvalidInput(w, "invalid id")
 		return
 	}
 	proof, err := c.uc.Approve(id, c.reviewer(r))
@@ -213,7 +213,7 @@ func (c *PaymentController) Approve(w http.ResponseWriter, r *http.Request) {
 		writeProofError(w, err, "approve")
 		return
 	}
-	response.WriteSuccess(w, http.StatusOK, proof)
+	httpx.WriteOK(w, proof)
 }
 
 type rejectRequest struct {
@@ -223,12 +223,12 @@ type rejectRequest struct {
 func (c *PaymentController) Reject(w http.ResponseWriter, r *http.Request) {
 	id, err := httpx.ParseIDParam(r)
 	if err != nil {
-		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid id")
+		httpx.WriteInvalidInput(w, "invalid id")
 		return
 	}
 	var req rejectRequest
 	if json.NewDecoder(r.Body).Decode(&req) != nil {
-		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid request body")
+		httpx.WriteInvalidInput(w, "invalid request body")
 		return
 	}
 	proof, err := c.uc.Reject(id, c.reviewer(r), req.Reason)
@@ -236,5 +236,5 @@ func (c *PaymentController) Reject(w http.ResponseWriter, r *http.Request) {
 		writeProofError(w, err, "reject")
 		return
 	}
-	response.WriteSuccess(w, http.StatusOK, proof)
+	httpx.WriteOK(w, proof)
 }

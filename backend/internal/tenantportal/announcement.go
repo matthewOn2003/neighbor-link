@@ -47,24 +47,24 @@ func (c *Controller) AnnouncementList(w http.ResponseWriter, r *http.Request) {
 	}
 	var req tenantListRequest
 	if json.NewDecoder(r.Body).Decode(&req) != nil {
-		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid request body")
+		httpx.WriteInvalidInput(w, "invalid request body")
 		return
 	}
 	page, perPage := httpx.NormalizePagination(req.CurrentPage, req.PerPage)
 
 	t, err := c.loadTenant(tenantID)
 	if err != nil {
-		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to load tenant")
+		httpx.WriteInternalError(w, "failed to load tenant")
 		return
 	}
 	if t.PropertyID == nil {
-		response.WriteSuccess(w, http.StatusOK, response.NewListData([]announcementItem{}, page, perPage, 0))
+		httpx.WriteOK(w, response.NewListData([]announcementItem{}, page, perPage, 0))
 		return
 	}
 	rows, total, err := c.propertyAnnouncements(*t.PropertyID, -1)
 	if err != nil {
-		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to load announcements")
+		httpx.WriteInternalError(w, "failed to load announcements")
 		return
 	}
-	response.WriteSuccess(w, http.StatusOK, response.NewListData(paginate(rows, page, perPage), page, perPage, total))
+	httpx.WriteOK(w, response.NewListData(paginate(rows, page, perPage), page, perPage, total))
 }

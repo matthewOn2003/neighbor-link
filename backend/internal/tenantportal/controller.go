@@ -11,8 +11,8 @@ import (
 	maintenancerepo "backend/internal/maintenance/repository"
 	maintenanceusecase "backend/internal/maintenance/usecase"
 	paymentrepo "backend/internal/payment/repository"
+	"backend/internal/pkg/httpx"
 	"backend/internal/pkg/middleware"
-	"backend/internal/pkg/response"
 	"backend/internal/pkg/storage"
 	userdelivery "backend/internal/user/delivery"
 
@@ -74,7 +74,7 @@ func (c *Controller) currentTenantID(r *http.Request) (uint, error) {
 func (c *Controller) tenantOr404(w http.ResponseWriter, r *http.Request) (uint, bool) {
 	tenantID, err := c.currentTenantID(r)
 	if err != nil {
-		response.WriteError(w, http.StatusNotFound, "TENANT_NOT_LINKED", "no tenant profile is linked to this account")
+		httpx.WriteNotFound(w, "no tenant profile is linked to this account")
 		return 0, false
 	}
 	return tenantID, true
@@ -86,5 +86,5 @@ func paginate[T any](rows []T, page, perPage int) []T {
 	if start >= len(rows) {
 		return []T{}
 	}
-	return rows[start:min(start+perPage)]
+	return rows[start:min(start+perPage, len(rows))]
 }

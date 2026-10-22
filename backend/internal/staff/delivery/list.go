@@ -53,7 +53,7 @@ type accountListRequest struct {
 func decodeListRequest[T any](w http.ResponseWriter, r *http.Request) (T, bool) {
 	var req T
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid request body")
+		httpx.WriteInvalidInput(w, "invalid request body")
 		return req, false
 	}
 	return req, true
@@ -126,7 +126,7 @@ func validDateOrEmpty(value string) bool {
 func writePagedList[T any](w http.ResponseWriter, build func() *gorm.DB, selectExpr, order string, currentPage, perPage int, failMessage string) {
 	var total int64
 	if err := build().Count(&total).Error; err != nil {
-		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", failMessage)
+		httpx.WriteInternalError(w, failMessage)
 		return
 	}
 
@@ -138,11 +138,11 @@ func writePagedList[T any](w http.ResponseWriter, build func() *gorm.DB, selectE
 		Limit(perPage).
 		Scan(&rows).Error
 	if err != nil {
-		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", failMessage)
+		httpx.WriteInternalError(w, failMessage)
 		return
 	}
 
-	response.WriteSuccess(w, http.StatusOK, response.NewListData(rows, currentPage, perPage, total))
+	httpx.WriteOK(w, response.NewListData(rows, currentPage, perPage, total))
 }
 
 // departmentHeadcount 统计部门下所有职位的员工数。

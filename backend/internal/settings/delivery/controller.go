@@ -5,7 +5,7 @@ import (
 	"errors"
 	"net/http"
 
-	"backend/internal/pkg/response"
+	"backend/internal/pkg/httpx"
 	"backend/internal/settings/usecase"
 )
 
@@ -28,16 +28,16 @@ type billingSettingsRequest struct {
 func (c *SettingsController) BillingDetail(w http.ResponseWriter, r *http.Request) {
 	settings, err := c.uc.GetBilling()
 	if err != nil {
-		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to load billing settings")
+		httpx.WriteInternalError(w, "failed to load billing settings")
 		return
 	}
-	response.WriteSuccess(w, http.StatusOK, settings)
+	httpx.WriteOK(w, settings)
 }
 
 func (c *SettingsController) BillingUpdate(w http.ResponseWriter, r *http.Request) {
 	var req billingSettingsRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		response.WriteError(w, http.StatusBadRequest, "INVALID_INPUT", "invalid request body")
+		httpx.WriteInvalidInput(w, "invalid request body")
 		return
 	}
 	settings, err := c.uc.UpdateBilling(usecase.BillingSettings{
@@ -49,11 +49,11 @@ func (c *SettingsController) BillingUpdate(w http.ResponseWriter, r *http.Reques
 	})
 	if err != nil {
 		if errors.Is(err, usecase.ErrInvalidSettings) {
-			response.WriteError(w, http.StatusBadRequest, "INVALID_SETTINGS", "due_day and overdue_day must be 1-28 and overdue_day must be after due_day")
+			httpx.WriteInvalidInput(w, "due_day and overdue_day must be 1-28 and overdue_day must be after due_day")
 			return
 		}
-		response.WriteError(w, http.StatusInternalServerError, "INTERNAL_ERROR", "failed to update billing settings")
+		httpx.WriteInternalError(w, "failed to update billing settings")
 		return
 	}
-	response.WriteSuccess(w, http.StatusOK, settings)
+	httpx.WriteOK(w, settings)
 }
