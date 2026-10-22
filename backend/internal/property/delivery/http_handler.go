@@ -10,4 +10,3 @@ func NewPropertyHandler(uc *usecase.PropertyUsecase, tokenSecret string, allowed
 	controller := NewPropertyController(uc)
 	return NewPropertyRouter(controller, tokenSecret, allowedOrigins)
 }
-

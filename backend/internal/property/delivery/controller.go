@@ -54,7 +54,7 @@ func (c *PropertyController) fillCoverURL(item *repository.PropertyListItem) {
 	}
 	link, err := c.storage.Presign(value, coverPresignTTL)
 	if err != nil {
-		log.Printf("cover image link failed for %q: %v", value, err)
+		log.Printf("[LOG] cover image link failed for %q: %v", value, err)
 		return
 	}
 	item.CoverImageURL = link
@@ -543,7 +543,7 @@ func (c *PropertyController) UploadCover(w http.ResponseWriter, r *http.Request)
 			response.WriteError(w, http.StatusServiceUnavailable, "STORAGE_NOT_CONFIGURED", "object storage is not configured")
 			return
 		}
-		log.Printf("cover upload failed for property %d: %v", id, err)
+		log.Printf("[LOG] cover upload failed for property %d: %v", id, err)
 		response.WriteError(w, http.StatusBadGateway, "UPLOAD_FAILED", "failed to store cover image")
 		return
 	}

@@ -14,8 +14,8 @@
       <rect x="180" y="185" width="30" height="30" rx="5"/>
     </g>
   </g>
-  <text x="357" y="205" font-family="Arial, Helvetica, sans-serif" font-size="126" font-weight="700" letter-spacing="-4">
+  <text x="357" y="205" font-family="SeekSans, "SeekSans Fallback", Arial, Tahoma, sans-serif" font-size="126" font-weight="700" letter-spacing="-4">
     <tspan fill="#293238">Neighbor</tspan><tspan fill="#E9A52C">Link</tspan>
   </text>
-  <text x="360" y="307" font-family="Arial, Helvetica, sans-serif" font-size="58" font-weight="400" letter-spacing="0" fill="#5B5F61">Rent Smarter. Live Happier.</text>
+  <text x="360" y="307" font-family="SeekSans, "SeekSans Fallback", Arial, Tahoma, sans-serif" font-size="58" font-weight="400" letter-spacing="0" fill="#5B5F61">Rent Smarter. Live Happier.</text>
 </svg>

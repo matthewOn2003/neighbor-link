@@ -54,7 +54,7 @@ func RunMigrations(db *gorm.DB, migrationsDir string) error {
 			return fmt.Errorf("failed to read migration file %s: %w", filename, err)
 		}
 
-		log.Printf("Applying migration: %s", filename)
+		log.Printf("[LOG] Applying migration: %s", filename)
 		// Run within a transaction
 		txErr := db.Transaction(func(tx *gorm.DB) error {
 			queries := splitSQLStatements(string(content))
@@ -73,7 +73,7 @@ func RunMigrations(db *gorm.DB, migrationsDir string) error {
 		if txErr != nil {
 			return fmt.Errorf("migration %s failed: %w", filename, txErr)
 		}
-		log.Printf("Successfully applied migration: %s", filename)
+		log.Printf("[LOG] Successfully applied migration: %s", filename)
 	}
 
 	return nil
@@ -122,7 +122,6 @@ func splitSQLStatements(script string) []string {
 	return statements
 }
 
- 
 // RunSQLFile executes an SQL script without recording it as a schema migration.
 // It is intended for repeatable development seed scripts.
 func RunSQLFile(db *gorm.DB, filePath string) error {

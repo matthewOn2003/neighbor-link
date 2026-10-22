@@ -170,7 +170,7 @@ func (c *Controller) ProofList(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	status := strings.TrimSpace(req.Status)
-	filtered := make([]paymentrepo.PaymentProof, 0, len(rows))
+	filtered := make([]paymentrepo.PaymentProof, 0)
 	for _, p := range rows {
 		if status != "" && p.Status != status {
 			continue

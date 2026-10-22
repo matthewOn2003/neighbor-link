@@ -12,7 +12,7 @@ func (c *Controller) statusCounts(table string, tenantID uint) (map[string]int64
 	if err != nil {
 		return nil, 0, err
 	}
-	counts := make(map[string]int64, len(rows))
+	counts := make(map[string]int64)
 	var total int64
 	for _, r := range rows {
 		counts[r.Status] = r.N

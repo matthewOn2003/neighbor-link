@@ -74,8 +74,8 @@ func whereKeyword(q *gorm.DB, keyword string, columns ...string) *gorm.DB {
 	if like == "" {
 		return q
 	}
-	conditions := make([]string, 0, len(columns))
-	args := make([]any, 0, len(columns))
+	conditions := make([]string, 0)
+	args := make([]any, 0)
 	for _, column := range columns {
 		conditions = append(conditions, column+" LIKE ?")
 		args = append(args, like)

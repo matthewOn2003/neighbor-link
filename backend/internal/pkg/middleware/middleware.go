@@ -2,7 +2,9 @@ package middleware
 
 import (
 	"backend/internal/pkg/response"
+	"log"
 	"net/http"
+	"net/http/httputil"
 )
 
 const AuthCookieName = "auth_token"
@@ -27,13 +29,18 @@ func RequireAuth(tokenSecret string, verifyToken func(string, string) (string, s
 
 // RequireRole validates the session and restricts the endpoint to the supplied roles.
 func RequireRole(tokenSecret string, verifyToken func(string, string) (string, string, bool), allowedRoles ...string) func(http.HandlerFunc) http.HandlerFunc {
-	allowed := make(map[string]struct{}, len(allowedRoles))
+	allowed := make(map[string]struct{})
 	for _, role := range allowedRoles {
 		allowed[role] = struct{}{}
 	}
 	return func(next http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
-			cookie, err := r.Cookie(AuthCookieName)
+
+			dump, _ := httputil.DumpRequest(r, true)
+			log.Printf("[LOG] dump: %v", string(dump))
+
+			cookie, err := r.Cookie(AuthCookieName) // cookie = read the Cookie value, like in the dumped request above
+			// dGVuYW50OnRlbmFudDoxNzkyNjY3MDYx.dtDcl1Qgqc5VsHjDRTJDq10NQLchiZdodmbx33dwX14
 			if err != nil {
 				response.WriteError(w, http.StatusUnauthorized, "UNAUTHENTICATED", "authentication required")
 				return
@@ -54,7 +61,7 @@ func RequireRole(tokenSecret string, verifyToken func(string, string) (string, s
 
 // WithCORS wraps an http.Handler with CORS headers.
 func WithCORS(next http.Handler, allowedOrigins []string) http.Handler {
-	allowedMap := make(map[string]struct{}, len(allowedOrigins))
+	allowedMap := make(map[string]struct{})
 	for _, origin := range allowedOrigins {
 		allowedMap[origin] = struct{}{}
 	}

@@ -23,7 +23,7 @@ func (r *SQLiteRepository) GetBillingSettings() (map[string]string, error) {
 	if err := r.db.Table("billing_settings").Select("key, value").Scan(&rows).Error; err != nil {
 		return nil, err
 	}
-	values := make(map[string]string, len(rows))
+	values := make(map[string]string)
 	for _, row := range rows {
 		values[row.Key] = row.Value
 	}

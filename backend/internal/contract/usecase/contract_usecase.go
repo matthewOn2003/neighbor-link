@@ -56,11 +56,11 @@ func (u *ContractUsecase) RunExpiryLoop(interval time.Duration) {
 	pass := func() {
 		n, err := u.ExpireDue(time.Now())
 		if err != nil {
-			log.Printf("contract expiry failed: %v", err)
+			log.Printf("[LOG] contract expiry failed: %v", err)
 			return
 		}
 		if n > 0 {
-			log.Printf("expired %d contract(s)", n)
+			log.Printf("[LOG] expired %d contract(s)", n)
 		}
 	}
 	pass()
