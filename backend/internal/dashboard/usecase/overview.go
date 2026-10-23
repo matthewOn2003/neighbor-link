@@ -18,15 +18,22 @@ const (
 	revenueMonths      = 12
 	expiringWindowDays = 60
 	renewalNotStarted  = "not_started"
+	// occupancyTargetRate is the portfolio occupancy goal, in percent.
+	occupancyTargetRate = 85
+	// complaintSLADays is how long a complaint may stay open before it counts as over SLA.
+	complaintSLADays = 3
 )
 
-// The JSON keys below are camelCase to match the admin dashboard mock (admin/mock/dashboard.js).
+// The JSON keys below are camelCase to match the admin dashboard.
 
 type Summary struct {
 	TotalUnits             int64   `json:"totalUnits"`
 	OccupiedUnits          int64   `json:"occupiedUnits"`
+	MaintenanceUnits       int64   `json:"maintenanceUnits"`
 	OccupancyRate          float64 `json:"occupancyRate"`
 	OccupancyRatePrevMonth float64 `json:"occupancyRatePrevMonth"`
+	OccupancyTarget        float64 `json:"occupancyTarget"`
+	UnitsToTarget          int64   `json:"unitsToTarget"`
 	ActiveLeases           int64   `json:"activeLeases"`
 	CycleBilledAmount      float64 `json:"cycleBilledAmount"`
 	CycleCollectedAmount   float64 `json:"cycleCollectedAmount"`
@@ -37,8 +44,10 @@ type Summary struct {
 	ContractsExpiring30d   int64   `json:"contractsExpiring30d"`
 	ContractsExpiring60d   int64   `json:"contractsExpiring60d"`
 	OpenComplaints         int64   `json:"openComplaints"`
+	ComplaintsOverSLA      int64   `json:"complaintsOverSla"`
 	OpenMaintenance        int64   `json:"openMaintenance"`
 	UrgentMaintenance      int64   `json:"urgentMaintenance"`
+	AvgResolutionDays      float64 `json:"avgResolutionDays"`
 	MaintenanceNewWeek     int64   `json:"maintenanceNewWeek"`
 	MaintenanceNewTenant   int64   `json:"maintenanceNewTenant"`
 	MaintenanceNewAdmin    int64   `json:"maintenanceNewAdmin"`
@@ -63,10 +72,13 @@ type PropertyStat struct {
 	MaintenanceUnits int64  `json:"maintenanceUnits"`
 }
 
+// RevenuePoint is one month. Billed is what was charged for that billing period; Rent and Extra
+// together are what was collected in that month (Extra = late fees).
 type RevenuePoint struct {
-	Month string  `json:"month"`
-	Rent  float64 `json:"rent"`
-	Extra float64 `json:"extra"`
+	Month  string  `json:"month"`
+	Billed float64 `json:"billed"`
+	Rent   float64 `json:"rent"`
+	Extra  float64 `json:"extra"`
 }
 
 type FunnelGroup struct {
@@ -107,6 +119,7 @@ type ActivityItem struct {
 }
 
 type Overview struct {
+	Cycle             string             `json:"cycle"`
 	Summary           Summary            `json:"summary"`
 	Focus             Focus              `json:"focus"`
 	Properties        []PropertyStat     `json:"properties"`
@@ -141,10 +154,17 @@ func nilIfEmpty(s string) *string {
 }
 
 // Overview assembles the admin dashboard payload from live data. now is the server's local time.
-func (uc *DashboardUsecase) Overview(now time.Time) (*Overview, error) {
+// cycle is the billing cycle to report on (YYYY-MM); an empty cycle means the cycle of now.
+func (uc *DashboardUsecase) Overview(now time.Time, cycle string) (*Overview, error) {
 	today := now.Format("2006-01-02")
-	cycle := now.Format("2006-01")
+	if cycle == "" {
+		cycle = now.Format("2006-01")
+	}
 	today0, err := time.ParseInLocation("2006-01-02", today, now.Location())
+	if err != nil {
+		return nil, err
+	}
+	cycleStart, err := time.ParseInLocation("2006-01", cycle, now.Location())
 	if err != nil {
 		return nil, err
 	}
@@ -155,6 +175,7 @@ func (uc *DashboardUsecase) Overview(now time.Time) (*Overview, error) {
 	}
 
 	out := &Overview{
+		Cycle:             cycle,
 		Properties:        []PropertyStat{},
 		Revenue:           []RevenuePoint{},
 		CollectionFunnel:  []FunnelGroup{},
@@ -178,16 +199,31 @@ func (uc *DashboardUsecase) Overview(now time.Time) (*Overview, error) {
 		})
 		out.Summary.TotalUnits += s.TotalUnits
 		out.Summary.OccupiedUnits += s.OccupiedUnits
+		out.Summary.MaintenanceUnits += s.MaintenanceUnits
 	}
-	if out.Summary.TotalUnits > 0 {
-		out.Summary.OccupancyRate = round1(float64(out.Summary.OccupiedUnits) / float64(out.Summary.TotalUnits) * 100)
+	total := out.Summary.TotalUnits
+	if total > 0 {
+		out.Summary.OccupancyRate = round1(float64(out.Summary.OccupiedUnits) / float64(total) * 100)
 	}
-	// Occupancy history is not recorded yet, so the previous-month figure is reported as 0.
+	// Occupancy at the end of the month before the cycle, rebuilt from contracts.
+	prevEnd := cycleStart.AddDate(0, 0, -1).Format("2006-01-02")
+	prevOccupied, err := uc.repo.OccupiedUnitsOn(prevEnd)
+	if err != nil {
+		return nil, err
+	}
+	if total > 0 {
+		out.Summary.OccupancyRatePrevMonth = round1(float64(prevOccupied) / float64(total) * 100)
+	}
+	out.Summary.OccupancyTarget = occupancyTargetRate
+	need := int64(math.Ceil(float64(total)*occupancyTargetRate/100)) - out.Summary.OccupiedUnits
+	if need > 0 {
+		out.Summary.UnitsToTarget = need
+	}
 	if out.Summary.ActiveLeases, err = uc.repo.ActiveContracts(); err != nil {
 		return nil, err
 	}
 
-	// Bills: current cycle figures, collection funnel, overdue counts and priority list.
+	// Bills: cycle figures, collection funnel, overdue counts and priority list.
 	bills, err := uc.repo.BillsForOverview(cycle)
 	if err != nil {
 		return nil, err
@@ -260,12 +296,18 @@ func (uc *DashboardUsecase) Overview(now time.Time) (*Overview, error) {
 	}
 	out.Summary.ContractsExpiring60d = int64(len(out.ExpiringContracts))
 
-	// Complaints come from the complaints table; maintenance requests are counted separately.
+	// Complaints: total open, and how many have been open longer than the SLA.
 	openComplaints, err := uc.repo.OpenComplaints()
 	if err != nil {
 		return nil, err
 	}
 	out.Summary.OpenComplaints = openComplaints
+	slaCutoff := today0.AddDate(0, 0, -complaintSLADays).Format("2006-01-02")
+	overSLA, err := uc.repo.OpenComplaintsOpenedBefore(slaCutoff)
+	if err != nil {
+		return nil, err
+	}
+	out.Summary.ComplaintsOverSLA = overSLA
 
 	weekStart := today0.AddDate(0, 0, -((int(now.Weekday()) + 6) % 7)).Format("2006-01-02")
 	maintenance, err := uc.repo.MaintenanceStats(weekStart)
@@ -278,6 +320,12 @@ func (uc *DashboardUsecase) Overview(now time.Time) (*Overview, error) {
 	out.Summary.MaintenanceNewTenant = maintenance.NewFromTenant
 	out.Summary.MaintenanceNewAdmin = maintenance.NewFromAdmin
 
+	avgDays, err := uc.repo.AvgMaintenanceResolutionDays(cycle)
+	if err != nil {
+		return nil, err
+	}
+	out.Summary.AvgResolutionDays = round1(avgDays)
+
 	proofs, err := uc.repo.PendingProofs()
 	if err != nil {
 		return nil, err
@@ -288,19 +336,23 @@ func (uc *DashboardUsecase) Overview(now time.Time) (*Overview, error) {
 	if out.Summary.OpenBills, err = uc.repo.OpenBills(); err != nil {
 		return nil, err
 	}
-	out.Summary.VacantUnits = out.Summary.TotalUnits - out.Summary.OccupiedUnits
+	out.Summary.VacantUnits = total - out.Summary.OccupiedUnits
 
 	out.Focus.ExpiringContracts = out.Summary.ContractsExpiring30d
 	out.Focus.UrgentMaintenance = out.Summary.UrgentMaintenance
 	out.Focus.PendingProofs = out.Summary.PendingProofCount
 
-	// Revenue for the last 12 months, oldest first. extra = late fees; rent = collected minus late fees.
-	since := time.Date(now.Year(), now.Month()-(revenueMonths-1), 1, 0, 0, 0, 0, now.Location())
+	// Last 12 months ending with the cycle, oldest first.
+	since := cycleStart.AddDate(0, -(revenueMonths - 1), 0)
 	collected, err := uc.repo.CollectedByMonth(since.Format("2006-01-02"))
 	if err != nil {
 		return nil, err
 	}
 	lateFees, err := uc.repo.LateFeesByMonth(since.Format("2006-01-02"))
+	if err != nil {
+		return nil, err
+	}
+	billedRows, err := uc.repo.BilledByMonth(since.Format("2006-01"))
 	if err != nil {
 		return nil, err
 	}
@@ -312,11 +364,15 @@ func (uc *DashboardUsecase) Overview(now time.Time) (*Overview, error) {
 	for _, row := range lateFees {
 		lateFeeBy[row.Month] = row.Total
 	}
+	billedBy := make(map[string]float64)
+	for _, row := range billedRows {
+		billedBy[row.Month] = row.Total
+	}
 	for i := revenueMonths - 1; i >= 0; i-- {
-		month := time.Date(now.Year(), now.Month()-time.Month(i), 1, 0, 0, 0, 0, now.Location()).Format("2006-01")
+		month := cycleStart.AddDate(0, -i, 0).Format("2006-01")
 		extra := lateFeeBy[month]
 		rent := math.Max(collectedBy[month]-extra, 0)
-		out.Revenue = append(out.Revenue, RevenuePoint{Month: month, Rent: rent, Extra: extra})
+		out.Revenue = append(out.Revenue, RevenuePoint{Month: month, Billed: billedBy[month], Rent: rent, Extra: extra})
 	}
 
 	out.Activity = uc.activity(now)
