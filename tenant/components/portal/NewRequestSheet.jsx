@@ -7,6 +7,7 @@ import { useToast } from "@/components/ui/Toast";
 import { useDropdown } from "@/hooks/useDropdown";
 import { maintenanceCreate } from "@/services/tenant-portal/maintenance";
 import { complaintCreate } from "@/services/tenant-portal/complaint";
+import { Input, Select } from "@/components/ui";
 
 const MAX_PHOTOS = 5;
 const MAX_PHOTO_BYTES = 10 * 1024 * 1024;
@@ -117,33 +118,39 @@ export default function NewRequestSheet({ initialKind = "maintenance", onClose, 
       </div>
       <form id="new-request-form" onSubmit={submit} className="flex flex-col gap-3.5">
         <Field label={t("portal_subject")}>
-          <input
-            className={inputClass}
-            maxLength={200}
+          <Input
+            name="title"
+            hideLabel
             placeholder={t("portal_subject_placeholder")}
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={setTitle}
           />
         </Field>
         <div className="grid grid-cols-2 gap-2.5">
           <Field label={t("category")}>
-            <select className={inputClass} value={selectedCategory} onChange={(e) => setCategory(e.target.value)}>
-              {categories.map((o) => (
-                <option key={o.value} value={o.value}>
-                  {optionLabel(slug, o)}
-                </option>
-              ))}
-            </select>
+            <Select
+              name="category"
+              label={t("category")}
+              value={selectedCategory}
+              onChange={setCategory}
+              options={categories.map((o) => ({
+                value: o.value,
+                label: optionLabel(slug, o),
+              }))}
+            />
           </Field>
           {kind === "maintenance" ? (
             <Field label={t("priority")}>
-              <select className={inputClass} value={selectedPriority} onChange={(e) => setPriority(e.target.value)}>
-                {priorities.map((o) => (
-                  <option key={o.value} value={o.value}>
-                    {optionLabel("maintenance_priority", o)}
-                  </option>
-                ))}
-              </select>
+              <Select
+                name="priority"
+                label={t("priority")}
+                value={selectedPriority}
+                onChange={setPriority}
+                options={priorities.map((o) => ({
+                  value: o.value,
+                  label: optionLabel("maintenance_priority", o),
+                }))}
+              />
             </Field>
           ) : null}
         </div>

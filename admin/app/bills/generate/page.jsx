@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Link, useRouter } from "@/i18n/navigation";
 import { Icon } from "@/components/ui/Icon";
 import { DataTable, SummaryCard } from "@/components/ui/DataTable";
+import { Input } from "@/components/ui/Input";
 import { request } from "@/services/request";
 import { useLocale } from "@/i18n";
 import { useToast } from "@/components/ui";
@@ -52,13 +53,14 @@ export default function GenerateBillsPage() {
           description={t("generate_bills_description")}
           buttons={(
             <>
-              <input
-                aria-label={t("billing_period")}
+              <Input
+                name="billing_period"
+                label={t("billing_period")}
                 type="month"
                 value={period}
-                onChange={(event) => setPeriod(event.target.value)}
-                className="input min-w-[160px]"
+                onChange={setPeriod}
                 required
+                className="min-w-[160px]"
               />
               <Link href="/bills" className="btn btn-outline">
                 <span>{t("back_to_bills")}</span>

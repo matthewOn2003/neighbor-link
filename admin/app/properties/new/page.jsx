@@ -27,6 +27,7 @@ export default function NewPropertyPage() {
   const { t } = useLocale();
   const router = useRouter();
   const toast = useToast();
+
   const [form, setForm] = useState(EMPTY_FORM);
   const [errors, setErrors] = useState({});
   const [saving, setSaving] = useState(false);
@@ -42,6 +43,7 @@ export default function NewPropertyPage() {
 
   async function handleSubmit(event) {
     event.preventDefault();
+
     const nextErrors = {};
     if (!form.name.trim()) nextErrors.name = t("field_required");
     if (!form.address.trim()) nextErrors.address = t("field_required");
@@ -79,19 +81,37 @@ export default function NewPropertyPage() {
       backHref="/properties"
       onSubmit={handleSubmit}
       size="md"
-      actions={(
+      actions={
         <div className="flex gap-3">
-          <button type="button" className="btn btn-outline" onClick={() => router.push("/properties")} disabled={saving}>
+          <button
+            type="button"
+            className="btn btn-outline"
+            onClick={() => router.push("/properties")}
+            disabled={saving}
+          >
             {t("cancel")}
           </button>
           <button type="submit" className="btn btn-primary" disabled={saving}>
-            {saving ? <><Spinner size="sm" label={t("saving")} /> {t("saving")}</> : t("create_property")}
+            {saving ? (
+              <>
+                <Spinner size="sm" label={t("saving")} /> {t("saving")}
+              </>
+            ) : (
+              t("create_property")
+            )}
           </button>
         </div>
-      )}
+      }
     >
       <FormSection title={t("details")}>
-        <Input label={t("name")} name="name" value={form.name} onChange={(v) => updateField("name", v)} required error={errors.name} />
+        <Input
+          label={t("name")}
+          name="name"
+          value={form.name}
+          onChange={(v) => updateField("name", v)}
+          required
+          error={errors.name}
+        />
         <Select
           label={t("developer")}
           name="developer_id"
@@ -115,13 +135,52 @@ export default function NewPropertyPage() {
           options={optionsOf("property_region")}
           placeholder={t("select_region")}
         />
-        <Input label={t("address")} name="address" value={form.address} onChange={(v) => updateField("address", v)} required error={errors.address} />
-        <Input label={t("city")} name="city" value={form.city} onChange={(v) => updateField("city", v)} />
-        <Input label={t("cover_image_url")} name="cover_image" type="url" placeholder="https://" value={form.cover_image} onChange={(v) => updateField("cover_image", v)} />
-        <Textarea label={t("description")} name="description" value={form.description} onChange={(v) => updateField("description", v)} />
-        <Input label={t("wifi_ssid")} name="wifi_ssid" value={form.wifi_ssid} onChange={(v) => updateField("wifi_ssid", v)} />
-        <Input label={t("wifi_password")} name="wifi_password" value={form.wifi_password} onChange={(v) => updateField("wifi_password", v)} />
-        <Textarea label={t("notes")} name="notes" value={form.notes} onChange={(v) => updateField("notes", v)} />
+        <Input
+          label={t("address")}
+          name="address"
+          value={form.address}
+          onChange={(v) => updateField("address", v)}
+          required
+          error={errors.address}
+        />
+        <Input
+          label={t("city")}
+          name="city"
+          value={form.city}
+          onChange={(v) => updateField("city", v)}
+        />
+        <Input
+          label={t("cover_image_url")}
+          name="cover_image"
+          type="url"
+          placeholder="https://"
+          value={form.cover_image}
+          onChange={(v) => updateField("cover_image", v)}
+        />
+        <Textarea
+          label={t("description")}
+          name="description"
+          value={form.description}
+          onChange={(v) => updateField("description", v)}
+        />
+        <Input
+          label={t("wifi_ssid")}
+          name="wifi_ssid"
+          value={form.wifi_ssid}
+          onChange={(v) => updateField("wifi_ssid", v)}
+        />
+        <Input
+          label={t("wifi_password")}
+          name="wifi_password"
+          value={form.wifi_password}
+          onChange={(v) => updateField("wifi_password", v)}
+        />
+        <Textarea
+          label={t("notes")}
+          name="notes"
+          value={form.notes}
+          onChange={(v) => updateField("notes", v)}
+        />
       </FormSection>
     </FormPage>
   );

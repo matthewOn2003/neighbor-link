@@ -34,7 +34,7 @@ export function Input({
           id={name}
           name={name}
           type={type}
-          className="w-full rounded-lg border border-line/60 bg-accent px-3 text-sm text-scene-content placeholder:text-subtle/60 outline-none transition-colors focus:border-primary"
+          className="w-full rounded-lg border border-line/60 bg-accent px-3 text-sm text-scene-content placeholder:text-primary/10 outline-none transition-colors focus:border-primary"
           style={{ height: "var(--control-height)" }}
           value={value}
           placeholder={placeholder}

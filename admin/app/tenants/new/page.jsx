@@ -9,12 +9,21 @@ import { useLocale } from "@/i18n";
 import { FormPage, FormSection, Select, Input, CopyableField, useToast } from "@/components/ui";
 import { Spinner } from "@/components/ui/Spinner";
 
-const EMPTY_FORM = { username: "", name: "", phone: "", email: "", property_id: "", unit_id: "", status: "active" };
+const EMPTY_FORM = {
+  username: "",
+  name: "",
+  phone: "",
+  email: "",
+  property_id: "",
+  unit_id: "",
+  status: "active",
+};
 
 export default function NewTenantPage() {
   const { t } = useLocale();
   const router = useRouter();
   const toast = useToast();
+
   const [form, setForm] = useState(EMPTY_FORM);
   const [errors, setErrors] = useState({});
   const [saving, setSaving] = useState(false);
@@ -43,6 +52,7 @@ export default function NewTenantPage() {
 
   async function handleSubmit(event) {
     event.preventDefault();
+
     const nextErrors = {};
     if (!form.username.trim()) nextErrors.username = t("field_required");
     if (!form.name.trim()) nextErrors.name = t("field_required");
@@ -64,7 +74,9 @@ export default function NewTenantPage() {
       setCreated(result);
       toast.success(t("tenant_created"));
     } catch (err) {
-      toast.error(err.code === "UNIT_NOT_VACANT" ? t("unit_not_vacant") : t("failed_to_create_tenant"));
+      toast.error(
+        err.code === "UNIT_NOT_VACANT" ? t("unit_not_vacant") : t("failed_to_create_tenant")
+      );
     } finally {
       setSaving(false);
     }
@@ -77,12 +89,16 @@ export default function NewTenantPage() {
         subtitle={t("save_password_notice")}
         backLabel={t("tenants")}
         backHref="/tenants"
-        actions={(
+        actions={
           <div className="flex gap-3">
-            <Link href="/tenants" className="btn btn-outline">{t("back_to_tenants")}</Link>
-            <Link href={`/tenants/${created.id}`} className="btn btn-primary">{t("view_tenant")}</Link>
+            <Link href="/tenants" className="btn btn-outline">
+              {t("back_to_tenants")}
+            </Link>
+            <Link href={`/tenants/${created.id}`} className="btn btn-primary">
+              {t("view_tenant")}
+            </Link>
           </div>
-        )}
+        }
         size="md"
       >
         <FormSection title={t("login_credentials")}>
@@ -101,22 +117,60 @@ export default function NewTenantPage() {
       backHref="/tenants"
       onSubmit={handleSubmit}
       size="md"
-      actions={(
+      actions={
         <div className="flex gap-3">
-          <button type="button" className="btn btn-outline" onClick={() => router.push("/tenants")} disabled={saving}>
+          <button
+            type="button"
+            className="btn btn-outline"
+            onClick={() => router.push("/tenants")}
+            disabled={saving}
+          >
             {t("cancel")}
           </button>
           <button type="submit" className="btn btn-primary" disabled={saving}>
-            {saving ? <><Spinner size="sm" label={t("saving")} /> {t("saving")}</> : t("create_tenant")}
+            {saving ? (
+              <>
+                <Spinner size="sm" label={t("saving")} /> {t("saving")}
+              </>
+            ) : (
+              t("create_tenant")
+            )}
           </button>
         </div>
-      )}
+      }
     >
       <FormSection title={t("details")}>
-        <Input label={t("username")} name="username" value={form.username} onChange={(v) => updateField("username", v)} required error={errors.username} />
-        <Input label={t("name")} name="name" value={form.name} onChange={(v) => updateField("name", v)} required error={errors.name} />
-        <Input label={t("phone")} name="phone" value={form.phone} onChange={(v) => updateField("phone", v)} required error={errors.phone} />
-        <Input label={t("email")} name="email" type="email" value={form.email} onChange={(v) => updateField("email", v)} />
+        <Input
+          label={t("username")}
+          name="username"
+          value={form.username}
+          onChange={(v) => updateField("username", v)}
+          required
+          error={errors.username}
+        />
+        <Input
+          label={t("name")}
+          name="name"
+          value={form.name}
+          onChange={(v) => updateField("name", v)}
+          required
+          error={errors.name}
+        />
+        <Input
+          label={t("phone")}
+          name="phone"
+          value={form.phone}
+          onChange={(v) => updateField("phone", v)}
+          required
+          error={errors.phone}
+        />
+        <Input
+          label={t("email")}
+          name="email"
+          type="email"
+          value={form.email}
+          onChange={(v) => updateField("email", v)}
+        />
         <Select
           label={t("property")}
           name="property_id"

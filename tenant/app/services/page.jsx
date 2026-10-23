@@ -11,6 +11,7 @@ import { useOptionLabel, STATUS_FILTERS, STATUS_LABEL_KEY } from "@/components/p
 import { RepairCard, ComplaintCard } from "@/components/portal/RequestCards";
 import NewRequestSheet from "@/components/portal/NewRequestSheet";
 import { EmptyState, FilterChips, LoadingBlock, SegmentedTabs, Stagger, inputClass } from "@/components/portal/primitives";
+import { Input } from "@/components/ui";
 
 export default function ServicesPage() {
   return (
@@ -91,11 +92,14 @@ function ServicesContent() {
           <div className="flex flex-col gap-2.5">
             <div className="relative">
               <Icon name="search" className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[18px] text-on-surface-variant" />
-              <input
-                className={`${inputClass} pl-11`}
+              <Input
+                name="keyword"
+                label={t("portal_search_requests")}
+                hideLabel
+                icon="search"
                 placeholder={t("portal_search_requests")}
                 value={keyword}
-                onChange={(e) => setKeyword(e.target.value)}
+                onChange={setKeyword}
               />
             </div>
             <FilterChips items={statusItems} value={status} onChange={setStatus} />

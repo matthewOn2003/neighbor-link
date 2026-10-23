@@ -17,7 +17,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   if (pathname === "/") return <>{children}</>;
 
   return (
-    <div className="bg-[#f8fafc] text-scene-content antialiased min-h-screen">
+    <div className="bg-scene text-scene-content antialiased min-h-screen">
       <Sidebar open={navOpen} onClose={() => setNavOpen(false)} />
       {navOpen ? (
         <div
@@ -28,7 +28,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       ) : null}
       <div className="md:pl-64">
         <Header onMenuClick={() => setNavOpen(!navOpen)} />
-        <main className="relative w-full pt-16 bg-[#f8fafc] min-h-screen">{children}</main>
+        <main className="relative w-full pt-16 bg-scene min-h-screen">{children}</main>
       </div>
     </div>
   );

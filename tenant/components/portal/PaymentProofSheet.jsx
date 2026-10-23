@@ -9,6 +9,7 @@ import { createPaymentProof } from "@/services/tenant-portal/paymentProof";
 import { todayKL } from "./format";
 import { useTOr } from "./status";
 import { Field, GhostButton, PrimaryButton, Sheet, inputClass } from "./primitives";
+import { Input, Select } from "../ui";
 
 const MAX_FILE_BYTES = 10 * 1024 * 1024;
 
@@ -83,31 +84,44 @@ export default function PaymentProofSheet({ bills, initialBillId, onClose, onSub
       ) : (
         <form id="payment-proof-form" onSubmit={submit} className="flex flex-col gap-3.5">
           <Field label={t("billing_period")}>
-            <select className={inputClass} value={billId ?? ""} onChange={(e) => changeBill(e.target.value)}>
-              {payable.map((b) => (
-                <option key={b.id} value={b.id}>
-                  {b.billing_period} ({money(b.outstanding, locale)})
-                </option>
-              ))}
-            </select>
-          </Field>
-          <div className="grid grid-cols-2 gap-2.5">
-            <Field label={t("payment_amount")}>
-              <input className={inputClass} type="number" inputMode="decimal" step="0.01" min="0" value={amount} onChange={(e) => setAmount(e.target.value)} />
-            </Field>
-            <Field label={t("paid_at")}>
-              <input className={inputClass} type="date" value={paidAt} onChange={(e) => setPaidAt(e.target.value)} />
-            </Field>
-          </div>
-          <Field label={t("payment_reference")}>
-            <input
-              className={inputClass}
-              maxLength={100}
-              placeholder={t("portal_reference_placeholder")}
-              value={reference}
-              onChange={(e) => setReference(e.target.value)}
+            <Select
+              name="bill"
+              label={t("bill")}
+              value={billId ?? ""}
+              onChange={changeBill}
+              options={payable.map((b) => ({
+                value: String(b.id),
+                label: `${b.billing_period} (${money(b.outstanding, locale)})`,
+              }))}
             />
           </Field>
+          <div className="grid grid-cols-2 gap-2.5">
+            <Input
+              name="amount"
+              label={t("payment_amount")}
+              type="number"
+              inputMode="decimal"
+              step="0.01"
+              min="0"
+              value={amount}
+              onChange={setAmount}
+            />
+            <Input
+              name="paid_at"
+              label={t("paid_at")}
+              type="date"
+              value={paidAt}
+              onChange={setPaidAt}
+            />
+          </div>
+          <Input
+            name="reference"
+            label={t("payment_reference")}
+            maxLength={100}
+            placeholder={t("portal_reference_placeholder")}
+            value={reference}
+            onChange={setReference}
+          />
           <Field label={t("proof_image")}>
             <label className="flex cursor-pointer items-center gap-3 rounded-2xl border-2 border-dashed border-white/15 bg-[#1c1e2d]/60 p-4 hover:border-primary/40">
               <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl border border-primary/40 bg-primary/20">

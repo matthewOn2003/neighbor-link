@@ -5,7 +5,7 @@ import { Link, useRouter } from "@/i18n/navigation";
 import { useApiRequest } from "@/hooks/useApiRequest";
 import { request } from "@/services/request";
 import { useLocale } from "@/i18n";
-import { useToast } from "@/components/ui";
+import { Input, Select, useToast } from "@/components/ui";
 
 const termFields = [
   ["start_date", "date", true],
@@ -22,6 +22,11 @@ const labelKeys = {
   security_deposit: "security_deposit",
   billing_day: "billing_day",
 };
+
+const contractStatusOptions = [
+  { value: "draft", label: t("contract_status_draft") },
+  { value: "active", label: t("contract_status_active") },
+]
 
 export default function NewContractPage() {
   const { t } = useLocale();
@@ -89,6 +94,13 @@ export default function NewContractPage() {
   const field = "field";
   const label = "field-label";
   const input = "input";
+  const tenantOptions = [
+    { value: "", label: loading ? t("loading") : t("select_tenant") },
+    ...tenants.map((x) => ({
+      value: String(x.id),
+      label: `${x.name} · ${x.property_name || t("no_property_assigned")} · ${x.unit || "—"}`,
+    })),
+  ];
 
   return (
     <main className="mx-auto flex w-full max-w-4xl flex-col gap-6 p-8">
@@ -107,20 +119,14 @@ export default function NewContractPage() {
             <label className={label} htmlFor="tenant_id">
               {t("tenant")} *
             </label>
-            <select
-              id="tenant_id"
+            <Select
+              name="tenant_id"
+              label={t("tenant")}
               value={f.tenant_id}
-              onChange={(e) => set("tenant_id", e.target.value)}
-              className={input + " w-full"}
+              onChange={(v) => set("tenant_id", v)}
               required
-            >
-              <option value="">{loading ? t("loading") : t("select_tenant")}</option>
-              {tenants.map((x) => (
-                <option key={x.id} value={x.id}>
-                  {x.name} · {x.property_name || t("no_property_assigned")} · {x.unit || "—"}
-                </option>
-              ))}
-            </select>
+              options={tenantOptions}
+            />
             {errors.tenant_id ? <span className="field-error">{errors.tenant_id}</span> : null}
             {!loading && !tenants.length ? (
               <p className="text-xs text-subtle">{t("no_active_tenants_for_contract")}</p>
@@ -138,16 +144,16 @@ export default function NewContractPage() {
                   {required ? " *" : ""}
                   {k === "monthly_rent" || k === "security_deposit" ? " (RM)" : ""}
                 </label>
-                <input
-                  id={k}
+                <Input
+                  name={k}
+                  label={t(labelKeys[k])}
                   type={type}
+                  value={f[k]}
+                  onChange={(v) => set(k, v)}
+                  required={required}
                   min={k === "billing_day" ? 1 : 0}
                   max={k === "billing_day" ? 28 : undefined}
                   step={k === "monthly_rent" || k === "security_deposit" ? "0.01" : undefined}
-                  className={input + " w-full"}
-                  value={f[k]}
-                  onChange={(e) => set(k, e.target.value)}
-                  required={required}
                 />
                 {errors[k] ? <span className="field-error">{errors[k]}</span> : null}
                 {k === "billing_day" ? (
@@ -160,15 +166,13 @@ export default function NewContractPage() {
               <label className={label} htmlFor="status">
                 {t("status")}
               </label>
-              <select
-                id="status"
-                className={input + " w-full"}
+              <Select
+                name="status"
+                label={t("status")}
                 value={f.status}
-                onChange={(e) => set("status", e.target.value)}
-              >
-                <option value="draft">{t("contract_status_draft")}</option>
-                <option value="active">{t("contract_status_active")}</option>
-              </select>
+                onChange={(v) => set("status", v)}
+                options={contractStatusOptions}
+              />
             </div>
           </div>
 

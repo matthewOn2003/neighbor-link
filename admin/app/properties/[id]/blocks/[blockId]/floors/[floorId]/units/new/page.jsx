@@ -38,10 +38,15 @@ export default function NewUnitPage({ params }) {
 
   async function handleSubmit(event) {
     event.preventDefault();
+
     const nextErrors = {};
     if (!form.code.trim()) nextErrors.code = t("field_required");
-    if (form.bedrooms === "" || Number(form.bedrooms) < 0) nextErrors.bedrooms = t("field_required");
-    if (form.size_sqft === "" || Number(form.size_sqft) < 0) nextErrors.size_sqft = t("field_required");
+    if (form.bedrooms === "" || Number(form.bedrooms) < 0) {
+      nextErrors.bedrooms = t("field_required");
+    }
+    if (form.size_sqft === "" || Number(form.size_sqft) < 0) {
+      nextErrors.size_sqft = t("field_required");
+    }
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) return;
 
@@ -72,22 +77,62 @@ export default function NewUnitPage({ params }) {
       backHref={floorHref}
       onSubmit={handleSubmit}
       size="md"
-      actions={(
+      actions={
         <div className="flex gap-3">
-          <button type="button" className="btn btn-outline" onClick={() => router.push(floorHref)} disabled={saving}>
+          <button
+            type="button"
+            className="btn btn-outline"
+            onClick={() => router.push(floorHref)}
+            disabled={saving}
+          >
             {t("cancel")}
           </button>
           <button type="submit" className="btn btn-primary" disabled={saving}>
-            {saving ? <><Spinner size="sm" label={t("saving")} /> {t("saving")}</> : t("save_changes")}
+            {saving ? (
+              <>
+                <Spinner size="sm" label={t("saving")} /> {t("saving")}
+              </>
+            ) : (
+              t("save_changes")
+            )}
           </button>
         </div>
-      )}
+      }
     >
       <FormSection title={t("details")}>
-        <Input label={t("unit_code")} name="code" value={form.code} onChange={(v) => updateField("code", v)} required error={errors.code} />
-        <Input label={t("bedrooms")} name="bedrooms" type="number" value={form.bedrooms} onChange={(v) => updateField("bedrooms", v)} required error={errors.bedrooms} />
-        <Input label={t("size_sqft")} name="size_sqft" type="number" value={form.size_sqft} onChange={(v) => updateField("size_sqft", v)} required error={errors.size_sqft} />
-        <Select label={t("status")} name="status" value={form.status} onChange={(v) => updateField("status", v)} options={statusOptions} />
+        <Input
+          label={t("unit_code")}
+          name="code"
+          value={form.code}
+          onChange={(v) => updateField("code", v)}
+          required
+          error={errors.code}
+        />
+        <Input
+          label={t("bedrooms")}
+          name="bedrooms"
+          type="number"
+          value={form.bedrooms}
+          onChange={(v) => updateField("bedrooms", v)}
+          required
+          error={errors.bedrooms}
+        />
+        <Input
+          label={t("size_sqft")}
+          name="size_sqft"
+          type="number"
+          value={form.size_sqft}
+          onChange={(v) => updateField("size_sqft", v)}
+          required
+          error={errors.size_sqft}
+        />
+        <Select
+          label={t("status")}
+          name="status"
+          value={form.status}
+          onChange={(v) => updateField("status", v)}
+          options={statusOptions}
+        />
       </FormSection>
     </FormPage>
   );

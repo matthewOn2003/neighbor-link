@@ -12,7 +12,7 @@ import { ImportModal } from "./ImportModal";
 export { SummaryCard } from "./SummaryCard";
 export { FilterSection } from "./FilterSection";
 
-const NAV_BTN = `inline-flex items-center gap-1 px-3 py-2 rounded-lg bg-primary/10 text-subtle hover:text-scene-content hover:bg-[#e5eeff] text-xs font-semibold transition-colors disabled:opacity-60`;
+const NAV_BTN = `inline-flex items-center gap-1 px-3 py-2 rounded-lg bg-primary/10 text-subtle hover:text-scene-content hover:bg-primary/10 text-xs font-semibold transition-colors disabled:opacity-60`;
 
 function buildPagination(current, total) {
   if (total <= 5) return Array.from({ length: total }, (_, i) => i + 1);
