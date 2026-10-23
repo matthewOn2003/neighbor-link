@@ -11,15 +11,14 @@ import { useDropdown } from "@/hooks/useDropdown";
 import { useLocale } from "@/i18n";
 import { request } from "@/services/request";
 import { fdl } from "@/utils/date";
+import { formatMoney } from "@/utils/format";
 
 const getInitials = (name = "") =>
   name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join("").toUpperCase();
 
-const formatRent = (value, locale) =>
-  value == null ? "-" : `RM ${Number(value).toLocaleString(locale, { maximumFractionDigits: 0 })}`;
+const formatRent = (value, locale) => formatMoney(value, locale, { digits: 0, fallback: "-" });
 
-const formatBalance = (value, locale) =>
-  `RM ${Number(value).toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+const formatBalance = (value, locale) => formatMoney(value, locale);
 
 const formatMonthYear = (date, locale) =>
   new Date(`${date}T00:00:00`).toLocaleDateString(locale, { month: "short", year: "numeric" });
@@ -255,7 +254,7 @@ export default function TenantsPage() {
                   </td>
                   <td>
                     <div className="flex justify-center items-center gap-2">
-                      <Link className="btn btn-primary !p-0 size-10 grid place-items-center" href={`/tenants/${tenant.id}`} aria-label={t("edit_tenant")}>
+                      <Link className="btn btn-primary btn-icon" href={`/tenants/${tenant.id}`} aria-label={t("edit_tenant")}>
                         <Icon name="andrsrxn:list-edit" className="text-scene !text-2xl" />
                       </Link>
                     </div>

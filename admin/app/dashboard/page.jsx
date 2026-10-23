@@ -7,8 +7,9 @@ import { Spinner } from "@/components/ui/Spinner";
 import { useApiRequest } from "@/hooks/useApiRequest";
 import { useLocale } from "@/i18n";
 import { Select } from "@/components/ui";
+import { formatMoney } from "@/utils/format";
 
-const money = (value) => `RM ${Number(value || 0).toLocaleString("en-MY", { maximumFractionDigits: 0 })}`;
+const money = (value) => formatMoney(value, "en-MY", { digits: 0 });
 const pct = (value, digits = 1) => `${Number(value || 0).toFixed(digits)}%`;
 const share = (part, whole) => (whole > 0 ? (part / whole) * 100 : 0);
 const clamp = (value) => Math.min(Math.max(Number(value) || 0, 0), 100);
@@ -36,7 +37,7 @@ function shortMonth(cycle) {
 
 function Panel({ eyebrow, title, badge, children, footer }) {
   return (
-    <div className="flex flex-col justify-between rounded-2xl border border-line/40 bg-accent p-5 shadow-sm">
+    <div className="flex flex-col justify-between card">
       <div>
         <div className="flex items-center justify-between border-b border-line/40 pb-3">
           <div>
@@ -122,7 +123,7 @@ export default function DashboardPage() {
   if (error || !data) {
     return (
       <div className="p-8">
-        <div className="rounded-2xl border border-line/40 bg-accent p-8 text-center shadow-sm">
+        <div className="card card-empty">
           <p className="text-sm text-error">Could not load the dashboard.</p>
           <button type="button" className="btn btn-outline mt-4" onClick={reload}>
             <Icon name="refresh" className="text-lg" />
@@ -232,7 +233,7 @@ export default function DashboardPage() {
 
       {/* Hero KPIs */}
       <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <div className="relative overflow-hidden rounded-2xl border border-line/40 bg-accent p-5 shadow-sm">
+        <div className="relative overflow-hidden card">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-xs font-semibold uppercase tracking-wider text-subtle">Occupancy Rate</p>
@@ -262,7 +263,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-line/40 bg-accent p-5 shadow-sm">
+        <div className="card">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-xs font-semibold uppercase tracking-wider text-subtle">Collected This Cycle</p>
@@ -287,7 +288,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-line/40 bg-accent p-5 shadow-sm">
+        <div className="card">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-xs font-semibold uppercase tracking-wider text-subtle">Outstanding This Cycle</p>
@@ -305,7 +306,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div className="relative overflow-hidden rounded-2xl border border-line/40 bg-accent p-5 shadow-sm">
+        <div className="relative overflow-hidden card">
           <div className="absolute inset-y-0 right-0 w-1.5 bg-error" />
           <div className="flex items-start justify-between">
             <div>
@@ -511,7 +512,7 @@ export default function DashboardPage() {
       </section>
 
       {/* Property benchmark */}
-      <section className="rounded-2xl border border-line/40 bg-accent p-5 shadow-sm">
+      <section className="card">
         <div className="mb-4 flex flex-col gap-2 border-b border-line/40 pb-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-subtle">Property Portfolio Benchmark</p>

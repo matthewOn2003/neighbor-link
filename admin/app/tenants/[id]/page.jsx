@@ -5,10 +5,9 @@ import { useApiRequest } from "@/hooks/useApiRequest";
 import { Icon } from "@/components/ui/Icon";
 import { Spinner } from "@/components/ui/Spinner";
 import { useLocale } from "@/i18n";
+import { formatMoney } from "@/utils/format";
 
-const money = (value) => value == null
-  ? "—"
-  : `RM ${Number(value).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+const money = (value) => formatMoney(value, undefined, { fallback: "—" });
 
 function DetailField({ label, value }) {
   return (

@@ -11,14 +11,9 @@ import { request } from "@/services/request";
 import { useLocale } from "@/i18n";
 import { useToast } from "@/components/ui";
 import { PdfPreviewModal } from "@/components/ui/PdfPreviewModal";
-import { buildSimplePdf } from "@/utils/pdf";
+import { buildContractSummaryPdf, contractRef } from "@/utils/documents";
+import { formatMoney } from "@/utils/format";
 
-const money = (value, locale) =>
-  "RM " +
-  Number(value || 0).toLocaleString(locale, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
 
 const statusKeys = {
   draft: "contract_status_draft",
@@ -26,61 +21,6 @@ const statusKeys = {
   expired: "contract_status_expired",
   terminated: "contract_status_terminated",
 };
-
-const contractRef = (id) => "CT-" + String(id).padStart(5, "0");
-
-const pdfMoney = (value) => "RM " + (Number(value) || 0).toFixed(2);
-
-const pdfContractStatus = {
-  draft: "Draft",
-  active: "Active",
-  expired: "Expired",
-  terminated: "Terminated",
-};
-
-// Contract summary PDF: English labels and values only (the built-in PDF font is Latin-only).
-// tenant is the /tenant/detail response (used for email); it may be null.
-function buildContractSummaryPdf(contract, tenant) {
-  return buildSimplePdf({
-    title: "Lease Agreement Summary",
-    subtitle: contractRef(contract.id),
-    sections: [
-      {
-        heading: "Parties",
-        rows: [
-          ["Tenant name", contract.tenant_name],
-          ["Tenant phone", tenant?.phone || contract.tenant_phone],
-          ["Tenant email", tenant?.email],
-        ],
-      },
-      {
-        heading: "Property and unit",
-        rows: [
-          ["Property", contract.property_name],
-          ["Unit", contract.unit_code],
-        ],
-      },
-      {
-        heading: "Term",
-        rows: [
-          ["Start date", contract.start_date],
-          ["End date", contract.end_date],
-          ["Billing day", contract.billing_day],
-          ["Status", pdfContractStatus[contract.status] ?? contract.status],
-        ],
-      },
-      {
-        heading: "Financial",
-        rows: [
-          ["Monthly rent", pdfMoney(contract.monthly_rent)],
-          ["Security deposit", pdfMoney(contract.security_deposit)],
-        ],
-      },
-      { heading: "Notes", rows: [["Notes", contract.notes]] },
-    ],
-    footer: "Generated " + new Date().toISOString().slice(0, 10),
-  });
-}
 
 async function buildContractPdf(contract) {
   const tenant = await request("/tenant/detail/" + contract.tenant_id).catch(() => null);
@@ -200,7 +140,7 @@ export default function ContractsPage() {
                 <td className="whitespace-nowrap font-semibold">
                   <Link
                     href={"/contracts/" + contract.id}
-                    className="text-primary-dark hover:underline"
+                    className="link-inline"
                   >
                     {contractRef(contract.id)}
                   </Link>
@@ -217,7 +157,7 @@ export default function ContractsPage() {
                   {contract.start_date} – {contract.end_date}
                 </td>
                 <td className="whitespace-nowrap font-semibold">
-                  {money(contract.monthly_rent, locale)}
+                  {formatMoney(contract.monthly_rent, locale)}
                 </td>
                 <td>
                   <span
@@ -236,7 +176,7 @@ export default function ContractsPage() {
                 <td className="whitespace-nowrap">
                   <Link
                     href={"/contracts/" + contract.id}
-                    className="text-primary-dark hover:underline"
+                    className="link-inline"
                   >
                     {t("view_details")}
                   </Link>
@@ -252,7 +192,7 @@ export default function ContractsPage() {
                   {contract.status === "draft" ? (
                     <button
                       type="button"
-                      className="ml-3 text-primary-dark hover:underline"
+                      className="ml-3 link-inline"
                       onClick={() => activate(contract, reload)}
                     >
                       {t("activate_contract")}

@@ -7,6 +7,7 @@ import { DataTable, SummaryCard } from "@/components/ui/DataTable";
 import { Input } from "@/components/ui/Input";
 import { request } from "@/services/request";
 import { useLocale } from "@/i18n";
+import { formatMoney } from "@/utils/format";
 import { useToast } from "@/components/ui";
 
 const currentPeriod = () => {
@@ -14,8 +15,6 @@ const currentPeriod = () => {
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
 };
 
-const money = (value, locale) =>
-  "RM " + Number(value || 0).toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 export default function GenerateBillsPage() {
   const { t, locale } = useLocale();
@@ -90,7 +89,7 @@ export default function GenerateBillsPage() {
             rows.map((contract) => (
               <tr key={contract.id}>
                 <td className="font-semibold whitespace-nowrap">
-                  <Link href={"/contracts/" + contract.id} className="text-primary-dark hover:underline">
+                  <Link href={"/contracts/" + contract.id} className="link-inline">
                     CT-{String(contract.id).padStart(5, "0")}
                   </Link>
                 </td>
@@ -99,7 +98,7 @@ export default function GenerateBillsPage() {
                   <div>{contract.property_name || "—"}</div>
                   <div className="text-xs text-subtle">{contract.unit_code || "—"}</div>
                 </td>
-                <td className="whitespace-nowrap font-semibold">{money(contract.monthly_rent, locale)}</td>
+                <td className="whitespace-nowrap font-semibold">{formatMoney(contract.monthly_rent, locale)}</td>
                 <td className="whitespace-nowrap">{contract.billing_day ?? "—"}</td>
               </tr>
             ))

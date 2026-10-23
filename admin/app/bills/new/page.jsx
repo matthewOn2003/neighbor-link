@@ -7,6 +7,7 @@ import { request } from "@/services/request";
 import { useLocale } from "@/i18n";
 import { Input, useToast } from "@/components/ui";
 import { Select } from "@/components/ui";
+import { contractRef } from "@/utils/documents";
 
 export default function NewBillPage() {
   const { t } = useLocale();
@@ -32,7 +33,7 @@ export default function NewBillPage() {
     { value: "", label: loading ? t("loading") : t("select_active_contract") },
     ...contracts.map((c) => ({
       value: String(c.id),
-      label: `CT-${String(c.id).padStart(5, "0")} · ${c.tenant_name} · ${c.property_name || "—"} / ${c.unit_code || "—"} · RM ${Number(c.monthly_rent).toFixed(2)}`,
+      label: `${contractRef(c.id)} · ${c.tenant_name} · ${c.property_name || "—"} / ${c.unit_code || "—"} · RM ${Number(c.monthly_rent).toFixed(2)}`,
     })),
   ]
 

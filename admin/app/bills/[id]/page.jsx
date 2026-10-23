@@ -11,14 +11,9 @@ import { Spinner } from "@/components/ui/Spinner";
 import { Icon } from "@/components/ui/Icon";
 import { Modal } from "@/components/ui/Modal";
 import { PdfPreviewModal } from "@/components/ui/PdfPreviewModal";
-import { buildSimplePdf } from "@/utils/pdf";
+import { billRef, buildInvoicePdf } from "@/utils/documents";
+import { formatMoney } from "@/utils/format";
 
-const money = (v, locale) =>
-  "RM " +
-  Number(v || 0).toLocaleString(locale, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
 
 const keys = {
   unpaid: "bill_status_unpaid",
@@ -38,56 +33,12 @@ const variants = {
   pending_review: "warning",
 };
 
-const billRef = (id) => "BL-" + String(id).padStart(5, "0");
-
-const pdfMoney = (value) => "RM " + (Number(value) || 0).toFixed(2);
-
-const pdfStatus = {
-  unpaid: "Unpaid",
-  overdue: "Overdue",
-  paid: "Paid",
-  void: "Void",
-  pending_review: "Pending review",
-};
-
 const methodOptions = [
   { value: "bank_transfer", label: t("payment_bank_transfer") },
   { value: "cash", label: t("payment_cash") },
   { value: "online", label: t("payment_online") },
   { value: "other", label: t("payment_other") },
 ];
-
-// Invoice PDF: English labels and values only (the built-in PDF font is Latin-only).
-function buildInvoicePdf(bill) {
-  const total = Number(bill.amount) + Number(bill.late_fee);
-  return buildSimplePdf({
-    title: "Invoice",
-    subtitle: billRef(bill.id),
-    sections: [
-      {
-        heading: "Bill",
-        rows: [
-          ["Invoice reference", billRef(bill.id)],
-          ["Tenant", bill.tenant_name],
-          ["Unit", bill.unit_code],
-          ["Property", bill.property_name],
-          ["Billing period", bill.billing_period],
-          ["Due date", bill.due_date],
-          ["Status", pdfStatus[bill.display_status ?? bill.status] ?? bill.status],
-        ],
-      },
-      {
-        heading: "Amount",
-        rows: [
-          ["Amount", pdfMoney(bill.amount)],
-          ["Late fee", pdfMoney(bill.late_fee)],
-          ["Total", pdfMoney(total)],
-        ],
-      },
-    ],
-    footer: "Generated " + new Date().toISOString().slice(0, 10),
-  });
-}
 
 export default function BillDetailPage({ params }) {
   const { id } = use(params);
@@ -218,8 +169,8 @@ export default function BillDetailPage({ params }) {
     [t("tenant"), data.tenant_name],
     [t("billing_period"), data.billing_period],
     [t("due_date"), data.due_date],
-    [t("monthly_rent"), money(data.amount, locale)],
-    [t("late_fee"), money(data.late_fee, locale)],
+    [t("monthly_rent"), formatMoney(data.amount, locale)],
+    [t("late_fee"), formatMoney(data.late_fee, locale)],
     [t("payment_method"), data.payment_method || "—"],
     [t("payment_reference"), data.payment_reference || "—"],
     [t("paid_at"), data.paid_at || "—"],
@@ -233,7 +184,7 @@ export default function BillDetailPage({ params }) {
           <header className="space-y-4">
             <Link
               href="/bills"
-              className="inline-flex items-center gap-2 text-sm font-semibold text-primary-dark hover:underline"
+              className="link-action"
             >
               <span aria-hidden="true">←</span>
               {t("back_to_bills")}
@@ -294,9 +245,9 @@ export default function BillDetailPage({ params }) {
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             {[
-              [t("bill_amount"), money(total, locale)],
-              [t("bill_paid"), money(data.amount_paid, locale)],
-              [t("bill_outstanding"), money(outstanding, locale)],
+              [t("bill_amount"), formatMoney(total, locale)],
+              [t("bill_paid"), formatMoney(data.amount_paid, locale)],
+              [t("bill_outstanding"), formatMoney(outstanding, locale)],
             ].map(([k, v]) => (
               <div key={k} className="rounded-xl bg-scene p-4">
                 <p className="text-sm text-subtle">{k}</p>
@@ -326,7 +277,7 @@ export default function BillDetailPage({ params }) {
                 <h2 className="text-lg font-semibold text-scene-content">{t("record_payment")}</h2>
                 <p className="mt-1 text-sm text-subtle">
                   {t("payment_remaining")}:{" "}
-                  <strong className="text-scene-content">{money(outstanding, locale)}</strong>
+                  <strong className="text-scene-content">{formatMoney(outstanding, locale)}</strong>
                 </p>
               </div>
 
