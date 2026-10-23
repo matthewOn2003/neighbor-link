@@ -1,7 +1,7 @@
 "use client";
 
 import { useLocale } from "@/i18n";
-import { useRequest } from "@/hooks/useRequest";
+import { useApiRequest } from "@/hooks/useApiRequest";
 import { fdl } from "@/utils/date";
 import { buildSimplePdf } from "@/utils/pdf";
 
@@ -27,7 +27,7 @@ export const labelFor = (options, value) => options.find((option) => option.valu
 // 后端 proof 与 payment 列表的筛选参数：物业 property_id、单元 unit_id（字符串）
 export function usePropertyOptions() {
   const { t } = useLocale();
-  const { data } = useRequest("/property/list", { per_page: 100 });
+  const { data } = useApiRequest("/property/list", { per_page: 100 });
   return [
     { value: "", label: t("all_properties") },
     ...(data?.list ?? []).map((property) => ({ value: String(property.id), label: property.name })),
@@ -37,7 +37,7 @@ export function usePropertyOptions() {
 // 未选物业时不展示单元，选定物业后才列出该物业的单元
 export function useUnitOptions(propertyId) {
   const { t } = useLocale();
-  const { data } = useRequest("/property/unit/list", { property_id: propertyId, per_page: 100 });
+  const { data } = useApiRequest("/property/unit/list", { property_id: propertyId, per_page: 100 });
   const units = propertyId ? (data?.list ?? []) : [];
   return [
     { value: "", label: t("all_units") },

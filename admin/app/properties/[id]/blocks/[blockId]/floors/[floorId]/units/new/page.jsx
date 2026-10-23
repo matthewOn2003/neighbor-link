@@ -5,7 +5,7 @@ import { useRouter } from "@/i18n/navigation";
 import { FormPage, FormSection, Input, Select, useToast } from "@/components/ui";
 import { Spinner } from "@/components/ui/Spinner";
 import { useDropdown } from "@/hooks/useDropdown";
-import { useRequest } from "@/hooks/useRequest";
+import { useApiRequest } from "@/hooks/useApiRequest";
 import { useLocale } from "@/i18n";
 import { request } from "@/services/request";
 
@@ -23,7 +23,7 @@ export default function NewUnitPage({ params }) {
   const { t } = useLocale();
   const router = useRouter();
   const toast = useToast();
-  const { data: floor } = useRequest(`/property/floor/${floorId}`);
+  const { data: floor } = useApiRequest(`/property/floor/${floorId}`);
   const { optionsOf } = useDropdown(["unit_status"]);
   const statusOptions = optionsOf("unit_status");
   const [form, setForm] = useState(EMPTY_FORM);

@@ -1,7 +1,7 @@
 "use client";
 
 import { use } from "react";
-import { useRequest } from "@/hooks/useRequest";
+import { useApiRequest } from "@/hooks/useApiRequest";
 import { Icon } from "@/components/ui/Icon";
 import { Spinner } from "@/components/ui/Spinner";
 import { useLocale } from "@/i18n";
@@ -22,7 +22,7 @@ function DetailField({ label, value }) {
 export default function TenantDetailPage({ params }) {
   const { t } = useLocale();
   const { id } = use(params);
-  const { data: tenant, loading, error } = useRequest(`/tenant/detail/${id}`);
+  const { data: tenant, loading, error } = useApiRequest(`/tenant/detail/${id}`);
 
   if (loading) {
     return <main className="p-4 md:p-8"><div className="flex min-h-48 items-center justify-center"><Spinner size="lg" /></div></main>;

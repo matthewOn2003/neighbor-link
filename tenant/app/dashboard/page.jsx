@@ -4,7 +4,7 @@ import { Link } from "@/i18n/navigation";
 import { useEffect, useState } from "react";
 import { useLocale } from "@/i18n";
 import { Icon } from "@/components/ui/Icon";
-import { useRequest } from "@/hooks/useRequest";
+import { useApiRequest } from "@/hooks/useApiRequest";
 import { ordinal, wholeMoney } from "@/components/portal/format";
 import { BILL_LABEL_KEY, MAINTENANCE_ICON, REQUEST_STAGE, REQUEST_STAGE_TOTAL, useDictLabel } from "@/components/portal/status";
 import { EmptyState, GlassCard, IconTile, LoadingBlock, Pill, ProgressBar, Stagger } from "@/components/portal/primitives";
@@ -14,7 +14,7 @@ const ATTENTION_LIMIT = 2;
 
 export default function DashboardPage() {
   const { t, locale } = useLocale();
-  const { data, loading } = useRequest("/tenant-portal/home", {});
+  const { data, loading } = useApiRequest("/tenant-portal/home", {});
   const dictLabel = useDictLabel(["maintenance_category"]);
 
   if (loading && !data) return <LoadingBlock rows={3} />;
@@ -83,43 +83,43 @@ export default function DashboardPage() {
 
         {attention.map(({ key, overdue: bill, request: item }, index) => (
           <Stagger key={key} index={index}>
-          {bill ? (
-            <Link key={key} href="/billing">
-              <GlassCard className="flex items-center gap-3 border-rose-500/20 p-4 transition-transform active:scale-[0.99]">
-                <IconTile icon="priority_high" tone="rose" size="sm" />
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-bold text-on-surface">{t("portal_notice_cycle", { period: bill.billing_period })}</p>
-                  <p className="text-xs text-on-surface-variant">
-                    {wholeMoney(bill.outstanding, locale)} · {t(BILL_LABEL_KEY[bill.display_status] ?? "bill_display_overdue")}
-                  </p>
-                </div>
-                <Icon name="chevron_right" className="text-[18px] text-on-surface-variant" />
-              </GlassCard>
-            </Link>
-          ) : (
-            <Link key={key} href={`/maintenance/${item.id}`}>
-              <GlassCard className="flex flex-col gap-3 p-4 transition-transform active:scale-[0.99]">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex min-w-0 items-center gap-3">
-                    <IconTile icon={MAINTENANCE_ICON[item.category] ?? "build"} tone="violet" size="sm" />
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-bold text-on-surface">{item.title}</p>
-                      <p className="truncate text-[11px] text-on-surface-variant">
-                        {[item.unit_code, dictLabel("maintenance_category", item.category)].filter(Boolean).join(" · ")}
-                      </p>
-                    </div>
+            {bill ? (
+              <Link key={key} href="/billing">
+                <GlassCard className="flex items-center gap-3 border-rose-500/20 p-4 transition-transform active:scale-[0.99]">
+                  <IconTile icon="priority_high" tone="rose" size="sm" />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-bold text-on-surface">{t("portal_notice_cycle", { period: bill.billing_period })}</p>
+                    <p className="text-xs text-on-surface-variant">
+                      {wholeMoney(bill.outstanding, locale)} · {t(BILL_LABEL_KEY[bill.display_status] ?? "bill_display_overdue")}
+                    </p>
                   </div>
-                  <Pill tone={item.status === "open" ? "amber" : "cyan"}>{t(`portal_status_${item.status}`)}</Pill>
-                </div>
-                <div className="space-y-1.5">
-                  <ProgressBar value={REQUEST_STAGE[item.status] ?? 1} max={REQUEST_STAGE_TOTAL} />
-                  <p className="text-right text-xs text-on-surface-variant">
-                    {t("portal_stage", { current: REQUEST_STAGE[item.status] ?? 1, total: REQUEST_STAGE_TOTAL })}
-                  </p>
-                </div>
-              </GlassCard>
-            </Link>
-          )}
+                  <Icon name="chevron_right" className="text-[18px] text-on-surface-variant" />
+                </GlassCard>
+              </Link>
+            ) : (
+              <Link key={key} href={`/maintenance/${item.id}`}>
+                <GlassCard className="flex flex-col gap-3 p-4 transition-transform active:scale-[0.99]">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex min-w-0 items-center gap-3">
+                      <IconTile icon={MAINTENANCE_ICON[item.category] ?? "build"} tone="violet" size="sm" />
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-bold text-on-surface">{item.title}</p>
+                        <p className="truncate text-[11px] text-on-surface-variant">
+                          {[item.unit_code, dictLabel("maintenance_category", item.category)].filter(Boolean).join(" · ")}
+                        </p>
+                      </div>
+                    </div>
+                    <Pill tone={item.status === "open" ? "amber" : "cyan"}>{t(`portal_status_${item.status}`)}</Pill>
+                  </div>
+                  <div className="space-y-1.5">
+                    <ProgressBar value={REQUEST_STAGE[item.status] ?? 1} max={REQUEST_STAGE_TOTAL} />
+                    <p className="text-right text-xs text-on-surface-variant">
+                      {t("portal_stage", { current: REQUEST_STAGE[item.status] ?? 1, total: REQUEST_STAGE_TOTAL })}
+                    </p>
+                  </div>
+                </GlassCard>
+              </Link>
+            )}
           </Stagger>
         ))}
       </section>

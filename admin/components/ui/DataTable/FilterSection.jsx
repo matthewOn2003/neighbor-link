@@ -6,7 +6,7 @@ import { useLocale } from "@/i18n";
 
 export function FilterSection({ values, badges, onClear, filterHint, resetFilters, applyFilters, children }) {
   const { t } = useLocale();
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
 
   // 有值的筛选项显示为 badge，基于当前输入，不必等 Apply
   const activeBadges = (badges ?? []).filter(({ key }) => values?.[key] !== "" && values?.[key] != null);

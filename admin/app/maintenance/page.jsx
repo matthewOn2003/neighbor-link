@@ -3,7 +3,7 @@
 import { Link } from "@/i18n/navigation";
 import { useDraftFilters } from "@/hooks/useDraftFilters";
 import { useDropdown } from "@/hooks/useDropdown";
-import { useRequest } from "@/hooks/useRequest";
+import { useApiRequest } from "@/hooks/useApiRequest";
 import { useLocale } from "@/i18n";
 import { request } from "@/services/request";
 import { Icon } from "@/components/ui/Icon";
@@ -43,7 +43,7 @@ export default function MaintenancePage() {
   const priorityOptions = [{ value: "", label: t("all_priorities") }, ...priorityItems];
   const statusOptions = [{ value: "", label: t("all_statuses") }, ...statusItems];
 
-  const { data: propertyData } = useRequest("/property/list", { per_page: 100 });
+  const { data: propertyData } = useApiRequest("/property/list", { per_page: 100 });
   const propertyOptions = [
     { value: "", label: t("all_properties") },
     ...(propertyData?.list ?? []).map((property) => ({ value: String(property.id), label: property.name })),

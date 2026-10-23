@@ -2,7 +2,7 @@
 
 import { use } from "react";
 import { useLocale } from "@/i18n";
-import { useRequest } from "@/hooks/useRequest";
+import { useApiRequest } from "@/hooks/useApiRequest";
 import { useDictLabel, COMPLAINT_ICON } from "@/components/portal/status";
 import { formatDateTime } from "@/components/portal/format";
 import RequestDetail from "@/components/portal/RequestDetail";
@@ -10,7 +10,7 @@ import RequestDetail from "@/components/portal/RequestDetail";
 export default function ComplaintDetailPage({ params }) {
   const { id } = use(params);
   const { t, locale } = useLocale();
-  const { data, loading } = useRequest(`/tenant-portal/complaint/detail/${id}`, {});
+  const { data, loading } = useApiRequest(`/tenant-portal/complaint/detail/${id}`, {});
   const label = useDictLabel(["complaint_category"]);
 
   return (

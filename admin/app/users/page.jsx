@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Link } from "@/i18n/navigation";
 import { useDraftFilters } from "@/hooks/useDraftFilters";
-import { useRequest } from "@/hooks/useRequest";
+import { useApiRequest } from "@/hooks/useApiRequest";
 import { useLocale } from "@/i18n";
 import { Icon } from "@/components/ui/Icon";
 import { DataTable, SummaryCard } from "@/components/ui/DataTable";
@@ -32,9 +32,9 @@ export default function UsersPage() {
   const [pending, setPending] = useState(null);
   const [deleting, setDeleting] = useState(false);
 
-  const { data: departmentData } = useRequest("/staff-department/list", { per_page: 100 });
+  const { data: departmentData } = useApiRequest("/staff-department/list", { per_page: 100 });
   const departments = departmentData?.list ?? [];
-  const { data: positionData } = useRequest("/staff-position/list", { per_page: 100 });
+  const { data: positionData } = useApiRequest("/staff-position/list", { per_page: 100 });
   const positions = positionData?.list ?? [];
 
   const departmentOptions = [

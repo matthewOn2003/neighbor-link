@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Link, useRouter } from "@/i18n/navigation";
-import { useRequest } from "@/hooks/useRequest";
+import { useApiRequest } from "@/hooks/useApiRequest";
 import { useDropdown } from "@/hooks/useDropdown";
 import { request } from "@/services/request";
 import { useLocale } from "@/i18n";
@@ -20,8 +20,8 @@ export default function NewTenantPage() {
   const [saving, setSaving] = useState(false);
   const [created, setCreated] = useState(null);
 
-  const { data: propertyData } = useRequest("/property/list", { per_page: 100 });
-  const { data: unitData } = useRequest("/property/unit/list", {
+  const { data: propertyData } = useApiRequest("/property/list", { per_page: 100 });
+  const { data: unitData } = useApiRequest("/property/unit/list", {
     property_id: form.property_id,
     status: "vacant",
     per_page: 100,

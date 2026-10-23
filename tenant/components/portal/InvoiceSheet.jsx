@@ -2,7 +2,7 @@
 
 import { useLocale } from "@/i18n";
 import { money } from "@/components/payments/shared";
-import { useRequest } from "@/hooks/useRequest";
+import { useApiRequest } from "@/hooks/useApiRequest";
 import { formatDate } from "./format";
 import { BILL_LABEL_KEY, BILL_TONE } from "./status";
 import { EmptyState, GhostButton, LoadingBlock, Pill, Sheet } from "./primitives";
@@ -15,7 +15,7 @@ const LINE_LABEL_KEY = {
 /** Statement of one bill: who it is billed to, the charges, and what has been paid. */
 export default function InvoiceSheet({ billId, onClose }) {
   const { t, locale } = useLocale();
-  const { data, loading } = useRequest(`/tenant-portal/bills/detail/${billId}`, {});
+  const { data, loading } = useApiRequest(`/tenant-portal/bills/detail/${billId}`, {});
   const tone = BILL_TONE[data?.status] ?? "neutral";
 
   return (

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "@/i18n/navigation";
-import { useRequest } from "@/hooks/useRequest";
+import { useApiRequest } from "@/hooks/useApiRequest";
 import { useDropdown } from "@/hooks/useDropdown";
 import { request } from "@/services/request";
 import { useLocale } from "@/i18n";
@@ -31,7 +31,7 @@ export default function NewPropertyPage() {
   const [errors, setErrors] = useState({});
   const [saving, setSaving] = useState(false);
 
-  const { data: facets } = useRequest("/property/facets");
+  const { data: facets } = useApiRequest("/property/facets");
   const { optionsOf } = useDropdown(["property_type", "property_region"]);
   const developers = facets?.developers ?? [];
 

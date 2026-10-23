@@ -5,7 +5,7 @@ import { useRouter } from "@/i18n/navigation";
 import { FormPage, FormSection, Input, Select, useToast } from "@/components/ui";
 import { Spinner } from "@/components/ui/Spinner";
 import { useDropdown } from "@/hooks/useDropdown";
-import { useRequest } from "@/hooks/useRequest";
+import { useApiRequest } from "@/hooks/useApiRequest";
 import { useLocale } from "@/i18n";
 import { request } from "@/services/request";
 
@@ -37,7 +37,7 @@ export default function EditUnitPage({ params }) {
   const [unit, setUnit] = useState(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
-  const { data: floor } = useRequest(`/property/floor/${floorId}`);
+  const { data: floor } = useApiRequest(`/property/floor/${floorId}`);
   const floorHref = `/properties/${id}/blocks/${blockId}/floors/${floorId}`;
 
   useEffect(() => {

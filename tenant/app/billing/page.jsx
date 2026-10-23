@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { useLocale } from "@/i18n";
 import { Icon } from "@/components/ui/Icon";
 import { wholeMoney } from "@/components/portal/format";
-import { useRequest } from "@/hooks/useRequest";
+import { useApiRequest } from "@/hooks/useApiRequest";
 import BillCard from "@/components/portal/BillCard";
 import ProofCard from "@/components/portal/ProofCard";
 import PaymentProofSheet from "@/components/portal/PaymentProofSheet";
@@ -28,8 +28,8 @@ function BillingContent() {
   const [invoiceBillId, setInvoiceBillId] = useState(null);
   // The home screen's "Submit Proof" action opens this sheet with ?sheet=proof.
   const [sheet, setSheet] = useState(() => (searchParams.get("sheet") === "proof" ? { billId: null } : null)); // null when closed; { billId } when open
-  const bills = useRequest("/tenant-portal/bills", { current_page: 1, per_page: 100 });
-  const proofs = useRequest("/tenant-portal/payment-proof/list", { current_page: 1, per_page: 100 });
+  const bills = useApiRequest("/tenant-portal/bills", { current_page: 1, per_page: 100 });
+  const proofs = useApiRequest("/tenant-portal/payment-proof/list", { current_page: 1, per_page: 100 });
 
   const billList = bills.data?.list ?? [];
   const proofList = proofs.data?.list ?? [];
@@ -94,14 +94,14 @@ function BillingContent() {
       ) : null}
 
       {!bannerUpload ? (
-      <button
-        type="button"
-        onClick={() => setSheet({ billId: null })}
-        className="flex w-full items-center justify-center gap-2 rounded-2xl bg-primary-container py-3.5 text-sm font-bold text-white shadow-lg shadow-primary-container/30 transition-all active:scale-[0.98]"
-      >
-        <Icon name="add_a_photo" className="text-[18px]" />
-        {t("submit_payment_proof")}
-      </button>
+        <button
+          type="button"
+          onClick={() => setSheet({ billId: null })}
+          className="flex w-full items-center justify-center gap-2 rounded-2xl bg-primary-container py-3.5 text-sm font-bold text-white shadow-lg shadow-primary-container/30 transition-all active:scale-[0.98]"
+        >
+          <Icon name="add_a_photo" className="text-[18px]" />
+          {t("submit_payment_proof")}
+        </button>
       ) : null}
 
       <SegmentedTabs
@@ -124,12 +124,12 @@ function BillingContent() {
           <div className="flex flex-col gap-3">
             {visibleBills.map((bill, index) => (
               <Stagger key={bill.id} index={index}>
-              <BillCard
-                key={bill.id}
-                bill={bill}
-                onUpload={(billId) => setSheet({ billId })}
-                onInvoice={(billId) => setInvoiceBillId(billId)}
-              />
+                <BillCard
+                  key={bill.id}
+                  bill={bill}
+                  onUpload={(billId) => setSheet({ billId })}
+                  onInvoice={(billId) => setInvoiceBillId(billId)}
+                />
               </Stagger>
             ))}
           </div>
@@ -143,12 +143,12 @@ function BillingContent() {
           <div className="flex flex-col gap-3">
             {proofList.map((proof, index) => (
               <Stagger key={proof.id} index={index}>
-              <ProofCard
-                key={proof.id}
-                proof={proof}
-                billPeriod={periodOf[proof.bill_id]}
-                onReupload={(billId) => setSheet({ billId })}
-              />
+                <ProofCard
+                  key={proof.id}
+                  proof={proof}
+                  billPeriod={periodOf[proof.bill_id]}
+                  onReupload={(billId) => setSheet({ billId })}
+                />
               </Stagger>
             ))}
           </div>
