@@ -126,6 +126,41 @@ func (r *SQLiteRepository) OpenComplaints() (int64, error) {
 	return total, err
 }
 
+// OccupiedUnitsOn counts distinct units covered by a non-draft contract on the given day (YYYY-MM-DD).
+// Used to rebuild past occupancy, since unit status is only kept for the present.
+func (r *SQLiteRepository) OccupiedUnitsOn(day string) (int64, error) {
+	var total int64
+	err := r.db.Raw(`SELECT COUNT(DISTINCT unit_id) FROM contracts
+		WHERE unit_id IS NOT NULL AND status <> 'draft' AND start_date <= ? AND end_date >= ?`, day, day).Scan(&total).Error
+	return total, err
+}
+
+// OpenComplaintsOpenedBefore counts open or in-progress complaints created before day (YYYY-MM-DD).
+func (r *SQLiteRepository) OpenComplaintsOpenedBefore(day string) (int64, error) {
+	var total int64
+	err := r.db.Raw(`SELECT COUNT(*) FROM complaints
+		WHERE status IN ('open', 'in_progress') AND date(created_at) < ?`, day).Scan(&total).Error
+	return total, err
+}
+
+// AvgMaintenanceResolutionDays averages the days from creation to resolution for requests resolved in cycle (YYYY-MM).
+func (r *SQLiteRepository) AvgMaintenanceResolutionDays(cycle string) (float64, error) {
+	var avg float64
+	err := r.db.Raw(`SELECT COALESCE(AVG(julianday(resolved_at) - julianday(created_at)), 0)
+		FROM maintenance_requests
+		WHERE resolved_at IS NOT NULL AND substr(resolved_at, 1, 7) = ?`, cycle).Scan(&avg).Error
+	return avg, err
+}
+
+// BilledByMonth sums billed amounts (amount plus late fee, void excluded) per billing period from since (YYYY-MM).
+func (r *SQLiteRepository) BilledByMonth(since string) ([]MonthTotal, error) {
+	rows := make([]MonthTotal, 0)
+	err := r.db.Raw(`SELECT billing_period AS month, COALESCE(SUM(amount + late_fee), 0) AS total
+		FROM bills WHERE status <> 'void' AND billing_period >= ?
+		GROUP BY billing_period`, since).Scan(&rows).Error
+	return rows, err
+}
+
 type ProofCounts struct {
 	Pending       int64   `json:"pending"`
 	PendingAmount float64 `json:"pending_amount"`
