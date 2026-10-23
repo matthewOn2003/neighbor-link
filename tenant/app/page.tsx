@@ -7,7 +7,7 @@ import { useLocale } from "@/i18n";
 import { useLoginMutation } from "@/store/authApi";
 import LangSelect from "@/components/LangSelect";
 import { Icon } from "@/components/ui/Icon";
-import { inputClass } from "@/components/portal/primitives";
+import { Input } from "@/components/ui";
 
 function getErrorMessage(error: unknown): string | undefined {
   if (typeof error === "object" && error !== null && "data" in error) {
@@ -79,22 +79,26 @@ export default function Home() {
 
           <form onSubmit={handleSubmit} className="mt-7 flex flex-col gap-4" noValidate>
             <Field label={t("username")} icon="person" error={fieldErrors.username}>
-              <input
+              <Input
                 name="username"
-                autoComplete="username"
-                className={`${inputClass} pl-11`}
+                label={t("username")}
                 value={form.username}
-                onChange={(event) => updateField("username")(event.target.value)}
+                onChange={updateField("username")}
+                error={fieldErrors.username}
+                autoComplete="username"
+                icon="person"
               />
             </Field>
             <Field label={t("password")} icon="lock" error={fieldErrors.password}>
-              <input
+              <Input
                 name="password"
+                label={t("password")}
                 type="password"
-                autoComplete="current-password"
-                className={`${inputClass} pl-11`}
                 value={form.password}
-                onChange={(event) => updateField("password")(event.target.value)}
+                onChange={updateField("password")}
+                error={fieldErrors.password}
+                autoComplete="current-password"
+                icon="lock"
               />
             </Field>
 

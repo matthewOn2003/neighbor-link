@@ -4,13 +4,13 @@ import { useState } from "react";
 import { Link } from "@/i18n/navigation";
 import { Icon } from "@/components/ui/Icon";
 import { Spinner } from "@/components/ui/Spinner";
-// import { SearchBar } from "@/components/ui/SearchBar";
 import { OccupancyBar, PropertyCover, StatBlock } from "@/components/property/parts";
 import { useDragScroll } from "@/hooks/useDragScroll";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useApiRequest } from "@/hooks/useApiRequest";
 import { useDropdown } from "@/hooks/useDropdown";
 import { useLocale } from "@/i18n";
+import { Select } from "@/components/ui";
 
 const EMPTY_FILTERS = { property_type: "", region: "", developer_id: "" };
 
@@ -80,6 +80,20 @@ export default function PropertiesPage() {
   const isInitialLoading = loading && items.length === 0;
   const message = error ? error : items.length === 0 ? t("no_properties_match_current_filters") : null;
 
+  const regionOptions = [
+    { value: "", label: t("all_regions") },
+    ...optionsOf("property_region"),
+  ]
+
+  const developerOptions = [
+    { value: "", label: t("all_developers") },
+    ...(facets?.developers ?? []).map((d) => ({
+      value: String(d.id),
+      label: d.name,
+    })),
+  ]
+
+
   return (
     <main className="flex flex-col w-full">
       <div className="p-4 md:p-8 space-y-6">
@@ -117,29 +131,25 @@ export default function PropertiesPage() {
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
-              <select
-                className="dropdown w-auto min-w-[160px]"
-                aria-label={t("region")}
+              <Select
+                variant="filter"
+                name="region"
+                label={t("region")}
                 value={filters.region}
-                onChange={(event) => setFilters((f) => ({ ...f, region: event.target.value }))}
-              >
-                <option value="">{t("all_regions")}</option>
-                {optionsOf("property_region").map((o) => (
-                  <option key={o.value} value={o.value}>{o.label}</option>
-                ))}
-              </select>
+                onChange={(region) => setFilters((f) => ({ ...f, region }))}
+                className="w-auto min-w-[160px]"
+                options={regionOptions}
+              />
 
-              <select
-                className="dropdown w-auto min-w-[180px]"
-                aria-label={t("developer")}
+              <Select
+                variant="filter"
+                name="developer_id"
+                label={t("developer")}
                 value={filters.developer_id}
-                onChange={(event) => setFilters((f) => ({ ...f, developer_id: event.target.value }))}
-              >
-                <option value="">{t("all_developers")}</option>
-                {(facets?.developers ?? []).map((d) => (
-                  <option key={d.id} value={String(d.id)}>{d.name}</option>
-                ))}
-              </select>
+                onChange={(developer_id) => setFilters((f) => ({ ...f, developer_id }))}
+                className="w-auto min-w-[180px]"
+                options={developerOptions}
+              />
 
               {hasActiveFilters ? (
                 <button className="btn btn-outline" type="button" onClick={resetFilters}>

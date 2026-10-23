@@ -5,7 +5,8 @@ import { Link, useRouter } from "@/i18n/navigation";
 import { useApiRequest } from "@/hooks/useApiRequest";
 import { request } from "@/services/request";
 import { useLocale } from "@/i18n";
-import { useToast } from "@/components/ui";
+import { Input, useToast } from "@/components/ui";
+import { Select } from "@/components/ui";
 
 export default function NewBillPage() {
   const { t } = useLocale();
@@ -26,6 +27,14 @@ export default function NewBillPage() {
     () => contracts.find((c) => String(c.id) === contractID),
     [contracts, contractID]
   );
+
+  const contractOptions = [
+    { value: "", label: loading ? t("loading") : t("select_active_contract") },
+    ...contracts.map((c) => ({
+      value: String(c.id),
+      label: `CT-${String(c.id).padStart(5, "0")} · ${c.tenant_name} · ${c.property_name || "—"} / ${c.unit_code || "—"} · RM ${Number(c.monthly_rent).toFixed(2)}`,
+    })),
+  ]
 
   function changeContract(id) {
     setContractID(id);
@@ -85,83 +94,57 @@ export default function NewBillPage() {
           <label htmlFor="contract" className={label}>
             {t("active_contract")} *
           </label>
-          <select
-            id="contract"
+          <Select
+            name="contract"
+            label={t("contract")}
             value={contractID}
-            onChange={(e) => changeContract(e.target.value)}
-            className={input + " w-full"}
+            onChange={changeContract}
             required
-          >
-            <option value="">
-              {loading ? t("loading") : t("select_active_contract")}
-            </option>
-            {contracts.map((c) => (
-              <option key={c.id} value={c.id}>
-                CT-{String(c.id).padStart(5, "0")} · {c.tenant_name} · {c.property_name || "—"} /{" "}
-                {c.unit_code || "—"} · RM {Number(c.monthly_rent).toFixed(2)}
-              </option>
-            ))}
-          </select>
+            disabled={loading}
+            placeholder={loading ? t("loading") : t("select_active_contract")}
+            options={contractOptions}
+          />
           {!loading && !contracts.length ? (
             <p className="mt-1 text-xs text-subtle">{t("no_active_contracts_for_bill")}</p>
           ) : null}
         </div>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <div className={field}>
-            <label htmlFor="period" className={label}>
-              {t("billing_period")} *
-            </label>
-            <input
-              id="period"
-              type="month"
-              value={period}
-              onChange={(e) => changePeriod(e.target.value)}
-              className={input + " w-full"}
-              required
-            />
-          </div>
+          <Input
+            name="period"
+            label={t("billing_period")}
+            type="month"
+            value={period}
+            onChange={changePeriod}
+            required
+          />
 
-          <div className={field}>
-            <label htmlFor="due" className={label}>
-              {t("due_date")} *
-            </label>
-            <input
-              id="due"
-              type="date"
-              value={dueDate}
-              onChange={(e) => setDueDate(e.target.value)}
-              className={input + " w-full"}
-              required
-            />
-          </div>
+          <Input
+            name="due"
+            label={t("due_date")}
+            type="date"
+            value={dueDate}
+            onChange={setDueDate}
+            required
+          />
 
-          <div className={field}>
-            <label htmlFor="amount" className={label}>
-              {t("bill_amount")}
-            </label>
-            <input
-              id="amount"
-              value={selected ? "RM " + Number(selected.monthly_rent).toFixed(2) : "—"}
-              className={input + " w-full"}
-              readOnly
-            />
-          </div>
+          <Input
+            name="amount"
+            label={t("bill_amount")}
+            value={selected ? "RM " + Number(selected.monthly_rent).toFixed(2) : "—"}
+            onChange={() => { }}
+            readOnly
+          />
 
-          <div className={field}>
-            <label htmlFor="fee" className={label}>
-              {t("late_fee")}
-            </label>
-            <input
-              id="fee"
-              type="number"
-              min="0"
-              step="0.01"
-              value={lateFee}
-              onChange={(e) => setLateFee(e.target.value)}
-              className={input + " w-full"}
-            />
-          </div>
+          <Input
+            name="fee"
+            label={t("late_fee")}
+            type="number"
+            value={lateFee}
+            onChange={setLateFee}
+            min="0"
+            step="0.01"
+          />
         </div>
 
         <div className={field}>

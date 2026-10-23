@@ -4,8 +4,9 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { Icon } from "@/components/ui/Icon";
 import { Spinner } from "@/components/ui/Spinner";
-import { useDashboardOverview } from "@/hooks/useDashboardOverview";
+import { useApiRequest } from "@/hooks/useApiRequest";
 import { useLocale } from "@/i18n";
+import { Select } from "@/components/ui";
 
 const money = (value) => `RM ${Number(value || 0).toLocaleString("en-MY", { maximumFractionDigits: 0 })}`;
 const pct = (value, digits = 1) => `${Number(value || 0).toFixed(digits)}%`;
@@ -104,7 +105,10 @@ function Donut({ segments }) {
 export default function DashboardPage() {
   const { t } = useLocale();
   const [selectedCycle, setSelectedCycle] = useState("");
-  const { data, loading, error, reload } = useDashboardOverview(selectedCycle);
+  // Empty cycle -> undefined -> dropped by JSON.stringify, so the server returns the current cycle.
+  const { data, loading, error, reload } = useApiRequest("/dashboard/overview", {
+    cycle: selectedCycle || undefined,
+  });
   const cycleOptions = useMemo(() => recentCycles(), []);
 
   if (loading && !data) {
@@ -215,17 +219,14 @@ export default function DashboardPage() {
         <label className="flex items-center gap-2 rounded-lg border border-line/40 bg-accent px-3.5 py-2 text-sm font-medium text-scene-content shadow-sm">
           <Icon name="calendar_month" className="text-lg text-primary" />
           <span className="sr-only">Billing cycle</span>
-          <select
-            className="bg-transparent pr-1 text-sm font-medium text-scene-content focus:outline-none"
+          <Select
+            variant="filter"
+            name="cycle"
+            label={t("cycle")}
             value={selectedCycle || data.cycle}
-            onChange={(event) => setSelectedCycle(event.target.value)}
-          >
-            {cycleOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
+            onChange={setSelectedCycle}
+            options={cycleOptions}
+          />
         </label>
       </header>
 
@@ -239,9 +240,8 @@ export default function DashboardPage() {
                 <span className="text-3xl font-bold tracking-tight text-scene-content">{pct(s.occupancyRate)}</span>
                 {s.totalUnits > 0 ? (
                   <span
-                    className={`rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${
-                      occupancyDelta >= 0 ? "bg-success/15 text-success" : "bg-error/10 text-error"
-                    }`}
+                    className={`rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${occupancyDelta >= 0 ? "bg-success/15 text-success" : "bg-error/10 text-error"
+                      }`}
                   >
                     {occupancyDelta >= 0 ? "+" : ""}
                     {occupancyDelta.toFixed(1)}%

@@ -22,6 +22,7 @@ import {
 function ReceiptsTab() {
   const { t, locale } = useLocale();
   const propertyOptions = usePropertyOptions();
+
   const { draft, setDraft, applied, apply, reset, clear } = useDraftFilters({
     keyword: "",
     property_id: "",
@@ -31,10 +32,12 @@ function ReceiptsTab() {
     amount_min: "",
     amount_max: "",
   });
+
   const unitOptions = useUnitOptions(draft.property_id);
   const [receipt, setReceipt] = useState(null);
 
-  const update = (key) => (value) => setDraft((current) => ({ ...current, [key]: value }));
+  const update = (key) => (value) =>
+    setDraft((current) => ({ ...current, [key]: value }));
 
   return (
     <>
@@ -44,8 +47,16 @@ function ReceiptsTab() {
         filterValues={draft}
         filterBadges={[
           { key: "keyword", label: t("search_keyword") },
-          { key: "property_id", label: t("property"), display: (value) => labelFor(propertyOptions, value) },
-          { key: "unit_id", label: t("unit"), display: (value) => labelFor(unitOptions, value) },
+          {
+            key: "property_id",
+            label: t("property"),
+            display: (value) => labelFor(propertyOptions, value),
+          },
+          {
+            key: "unit_id",
+            label: t("unit"),
+            display: (value) => labelFor(unitOptions, value),
+          },
           { key: "paid_from", label: t("paid_from") },
           { key: "paid_to", label: t("paid_to") },
           { key: "amount_min", label: t("amount_min") },
@@ -68,7 +79,7 @@ function ReceiptsTab() {
         title={t("payments")}
         description={t("payments_description")}
         emptyText={t("no_payment_records")}
-        filters={(
+        filters={
           <>
             <Input
               variant="filter"
@@ -89,25 +100,60 @@ function ReceiptsTab() {
               }}
               options={propertyOptions}
             />
-            <Select variant="filter" name="unit_id" label={t("unit")} value={draft.unit_id} onChange={update("unit_id")} options={unitOptions} />
-            <DatePicker variant="filter" name="paid_from" label={t("paid_from")} value={draft.paid_from} max={draft.paid_to || undefined} onChange={update("paid_from")} />
-            <DatePicker variant="filter" name="paid_to" label={t("paid_to")} value={draft.paid_to} min={draft.paid_from || undefined} onChange={update("paid_to")} />
-            <Input variant="filter" name="amount_min" type="number" label={t("amount_min")} value={draft.amount_min} onChange={update("amount_min")} />
-            <Input variant="filter" name="amount_max" type="number" label={t("amount_max")} value={draft.amount_max} onChange={update("amount_max")} />
+            <Select
+              variant="filter"
+              name="unit_id"
+              label={t("unit")}
+              value={draft.unit_id}
+              onChange={update("unit_id")}
+              options={unitOptions}
+            />
+            <DatePicker
+              variant="filter"
+              name="paid_from"
+              label={t("paid_from")}
+              value={draft.paid_from}
+              max={draft.paid_to || undefined}
+              onChange={update("paid_from")}
+            />
+            <DatePicker
+              variant="filter"
+              name="paid_to"
+              label={t("paid_to")}
+              value={draft.paid_to}
+              min={draft.paid_from || undefined}
+              onChange={update("paid_to")}
+            />
+            <Input
+              variant="filter"
+              name="amount_min"
+              type="number"
+              label={t("amount_min")}
+              value={draft.amount_min}
+              onChange={update("amount_min")}
+            />
+            <Input
+              variant="filter"
+              name="amount_max"
+              type="number"
+              label={t("amount_max")}
+              value={draft.amount_max}
+              onChange={update("amount_max")}
+            />
           </>
-        )}
+        }
         resetFilters={reset}
         applyFilters={apply}
-        buttons={(
+        buttons={
           <>
             <Link className="btn btn-outline" href="/payments/settings">
               <Icon name="settings" className="text-lg" />
               <span>{t("collection_settings")}</span>
             </Link>
           </>
-        )}
+        }
         header={() => (
-          <tr className="bg-accent text-subtle font-semibold">
+          <tr className="bg-accent font-semibold text-subtle">
             <th>{t("tenant_name")}</th>
             <th>{t("property_and_unit")}</th>
             <th>{t("billing_period")}</th>
@@ -125,7 +171,7 @@ function ReceiptsTab() {
               <td>
                 <div className="flex flex-col">
                   <span className="text-scene-content">{row.property_name || "-"}</span>
-                  <span className="text-subtle text-xs">{row.unit_code || "-"}</span>
+                  <span className="text-xs text-subtle">{row.unit_code || "-"}</span>
                 </div>
               </td>
               <td className="text-scene-content">{row.bill_period}</td>
@@ -134,10 +180,10 @@ function ReceiptsTab() {
               <td className="text-subtle">{row.reference || "-"}</td>
               <td className="whitespace-nowrap text-subtle">{fdl(row.paid_at)}</td>
               <td>
-                <div className="flex justify-center items-center gap-2">
+                <div className="flex items-center justify-center gap-2">
                   <button
                     type="button"
-                    className="btn btn-primary !p-0 size-10 grid place-items-center"
+                    className="btn btn-primary !p-0 grid size-10 place-items-center"
                     aria-label={t("view_receipt")}
                     onClick={() => setReceipt(row)}
                   >
@@ -163,8 +209,8 @@ function ReceiptsTab() {
 
 export default function PaymentsPage() {
   return (
-    <main className="flex flex-col w-full">
-      <div className="p-4 md:p-8 space-y-6">
+    <main className="flex w-full flex-col">
+      <div className="space-y-6 p-4 md:p-8">
         <ReceiptsTab />
       </div>
     </main>
