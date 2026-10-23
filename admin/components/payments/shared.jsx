@@ -4,9 +4,9 @@ import { useLocale } from "@/i18n";
 import { useApiRequest } from "@/hooks/useApiRequest";
 import { fdl } from "@/utils/date";
 import { buildSimplePdf } from "@/utils/pdf";
+import { formatMoney } from "@/utils/format";
 
-export const money = (value, locale) =>
-  `RM ${Number(value || 0).toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+export const money = (value, locale) => formatMoney(value, locale);
 
 export const receiptNumber = (id) => `RCPT-${String(id).padStart(6, "0")}`;
 

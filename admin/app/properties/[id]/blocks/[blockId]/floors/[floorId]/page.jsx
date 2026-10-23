@@ -200,7 +200,7 @@ export default function FloorDetailPage({ params }) {
                 <td>
                   <div className="flex justify-center items-center gap-2">
                     <Link
-                      className="btn btn-primary !p-0 size-10 grid place-items-center"
+                      className="btn btn-primary btn-icon"
                       href={`/properties/${id}/blocks/${blockId}/floors/${floorId}/units/${unit.id}`}
                       aria-label={t("edit_unit")}
                     >

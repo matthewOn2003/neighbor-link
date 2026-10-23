@@ -209,7 +209,7 @@ export default function MaintenancePage() {
                 <td>
                   <div className="flex justify-center items-center gap-2">
                     <Link
-                      className="btn btn-primary !p-0 size-10 grid place-items-center"
+                      className="btn btn-primary btn-icon"
                       href={`/maintenance/${item.id}`}
                       aria-label={t("edit")}
                     >

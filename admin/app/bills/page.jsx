@@ -9,10 +9,8 @@ import { Select } from "@/components/ui/Select";
 import { PdfPreviewModal } from "@/components/ui/PdfPreviewModal";
 import { useDraftFilters } from "@/hooks/useDraftFilters";
 import { useLocale } from "@/i18n";
-import { buildSimplePdf } from "@/utils/pdf";
-
-const money = (value, locale) =>
-  "RM " + Number(value || 0).toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+import { billRef, buildInvoicePdf } from "@/utils/documents";
+import { formatMoney } from "@/utils/format";
 
 const statusKeys = {
   unpaid: "bill_status_unpaid",
@@ -23,42 +21,6 @@ const statusKeys = {
   pending_review: "bill_status_pending_review",
 };
 const statusClass = { unpaid: "neutral", partial: "warning", paid: "success", overdue: "danger", void: "neutral", pending_review: "warning" };
-
-const billRef = (id) => "BL-" + String(id).padStart(5, "0");
-const pdfMoney = (value) => "RM " + (Number(value) || 0).toFixed(2);
-const pdfStatus = { unpaid: "Unpaid", overdue: "Overdue", paid: "Paid", void: "Void", pending_review: "Pending review" };
-
-// Invoice PDF: English labels and values only (the built-in PDF font is Latin-only).
-function buildInvoicePdf(bill) {
-  const total = Number(bill.amount) + Number(bill.late_fee);
-  return buildSimplePdf({
-    title: "Invoice",
-    subtitle: billRef(bill.id),
-    sections: [
-      {
-        heading: "Bill",
-        rows: [
-          ["Invoice reference", billRef(bill.id)],
-          ["Tenant", bill.tenant_name],
-          ["Unit", bill.unit_code],
-          ["Property", bill.property_name],
-          ["Billing period", bill.billing_period],
-          ["Due date", bill.due_date],
-          ["Status", pdfStatus[bill.display_status ?? bill.status] ?? bill.status],
-        ],
-      },
-      {
-        heading: "Amount",
-        rows: [
-          ["Amount", pdfMoney(bill.amount)],
-          ["Late fee", pdfMoney(bill.late_fee)],
-          ["Total", pdfMoney(total)],
-        ],
-      },
-    ],
-    footer: "Generated " + new Date().toISOString().slice(0, 10),
-  });
-}
 
 export default function BillsPage() {
   const { t, locale } = useLocale();
@@ -133,9 +95,9 @@ export default function BillsPage() {
             const stats = summary ?? {};
             return (
             <>
-              <SummaryCard label={t("bill_total_amount")} value={money(stats.total_amount, locale)} icon="receipt_long" />
-              <SummaryCard label={t("bill_total_paid")} value={money(stats.total_paid, locale)} icon="task_alt" />
-              <SummaryCard label={t("bill_outstanding")} value={money(stats.outstanding, locale)} icon="account_balance_wallet" />
+              <SummaryCard label={t("bill_total_amount")} value={formatMoney(stats.total_amount, locale)} icon="receipt_long" />
+              <SummaryCard label={t("bill_total_paid")} value={formatMoney(stats.total_paid, locale)} icon="task_alt" />
+              <SummaryCard label={t("bill_outstanding")} value={formatMoney(stats.outstanding, locale)} icon="account_balance_wallet" />
               <SummaryCard label={t("bill_overdue_count")} value={String(stats.overdue_count ?? 0)} icon="schedule" />
             </>
             );
@@ -153,7 +115,7 @@ export default function BillsPage() {
               return (
                 <tr className="group" key={bill.id}>
                   <td className="font-semibold whitespace-nowrap">
-                    <Link href={"/bills/" + bill.id} className="text-primary-dark hover:underline">{billRef(bill.id)}</Link>
+                    <Link href={"/bills/" + bill.id} className="link-inline">{billRef(bill.id)}</Link>
                   </td>
                   <td>
                     <div className="font-semibold text-scene-content">{bill.tenant_name}</div>
@@ -161,12 +123,12 @@ export default function BillsPage() {
                   </td>
                   <td className="whitespace-nowrap">{bill.billing_period}</td>
                   <td className="whitespace-nowrap">{bill.due_date}</td>
-                  <td className="whitespace-nowrap font-semibold">{money(Number(bill.amount) + Number(bill.late_fee), locale)}</td>
-                  <td className="whitespace-nowrap">{money(bill.amount_paid, locale)}</td>
+                  <td className="whitespace-nowrap font-semibold">{formatMoney(Number(bill.amount) + Number(bill.late_fee), locale)}</td>
+                  <td className="whitespace-nowrap">{formatMoney(bill.amount_paid, locale)}</td>
                   <td><span className={"status-pill " + (statusClass[displayStatus] || "neutral")}>{t(statusKeys[displayStatus] || statusKeys.unpaid)}</span></td>
                   <td className="whitespace-nowrap">
                     <div className="flex items-center gap-3">
-                      <Link href={"/bills/" + bill.id} className="text-primary-dark hover:underline">{t("view_details")}</Link>
+                      <Link href={"/bills/" + bill.id} className="link-inline">{t("view_details")}</Link>
                       <button
                         type="button"
                         aria-label={t("view_pdf")}

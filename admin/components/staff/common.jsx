@@ -27,12 +27,12 @@ export function RowActions({ editHref, editLabel, onDelete }) {
   const { t } = useLocale();
   return (
     <div className="flex justify-center items-center gap-2">
-      <Link className="btn btn-primary !p-0 size-10 grid place-items-center" href={editHref} aria-label={editLabel}>
+      <Link className="btn btn-primary btn-icon" href={editHref} aria-label={editLabel}>
         <Icon name="edit" className="text-lg" />
       </Link>
       <button
         type="button"
-        className="btn btn-outline !p-0 size-10 grid place-items-center text-error"
+        className="btn btn-outline btn-icon text-error"
         aria-label={t("delete")}
         onClick={onDelete}
       >

@@ -12,8 +12,6 @@ import { ImportModal } from "./ImportModal";
 export { SummaryCard } from "./SummaryCard";
 export { FilterSection } from "./FilterSection";
 
-const NAV_BTN = `inline-flex items-center gap-1 px-3 py-2 rounded-lg bg-primary/10 text-subtle hover:text-scene-content hover:bg-primary/10 text-xs font-semibold transition-colors disabled:opacity-60`;
-
 function buildPagination(current, total) {
   if (total <= 5) return Array.from({ length: total }, (_, i) => i + 1);
   const pages = new Set([1, total, current - 1, current, current + 1]);
@@ -199,7 +197,7 @@ export function DataTable({
           <b className="text-scene-content font-semibold">{total}</b> {t("results")}
         </div>
         <div className="flex items-center gap-2">
-          <button className={NAV_BTN} disabled={page === 1} type="button" onClick={() => setPage(page - 1)}>
+          <button className="table-nav-btn" disabled={page === 1} type="button" onClick={() => setPage(page - 1)}>
             <Icon name="chevron_left" />
             {t("previous")}
           </button>
@@ -221,7 +219,7 @@ export function DataTable({
               </button>
             ),
           )}
-          <button className={NAV_BTN} disabled={page >= totalPages} type="button" onClick={() => setPage(page + 1)}>
+          <button className="table-nav-btn" disabled={page >= totalPages} type="button" onClick={() => setPage(page + 1)}>
             {t("next")}
             <Icon name="chevron_right" />
           </button>

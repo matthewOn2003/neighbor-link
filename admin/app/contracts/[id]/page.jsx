@@ -9,67 +9,14 @@ import { Spinner } from "@/components/ui/Spinner";
 import { Input, useToast } from "@/components/ui";
 import { Icon } from "@/components/ui/Icon";
 import { PdfPreviewModal } from "@/components/ui/PdfPreviewModal";
-import { buildSimplePdf } from "@/utils/pdf";
+import { buildContractSummaryPdf, contractRef } from "@/utils/documents";
+import { formatMoney } from "@/utils/format";
 import { Select } from "@/components/ui";
-
-const contractRef = (id) => "CT-" + String(id).padStart(5, "0");
-
-const pdfMoney = (value) => "RM " + (Number(value) || 0).toFixed(2);
-
-const pdfContractStatus = {
-  draft: "Draft",
-  active: "Active",
-  expired: "Expired",
-  terminated: "Terminated",
-};
 
 const contractStatusOptions = ["draft", "active", "expired", "terminated"].map((s) => ({
   value: s,
   label: s.charAt(0).toUpperCase() + s.slice(1),
 }));
-
-// Contract summary PDF: English labels and values only (the built-in PDF font is Latin-only).
-function buildContractSummaryPdf(contract, tenant) {
-  return buildSimplePdf({
-    title: "Lease Agreement Summary",
-    subtitle: contractRef(contract.id),
-    sections: [
-      {
-        heading: "Parties",
-        rows: [
-          ["Tenant name", contract.tenant_name],
-          ["Tenant phone", tenant?.phone || contract.tenant_phone],
-          ["Tenant email", tenant?.email],
-        ],
-      },
-      {
-        heading: "Property and unit",
-        rows: [
-          ["Property", contract.property_name],
-          ["Unit", contract.unit_code],
-        ],
-      },
-      {
-        heading: "Term",
-        rows: [
-          ["Start date", contract.start_date],
-          ["End date", contract.end_date],
-          ["Billing day", contract.billing_day],
-          ["Status", pdfContractStatus[contract.status] ?? contract.status],
-        ],
-      },
-      {
-        heading: "Financial",
-        rows: [
-          ["Monthly rent", pdfMoney(contract.monthly_rent)],
-          ["Security deposit", pdfMoney(contract.security_deposit)],
-        ],
-      },
-      { heading: "Notes", rows: [["Notes", contract.notes]] },
-    ],
-    footer: "Generated " + new Date().toISOString().slice(0, 10),
-  });
-}
 
 async function buildContractPdf(contract) {
   const tenant = await request("/tenant/detail/" + contract.tenant_id).catch(() => null);
@@ -90,12 +37,6 @@ const variants = {
   terminated: "danger",
 };
 
-const money = (v, locale) =>
-  "RM " +
-  Number(v || 0).toLocaleString(locale, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
 
 export default function ContractDetailPage({ params }) {
   const { id } = use(params);
@@ -185,8 +126,8 @@ export default function ContractDetailPage({ params }) {
   ];
 
   const summaryCards = [
-    [t("monthly_rent"), money(data.monthly_rent, locale)],
-    [t("security_deposit"), money(data.security_deposit, locale)],
+    [t("monthly_rent"), formatMoney(data.monthly_rent, locale)],
+    [t("security_deposit"), formatMoney(data.security_deposit, locale)],
     [t("billing_day"), data.billing_day ?? "—"],
   ];
 
@@ -197,7 +138,7 @@ export default function ContractDetailPage({ params }) {
           <header className="space-y-4">
             <Link
               href="/contracts"
-              className="inline-flex items-center gap-2 text-sm font-semibold text-primary-dark hover:underline"
+              className="link-action"
             >
               <span aria-hidden="true">←</span>
               {t("back_to_contracts")}

@@ -379,3 +379,27 @@ h1 {
     transition-duration: 1ms !important;
   }
 }
+/* 通用卡片、链接、图标按钮、表格分页按钮（原本在各页面里重复写的 Tailwind 组合） */
+.card {
+  @apply rounded-2xl border border-line/40 bg-accent p-5 shadow-sm;
+}
+
+.card-empty {
+  @apply p-8 text-center;
+}
+
+.link-action {
+  @apply inline-flex items-center gap-2 text-sm font-semibold text-primary-dark hover:underline;
+}
+
+.link-inline {
+  @apply text-primary-dark hover:underline;
+}
+
+.btn-icon {
+  @apply !p-0 size-10 grid place-items-center;
+}
+
+.table-nav-btn {
+  @apply inline-flex items-center gap-1 px-3 py-2 rounded-lg bg-primary/10 text-subtle hover:text-scene-content hover:bg-primary/10 text-xs font-semibold transition-colors disabled:opacity-60;
+}
