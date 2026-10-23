@@ -7,7 +7,7 @@ import { FormPage, FormSection, Input, Select, Textarea, useToast } from "@/comp
 import { Spinner } from "@/components/ui/Spinner";
 import { RecordFallback } from "@/components/staff/common";
 import { useDropdown } from "@/hooks/useDropdown";
-import { useRequest } from "@/hooks/useRequest";
+import { useApiRequest } from "@/hooks/useApiRequest";
 import { request } from "@/services/request";
 import { fdl } from "@/utils/date";
 
@@ -17,7 +17,7 @@ function Pill({ item, fallback }) {
 
 export default function MaintenanceDetailPage({ params }) {
   const { id } = use(params);
-  const { data, loading, reload } = useRequest(`/maintenance/detail/${id}`, {});
+  const { data, loading, reload } = useApiRequest(`/maintenance/detail/${id}`, {});
 
   return (
     <RecordFallback loading={loading && !data} found={Boolean(data)}>

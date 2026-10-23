@@ -1,7 +1,7 @@
 "use client";
 import { use, useState } from "react";
 import { Link } from "@/i18n/navigation";
-import { useRequest } from "@/hooks/useRequest";
+import { useApiRequest } from "@/hooks/useApiRequest";
 import { request } from "@/services/request";
 import { useLocale } from "@/i18n";
 import { useToast } from "@/components/ui";
@@ -53,7 +53,7 @@ function buildInvoicePdf(bill) {
 
 export default function BillDetailPage({ params }) {
   const { id } = use(params), { t, locale } = useLocale(), toast = useToast();
-  const { data, loading, error, reload } = useRequest("/bill/detail/" + id);
+  const { data, loading, error, reload } = useApiRequest("/bill/detail/" + id);
   const [amount, setAmount] = useState(""), [method, setMethod] = useState("bank_transfer"), [reference, setReference] = useState("");
   const [paidAt, setPaidAt] = useState(new Date().toISOString().slice(0, 10)), [saving, setSaving] = useState(false);
   const [editOpen, setEditOpen] = useState(false), [editSaving, setEditSaving] = useState(false);
@@ -113,17 +113,17 @@ export default function BillDetailPage({ params }) {
     </form> : null}
     {data.status === "void" ? <p className="rounded-xl bg-scene p-4 text-sm text-subtle">{t("bill_voided_notice")}</p> : null}
   </section></div>
-  <Modal open={editOpen} title={t("edit_bill")} onClose={() => setEditOpen(false)} size="md" footer={<>
-    <button type="button" className="btn btn-outline" onClick={() => setEditOpen(false)} disabled={editSaving}>{t("cancel")}</button>
-    <button type="submit" form="bill-edit-form" className="btn btn-primary" disabled={editSaving}>{editSaving ? t("saving") : t("save_changes")}</button>
-  </>}>
-    <form id="bill-edit-form" onSubmit={saveEdit} className="grid gap-4">
-      <div className={field}><label htmlFor="edit-amount" className={label}>{t("bill_amount")} *</label><input id="edit-amount" type="number" min="0" step="0.01" value={edit.amount} onChange={e => setEdit({ ...edit, amount: e.target.value })} className={input + " w-full"} required /></div>
-      <div className={field}><label htmlFor="edit-late-fee" className={label}>{t("late_fee")}</label><input id="edit-late-fee" type="number" min="0" step="0.01" value={edit.late_fee} onChange={e => setEdit({ ...edit, late_fee: e.target.value })} className={input + " w-full"} /></div>
-      <div className={field}><label htmlFor="edit-due-date" className={label}>{t("due_date")} *</label><input id="edit-due-date" type="date" value={edit.due_date} onChange={e => setEdit({ ...edit, due_date: e.target.value })} className={input + " w-full"} required /></div>
-      <div className={field}><label htmlFor="edit-notes" className={label}>{t("notes")}</label><textarea id="edit-notes" rows={3} value={edit.notes} onChange={e => setEdit({ ...edit, notes: e.target.value })} className={input + " w-full"} /></div>
-    </form>
-  </Modal>
-  <PdfPreviewModal open={pdfOpen} onClose={() => setPdfOpen(false)} title={t("invoice")} fileName={"invoice-" + billRef(data.id)} build={() => buildInvoicePdf(data)} />
+    <Modal open={editOpen} title={t("edit_bill")} onClose={() => setEditOpen(false)} size="md" footer={<>
+      <button type="button" className="btn btn-outline" onClick={() => setEditOpen(false)} disabled={editSaving}>{t("cancel")}</button>
+      <button type="submit" form="bill-edit-form" className="btn btn-primary" disabled={editSaving}>{editSaving ? t("saving") : t("save_changes")}</button>
+    </>}>
+      <form id="bill-edit-form" onSubmit={saveEdit} className="grid gap-4">
+        <div className={field}><label htmlFor="edit-amount" className={label}>{t("bill_amount")} *</label><input id="edit-amount" type="number" min="0" step="0.01" value={edit.amount} onChange={e => setEdit({ ...edit, amount: e.target.value })} className={input + " w-full"} required /></div>
+        <div className={field}><label htmlFor="edit-late-fee" className={label}>{t("late_fee")}</label><input id="edit-late-fee" type="number" min="0" step="0.01" value={edit.late_fee} onChange={e => setEdit({ ...edit, late_fee: e.target.value })} className={input + " w-full"} /></div>
+        <div className={field}><label htmlFor="edit-due-date" className={label}>{t("due_date")} *</label><input id="edit-due-date" type="date" value={edit.due_date} onChange={e => setEdit({ ...edit, due_date: e.target.value })} className={input + " w-full"} required /></div>
+        <div className={field}><label htmlFor="edit-notes" className={label}>{t("notes")}</label><textarea id="edit-notes" rows={3} value={edit.notes} onChange={e => setEdit({ ...edit, notes: e.target.value })} className={input + " w-full"} /></div>
+      </form>
+    </Modal>
+    <PdfPreviewModal open={pdfOpen} onClose={() => setPdfOpen(false)} title={t("invoice")} fileName={"invoice-" + billRef(data.id)} build={() => buildInvoicePdf(data)} />
   </main>;
 }

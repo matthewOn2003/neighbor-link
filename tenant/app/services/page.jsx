@@ -4,7 +4,7 @@ import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useLocale } from "@/i18n";
 import { Icon } from "@/components/ui/Icon";
-import { useRequest } from "@/hooks/useRequest";
+import { useApiRequest } from "@/hooks/useApiRequest";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useDropdown } from "@/hooks/useDropdown";
 import { useOptionLabel, STATUS_FILTERS, STATUS_LABEL_KEY } from "@/components/portal/status";
@@ -44,8 +44,8 @@ function ServicesContent() {
     keyword: debouncedKeyword,
     status: status === "all" ? "" : status,
   };
-  const repairs = useRequest("/tenant-portal/maintenance/list", params);
-  const complaints = useRequest("/tenant-portal/complaint/list", params);
+  const repairs = useApiRequest("/tenant-portal/maintenance/list", params);
+  const complaints = useApiRequest("/tenant-portal/complaint/list", params);
   const dict = useDropdown(["maintenance_category", "complaint_category"]);
 
   const current = kind === "maintenance" ? repairs : complaints;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRequest } from "@/hooks/useRequest";
+import { useApiRequest } from "@/hooks/useApiRequest";
 
 /**
  * Load backend-managed dropdown options.
@@ -9,7 +9,7 @@ import { useRequest } from "@/hooks/useRequest";
  */
 export function useDropdown(keys) {
   const keyList = [...keys].sort();
-  const { data, loading, error } = useRequest("/dictionary/dropdown", { keys: keyList });
+  const { data, loading, error } = useApiRequest("/dictionary/dropdown", { keys: keyList });
   const dropdown = data?.dropdown ?? {};
 
   function labelOf(key, value) {

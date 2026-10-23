@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { UnitStatusBadge } from "@/components/property/parts";
 import { useDraftFilters } from "@/hooks/useDraftFilters";
-import { useRequest } from "@/hooks/useRequest";
+import { useApiRequest } from "@/hooks/useApiRequest";
 import { useDropdown } from "@/hooks/useDropdown";
 import { useLocale } from "@/i18n";
 import { request } from "@/services/request";
@@ -20,7 +20,7 @@ const BEDROOM_OPTIONS = [1, 2, 3, 4, 5];
 export default function FloorDetailPage({ params }) {
   const { id, blockId, floorId } = use(params);
   const { t, locale } = useLocale();
-  const { data: floor, loading, error } = useRequest(`/property/floor/${floorId}`);
+  const { data: floor, loading, error } = useApiRequest(`/property/floor/${floorId}`);
   const { labelOf, optionsOf } = useDropdown(["unit_status"]);
   const { draft, setDraft, applied, apply, reset, clear } = useDraftFilters({
     status: "",

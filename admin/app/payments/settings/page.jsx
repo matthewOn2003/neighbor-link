@@ -4,7 +4,7 @@ import { useState } from "react";
 import { FormSection, Input, useToast } from "@/components/ui";
 import { Icon } from "@/components/ui/Icon";
 import { Spinner } from "@/components/ui/Spinner";
-import { useRequest } from "@/hooks/useRequest";
+import { useApiRequest } from "@/hooks/useApiRequest";
 import { Link } from "@/i18n/navigation";
 import { useLocale } from "@/i18n";
 import { request } from "@/services/request";
@@ -101,7 +101,7 @@ function BillingSettingsForm({ initial, onSaved }) {
 
 export default function CollectionSettingsPage() {
   const { t } = useLocale();
-  const { data, loading, reload } = useRequest("/billing-settings/detail", {});
+  const { data, loading, reload } = useApiRequest("/billing-settings/detail", {});
 
   return (
     <main className="flex flex-col w-full">

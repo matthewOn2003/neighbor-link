@@ -5,14 +5,14 @@ import { Link } from "@/i18n/navigation";
 import { Icon } from "@/components/ui/Icon";
 import { Spinner } from "@/components/ui/Spinner";
 import { OccupancyBar, StatBlock } from "@/components/property/parts";
-import { useRequest } from "@/hooks/useRequest";
+import { useApiRequest } from "@/hooks/useApiRequest";
 import { useLocale } from "@/i18n";
 
 export default function BlockDetailPage({ params }) {
   const { id, blockId } = use(params);
   const { t } = useLocale();
-  const { data: block, loading, error } = useRequest(`/property/block/${blockId}`);
-  const { data: floorData } = useRequest("/property/floor/list", { block_id: blockId, per_page: 100 });
+  const { data: block, loading, error } = useApiRequest(`/property/block/${blockId}`);
+  const { data: floorData } = useApiRequest("/property/floor/list", { block_id: blockId, per_page: 100 });
   const floors = floorData?.list ?? [];
 
   if (error) {
