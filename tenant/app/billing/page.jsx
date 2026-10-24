@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useState } from "react";
+import { api } from "@/services/api";
 import { useSearchParams } from "next/navigation";
 import { useLocale } from "@/i18n";
 import { Icon } from "@/components/ui/Icon";
@@ -28,8 +29,8 @@ function BillingContent() {
   const [invoiceBillId, setInvoiceBillId] = useState(null);
   // The home screen's "Submit Proof" action opens this sheet with ?sheet=proof.
   const [sheet, setSheet] = useState(() => (searchParams.get("sheet") === "proof" ? { billId: null } : null)); // null when closed; { billId } when open
-  const bills = useApiRequest("/tenant-portal/bills", { current_page: 1, per_page: 100 });
-  const proofs = useApiRequest("/tenant-portal/payment-proof/list", { current_page: 1, per_page: 100 });
+  const bills = useApiRequest(api.bill.list, { current_page: 1, per_page: 100 });
+  const proofs = useApiRequest(api.paymentProof.list, { current_page: 1, per_page: 100 });
 
   const billList = bills.data?.list ?? [];
   const proofList = proofs.data?.list ?? [];

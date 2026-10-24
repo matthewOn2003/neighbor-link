@@ -2,8 +2,7 @@
 
 import { use, useState } from "react";
 import { Link } from "@/i18n/navigation";
-import { useApiRequest } from "@/hooks/useApiRequest";
-import { request } from "@/services/request";
+import { useApiRequest, request } from "@/hooks/useApiRequest";
 import { useLocale } from "@/i18n";
 import { Spinner, Input, Textarea, useToast, Icon, PdfPreviewModal, Select, StatusBadge } from "@/components/ui";
 import { buildContractSummaryPdf, contractRef } from "@/utils/documents";
@@ -13,7 +12,7 @@ import { apiErrorMessage } from "@/utils/errors";
 import { api } from "@/services/api";
 
 async function buildContractPdf(contract) {
-  const tenant = await request(api.tenant.detail(contract.tenant_id)).catch(() => null);
+  const tenant = await request(api.tenant.detail, { id: contract.tenant_id }).catch(() => null);
   return buildContractSummaryPdf(contract, tenant);
 }
 
@@ -25,7 +24,7 @@ export default function ContractDetailPage({ params }) {
   const { optionsOf } = useDropdown(["contract_status"]);
   const contractStatusItems = optionsOf("contract_status");
 
-  const { data, loading, error, reload } = useApiRequest(api.contract.detail(id));
+  const { data, loading, error, reload } = useApiRequest(api.contract.detail, { id: Number(id) });
 
   const [draft, setDraft] = useState(null);
   const [submitting, setSubmitting] = useState(false);
@@ -52,7 +51,8 @@ export default function ContractDetailPage({ params }) {
 
     setSubmitting(true);
     try {
-      await request(api.contract.update(id), {
+      await request(api.contract.update, {
+        id: Number(id),
         ...form,
         tenant_id: Number(form.tenant_id),
         monthly_rent: Number(form.monthly_rent),

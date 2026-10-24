@@ -1,6 +1,7 @@
 "use client";
 
 import { Link } from "@/i18n/navigation";
+import { api } from "@/services/api";
 import { useEffect, useState } from "react";
 import { useLocale } from "@/i18n";
 import { Icon } from "@/components/ui/Icon";
@@ -14,7 +15,7 @@ const ATTENTION_LIMIT = 2;
 
 export default function DashboardPage() {
   const { t, locale } = useLocale();
-  const { data, loading } = useApiRequest("/tenant-portal/home", {});
+  const { data, loading } = useApiRequest(api.portal.home, {});
   const dictLabel = useDictLabel(["maintenance_category"]);
 
   if (loading && !data) return <LoadingBlock rows={3} />;

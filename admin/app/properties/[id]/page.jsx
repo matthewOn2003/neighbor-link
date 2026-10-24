@@ -13,7 +13,7 @@ import { api } from "@/services/api";
 export default function PropertyDetailPage({ params }) {
   const { id } = use(params);
   const { t } = useLocale();
-  const { data: property, loading, error, reload } = useApiRequest(api.property.detail(id));
+  const { data: property, loading, error, reload } = useApiRequest(api.property.detail, { id: Number(id) });
   const [coverOpen, setCoverOpen] = useState(false);
   const { data: blockData } = useApiRequest(api.property.blockList, { property_id: id, per_page: 100 });
   const blocks = blockData?.list ?? [];

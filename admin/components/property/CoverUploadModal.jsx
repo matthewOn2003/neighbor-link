@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Modal, FileDropzone, Spinner, useToast } from "@/components/ui";
 import { useLocale } from "@/i18n";
-import { uploadFile } from "@/services/request";
+import { uploadFile } from "@/hooks/useApiRequest";
 import { api } from "@/services/api";
 import { apiErrorMessage } from "@/utils/errors";
 
@@ -50,7 +50,7 @@ export function CoverUploadModal({ open, onClose, propertyId, onUploaded }) {
     setSubmitting(true);
     setError("");
     try {
-      const updated = await uploadFile(api.property.cover(propertyId), file);
+      const updated = await uploadFile(api.property.cover, file, { fields: { id: propertyId } });
       toast.success(t("cover_uploaded"));
       setFile(null);
       onUploaded?.(updated);

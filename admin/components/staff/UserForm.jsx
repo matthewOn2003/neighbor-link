@@ -3,12 +3,11 @@
 import { useState } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { useLocale } from "@/i18n";
-import { useApiRequest } from "@/hooks/useApiRequest";
+import { useApiRequest, request } from "@/hooks/useApiRequest";
 import { FormPage, FormSection, Input, Select, useToast, DatePicker, Spinner } from "@/components/ui";
 import { useStatusOptions } from "./common";
 import { apiErrorMessage } from "@/utils/errors";
 import { api } from "@/services/api";
-import { request } from "@/services/request";
 
 const EMPTY_FORM = {
   username: "",
@@ -68,7 +67,7 @@ export function UserForm({ record }) {
     setSubmitting(true);
     try {
       if (isEdit) {
-        await request(api.staffAccount.update(record.id), body);
+        await request(api.staffAccount.update, { id: record.id, ...body });
       } else {
         await request(api.staffAccount.create, body);
       }

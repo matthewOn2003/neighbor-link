@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Link } from "@/i18n/navigation";
 import { useDraftFilters } from "@/hooks/useDraftFilters";
-import { useApiRequest } from "@/hooks/useApiRequest";
+import { useApiRequest, request } from "@/hooks/useApiRequest";
 import { useLocale } from "@/i18n";
 import { Icon, DataTable, SummaryCard, Input, Select, DatePicker, ConfirmDialog, useToast, StatusBadge } from "@/components/ui";
 import { fdl, fds } from "@/utils/date";
@@ -12,7 +12,6 @@ import { RowActions, useStatusOptions } from "@/components/staff/common";
 import { apiErrorMessage } from "@/utils/errors";
 import { labelMap } from "@/utils/collections";
 import { api } from "@/services/api";
-import { request } from "@/services/request";
 
 export default function UsersPage() {
   const { t } = useLocale();
@@ -51,7 +50,7 @@ export default function UsersPage() {
   async function confirmDelete() {
     setSubmitting(true);
     try {
-      await request(api.staffAccount.delete(pending.id));
+      await request(api.staffAccount.delete, { id: pending.id });
       toast.success(t("record_deleted"));
       pending.reload();
     } catch (err) {

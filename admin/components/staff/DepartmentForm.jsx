@@ -6,7 +6,7 @@ import { useLocale } from "@/i18n";
 import { FormPage, FormSection, Input, Select, Textarea, useToast, Spinner } from "@/components/ui";
 import { useStatusOptions } from "./common";
 import { apiErrorMessage } from "@/utils/errors";
-import { request } from "@/services/request";
+import { request } from "@/hooks/useApiRequest";
 import { api } from "@/services/api";
 
 const EMPTY_FORM = {
@@ -55,7 +55,7 @@ export function DepartmentForm({ record }) {
     setSubmitting(true);
     try {
       if (isEdit) {
-        await request(api.staffDepartment.update(record.id), body);
+        await request(api.staffDepartment.update, { id: record.id, ...body });
       } else {
         await request(api.staffDepartment.create, body);
       }

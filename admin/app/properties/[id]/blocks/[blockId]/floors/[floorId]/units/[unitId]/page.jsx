@@ -4,9 +4,8 @@ import { use, useEffect, useState } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { EmptyState, FormPage, FormSection, Input, Select, useToast, Spinner } from "@/components/ui";
 import { useDropdown } from "@/hooks/useDropdown";
-import { useApiRequest } from "@/hooks/useApiRequest";
+import { useApiRequest, request } from "@/hooks/useApiRequest";
 import { useLocale } from "@/i18n";
-import { request } from "@/services/request";
 import { apiErrorMessage } from "@/utils/errors";
 import { api } from "@/services/api";
 
@@ -34,7 +33,7 @@ export default function EditUnitPage({ params }) {
   const [unit, setUnit] = useState(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
-  const { data: floor } = useApiRequest(api.property.floorDetail(floorId));
+  const { data: floor } = useApiRequest(api.property.floorDetail, { id: Number(floorId) });
   const floorHref = `/properties/${id}/blocks/${blockId}/floors/${floorId}`;
 
   useEffect(() => {
@@ -123,7 +122,8 @@ function EditUnitForm({ unit, floorHref, backLabel, unitId }) {
 
     setSubmitting(true);
     try {
-      await request(api.property.unitUpdate(unitId), {
+      await request(api.property.unitUpdate, {
+        id: Number(unitId),
         code: form.code.trim(),
         bedrooms: Number(form.bedrooms),
         size_sqft: Number(form.size_sqft),

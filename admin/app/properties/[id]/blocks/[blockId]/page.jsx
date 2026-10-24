@@ -11,7 +11,7 @@ import { api } from "@/services/api";
 export default function BlockDetailPage({ params }) {
   const { id, blockId } = use(params);
   const { t } = useLocale();
-  const { data: block, loading, error } = useApiRequest(api.property.blockDetail(blockId));
+  const { data: block, loading, error } = useApiRequest(api.property.blockDetail, { id: Number(blockId) });
   const { data: floorData } = useApiRequest(api.property.floorList, {
     block_id: blockId,
     per_page: 100,

@@ -1,6 +1,7 @@
 "use client";
 
 import { use } from "react";
+import { api } from "@/services/api";
 import { useLocale } from "@/i18n";
 import { useApiRequest } from "@/hooks/useApiRequest";
 import { useDictLabel, COMPLAINT_ICON } from "@/components/portal/status";
@@ -10,7 +11,7 @@ import RequestDetail from "@/components/portal/RequestDetail";
 export default function ComplaintDetailPage({ params }) {
   const { id } = use(params);
   const { t, locale } = useLocale();
-  const { data, loading } = useApiRequest(`/tenant-portal/complaint/detail/${id}`, {});
+  const { data, loading } = useApiRequest(api.complaint.detail, { id: Number(id) });
   const label = useDictLabel(["complaint_category"]);
 
   return (

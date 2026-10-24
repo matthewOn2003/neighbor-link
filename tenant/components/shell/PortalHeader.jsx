@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { api } from "@/services/api";
 import Image from "next/image";
 import { useLocale } from "@/i18n";
 import { Icon } from "@/components/ui/Icon";
@@ -20,8 +21,8 @@ function initialsOf(name) {
 
 export default function PortalHeader() {
   const { t } = useLocale();
-  const { data } = useApiRequest("/tenant-portal/me", {});
-  const notices = useApiRequest("/tenant-portal/notification/list", { current_page: 1, per_page: 1 });
+  const { data } = useApiRequest(api.portal.me, {});
+  const notices = useApiRequest(api.notification.list, { current_page: 1, per_page: 1 });
   const [open, setOpen] = useState(false);
   // The dot marks only notifications that need action; announcements stay quiet.
   const actionCount = notices.data?.summary?.action_count ?? 0;

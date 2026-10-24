@@ -12,9 +12,9 @@ func NewMaintenanceRouter(c *MaintenanceController, tokenSecret string, allowedO
 	admin := middleware.RequireRole(tokenSecret, userdelivery.VerifyToken, "admin")
 
 	mux.HandleFunc("POST /api/v1/maintenance/list", admin(c.List))
-	mux.HandleFunc("POST /api/v1/maintenance/detail/{id}", admin(c.Detail))
+	mux.HandleFunc("POST /api/v1/maintenance/detail", admin(c.Detail))
 	mux.HandleFunc("POST /api/v1/maintenance/create", admin(c.Create))
-	mux.HandleFunc("POST /api/v1/maintenance/update/{id}", admin(c.Update))
+	mux.HandleFunc("POST /api/v1/maintenance/update", admin(c.Update))
 
 	return middleware.WithCORS(mux, allowedOrigins)
 }

@@ -5,7 +5,8 @@ import { useLocale } from "@/i18n";
 import { Icon } from "@/components/ui/Icon";
 import { useToast } from "@/components/ui/Toast";
 import { money } from "@/components/payments/shared";
-import { createPaymentProof } from "@/services/tenant-portal/paymentProof";
+import { uploadFile } from "@/hooks/useApiRequest";
+import { api } from "@/services/api";
 import { todayKL } from "./format";
 import { useTOr } from "./status";
 import { Field, GhostButton, PrimaryButton, Sheet, inputClass } from "./primitives";
@@ -57,7 +58,9 @@ export default function PaymentProofSheet({ bills, initialBillId, onClose, onSub
 
     setSubmitting(true);
     try {
-      await createPaymentProof({ bill_id: selected.id, amount: value, paid_at: paidAt, reference: reference.trim(), file });
+      await uploadFile(api.paymentProof.create, file, {
+        fields: { bill_id: selected.id, amount: value, paid_at: paidAt, reference: reference.trim() },
+      });
       toast.show(t("portal_proof_submitted"), "success");
       onSubmitted();
     } catch (err) {

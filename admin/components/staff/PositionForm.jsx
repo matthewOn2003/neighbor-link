@@ -3,14 +3,13 @@
 import { useState } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { useLocale } from "@/i18n";
-import { useApiRequest } from "@/hooks/useApiRequest";
+import { useApiRequest, request } from "@/hooks/useApiRequest";
 import { useDropdown } from "@/hooks/useDropdown";
 import { FormPage, FormSection, Input, Select, Textarea, useToast, Spinner } from "@/components/ui";
 import { useStatusOptions } from "./common";
 import { PermissionTree, parsePermissionIds } from "./PermissionTree";
 import { apiErrorMessage } from "@/utils/errors";
 import { api } from "@/services/api";
-import { request } from "@/services/request";
 
 const EMPTY_FORM = {
   department_id: "",
@@ -74,7 +73,7 @@ export function PositionForm({ record }) {
     setSubmitting(true);
     try {
       if (isEdit) {
-        await request(api.staffPosition.update(record.id), body);
+        await request(api.staffPosition.update, { id: record.id, ...body });
       } else {
         await request(api.staffPosition.create, body);
       }

@@ -12,9 +12,9 @@ func NewContractRouter(c *ContractController, secret string, origins []string) h
 	adminMiddleware := middleware.RequireRole(secret, userdelivery.VerifyToken, "admin")
 
 	mux.HandleFunc("POST /api/v1/contract/list", adminMiddleware(c.List))
-	mux.HandleFunc("POST /api/v1/contract/detail/{id}", adminMiddleware(c.Detail))
+	mux.HandleFunc("POST /api/v1/contract/detail", adminMiddleware(c.Detail))
 	mux.HandleFunc("POST /api/v1/contract/create", adminMiddleware(c.Create))
-	mux.HandleFunc("POST /api/v1/contract/update/{id}", adminMiddleware(c.Update))
+	mux.HandleFunc("POST /api/v1/contract/update", adminMiddleware(c.Update))
 
 	return middleware.WithCORS(mux, origins)
 }
