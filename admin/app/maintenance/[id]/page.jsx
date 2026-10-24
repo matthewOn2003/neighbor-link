@@ -10,14 +10,7 @@ import { useDropdown } from "@/hooks/useDropdown";
 import { useApiRequest } from "@/hooks/useApiRequest";
 import { request } from "@/services/request";
 import { fdl } from "@/utils/date";
-
-function Pill({ item, fallback }) {
-  return (
-    <span className={`status-pill ${item?.variant || "neutral"}`}>
-      {item?.label ?? fallback}
-    </span>
-  );
-}
+import { StatusBadge } from "@/components/ui/StatusBadge";
 
 export default function MaintenanceDetailPage({ params }) {
   const { id } = use(params);
@@ -44,8 +37,6 @@ function MaintenanceDetailForm({ record, reload }) {
   const statusItems = optionsOf("maintenance_status");
 
   const categoryMap = Object.fromEntries(categoryItems.map((item) => [item.value, item]));
-  const priorityMap = Object.fromEntries(priorityItems.map((item) => [item.value, item]));
-  const statusMap = Object.fromEntries(statusItems.map((item) => [item.value, item]));
 
   const [form, setForm] = useState(() => ({
     title: record.title ?? "",
@@ -99,11 +90,11 @@ function MaintenanceDetailForm({ record, reload }) {
   const summary = [
     [
       t("status"),
-      <Pill key="status" item={statusMap[record.status]} fallback={record.status} />,
+      <StatusBadge key="status" value={record.status} options={statusItems} />,
     ],
     [
       t("priority"),
-      <Pill key="priority" item={priorityMap[record.priority]} fallback={record.priority} />,
+      <StatusBadge key="priority" value={record.priority} options={priorityItems} />,
     ],
     [t("category"), categoryMap[record.category]?.label ?? record.category],
     [

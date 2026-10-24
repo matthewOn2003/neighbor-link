@@ -14,7 +14,8 @@ import { ConfirmDialog, useToast } from "@/components/ui";
 import { positionCreate, positionDelete } from "@/services/staff/position";
 import { fdl } from "@/utils/date";
 import { fetchAllRows } from "@/utils/excel";
-import { RowActions, StatusPill, saveErrorMessage, useStatusOptions } from "@/components/staff/common";
+import { RowActions, saveErrorMessage, useStatusOptions } from "@/components/staff/common";
+import { StatusBadge } from "@/components/ui/StatusBadge";
 
 export default function PositionsPage() {
   const { t } = useLocale();
@@ -224,7 +225,7 @@ export default function PositionsPage() {
                 </td>
                 <td className="text-scene-content">{position.headcount}</td>
                 <td>
-                  <StatusPill status={position.status} />
+                  <StatusBadge value={position.status} options={statusOptions} />
                 </td>
                 <td>
                   <RowActions

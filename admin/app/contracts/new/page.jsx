@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Link, useRouter } from "@/i18n/navigation";
 import { useApiRequest } from "@/hooks/useApiRequest";
+import { useDropdown } from "@/hooks/useDropdown";
 import { request } from "@/services/request";
 import { useLocale } from "@/i18n";
 import { Input, Select, Textarea, useToast } from "@/components/ui";
@@ -23,13 +24,10 @@ const labelKeys = {
   billing_day: "billing_day",
 };
 
-const contractStatusOptions = [
-  { value: "draft", label: t("contract_status_draft") },
-  { value: "active", label: t("contract_status_active") },
-]
-
 export default function NewContractPage() {
   const { t } = useLocale();
+  const { optionsOf } = useDropdown(["contract_status"]);
+  const contractStatusOptions = optionsOf("contract_status");
   const router = useRouter();
   const toast = useToast();
 

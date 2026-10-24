@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/Input";
 import { DatePicker } from "@/components/ui/DatePicker";
 import { Select } from "@/components/ui/Select";
 import { useDropdown } from "@/hooks/useDropdown";
+import { StatusBadge } from "@/components/ui/StatusBadge";
 import { useLocale } from "@/i18n";
 import { request } from "@/services/request";
 import { fdl } from "@/utils/date";
@@ -177,7 +178,6 @@ export default function TenantsPage() {
           )}
           body={({ rows }) =>
             rows.map((tenant) => {
-              const status = statusMap[tenant.status];
               return (
                 <tr className="group" key={tenant.id}>
                   <td>
@@ -248,9 +248,7 @@ export default function TenantsPage() {
                     )}
                   </td>
                   <td>
-                    <span className={`status-pill ${status?.variant ?? "neutral"}`}>
-                      {status?.label ?? tenant.status}
-                    </span>
+                    <StatusBadge value={tenant.status} options={statusOptions} />
                   </td>
                   <td>
                     <div className="flex justify-center items-center gap-2">

@@ -50,7 +50,13 @@ export default function AccountMenu({ name, avatar }) {
         onClick={() => setOpen((value) => !value)}
         className="rounded-full ring-offset-2 ring-offset-accent transition-shadow hover:ring-2 hover:ring-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
       >
-        <img alt={name ?? t("profile")} className="h-8 w-8 rounded-full object-cover" src={avatar} />
+        {avatar ? (
+          <img alt={name ?? t("profile")} className="h-8 w-8 rounded-full object-cover" src={avatar} />
+        ) : (
+          <span className="grid h-8 w-8 place-items-center rounded-full bg-scene text-xs font-semibold text-primary">
+            {(name ?? "?").slice(0, 1).toUpperCase()}
+          </span>
+        )}
       </button>
       {open ? (
         <div role="menu" className="absolute right-0 top-11 z-50 w-48 rounded-2xl border border-white/10 bg-surface-container-high p-1.5 shadow-2xl shadow-black/40">

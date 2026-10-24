@@ -13,11 +13,7 @@ import { Select } from "@/components/ui/Select";
 import { DatePicker } from "@/components/ui/DatePicker";
 import { fetchAllRows } from "@/utils/excel";
 import { fdl } from "@/utils/date";
-
-// 状态、优先级的文字和颜色来自后端 dropdown：{ value, label, variant }
-function Pill({ item, fallback }) {
-  return <span className={`status-pill ${item?.variant || "neutral"}`}>{item?.label ?? fallback}</span>;
-}
+import { StatusBadge } from "@/components/ui/StatusBadge";
 
 export default function MaintenancePage() {
   const { t } = useLocale();
@@ -192,10 +188,10 @@ export default function MaintenancePage() {
                 </td>
                 <td className="text-scene-content">{categoryMap[item.category]?.label ?? item.category}</td>
                 <td>
-                  <Pill item={priorityMap[item.priority]} fallback={item.priority} />
+                  <StatusBadge value={item.priority} options={priorityItems} />
                 </td>
                 <td>
-                  <Pill item={statusMap[item.status]} fallback={item.status} />
+                  <StatusBadge value={item.status} options={statusItems} />
                 </td>
                 <td>
                   <div className="flex flex-col">

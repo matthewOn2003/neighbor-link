@@ -6,6 +6,8 @@ import { Link } from "@/i18n/navigation";
 import { useApiRequest } from "@/hooks/useApiRequest";
 import { request } from "@/services/request";
 import { useLocale } from "@/i18n";
+import { useDropdown } from "@/hooks/useDropdown";
+import { StatusBadge } from "@/components/ui/StatusBadge";
 import { useToast } from "@/components/ui";
 import { Spinner } from "@/components/ui/Spinner";
 import { Icon } from "@/components/ui/Icon";
@@ -15,34 +17,12 @@ import { billRef, buildInvoicePdf } from "@/utils/documents";
 import { formatMoney } from "@/utils/format";
 
 
-const keys = {
-  unpaid: "bill_status_unpaid",
-  partial: "bill_status_partial",
-  paid: "bill_status_paid",
-  overdue: "bill_status_overdue",
-  void: "bill_status_void",
-  pending_review: "bill_status_pending_review",
-};
-
-const variants = {
-  unpaid: "neutral",
-  partial: "warning",
-  paid: "success",
-  overdue: "danger",
-  void: "neutral",
-  pending_review: "warning",
-};
-
-const methodOptions = [
-  { value: "bank_transfer", label: t("payment_bank_transfer") },
-  { value: "cash", label: t("payment_cash") },
-  { value: "online", label: t("payment_online") },
-  { value: "other", label: t("payment_other") },
-];
-
 export default function BillDetailPage({ params }) {
   const { id } = use(params);
   const { t, locale } = useLocale();
+  const { optionsOf } = useDropdown(["bill_status", "bill_payment_method"]);
+  const billStatusItems = optionsOf("bill_status");
+  const methodOptions = optionsOf("bill_payment_method");
   const toast = useToast();
 
   const { data, loading, error, reload } = useApiRequest("/bill/detail/" + id);
@@ -202,9 +182,7 @@ export default function BillDetailPage({ params }) {
               </div>
 
               <div className="flex flex-wrap items-center gap-2">
-                <span className={"status-pill " + (variants[displayStatus] || "neutral")}>
-                  {t(keys[displayStatus] || keys.unpaid)}
-                </span>
+                <StatusBadge value={displayStatus} options={billStatusItems} />
 
                 <button
                   type="button"

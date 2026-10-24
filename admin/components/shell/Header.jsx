@@ -1,13 +1,15 @@
-﻿"use client";
+"use client";
 
 import LangSelect from "@/components/LangSelect";
 import { Icon } from "@/components/ui/Icon";
 import { useLocale } from "@/i18n";
-import { currentUser } from "@/mock/session";
+import { useGetSessionQuery } from "@/store/authApi";
 import AccountMenu from "@/components/shell/AccountMenu";
 
 export default function Header({ onMenuClick }) {
   const { t } = useLocale();
+  const { data } = useGetSessionQuery();
+  const user = data?.user;
   return (
     <header className="fixed top-0 left-0 md:left-64 right-0 h-16 bg-[color:color-mix(in_srgb,var(--accent)_90%,transparent)] backdrop-blur-xl shadow z-40 flex items-center justify-between gap-3 px-4 md:px-8">
       <div className="flex items-center gap-2 min-w-0 flex-1 md:flex-none">
@@ -28,10 +30,10 @@ export default function Header({ onMenuClick }) {
         <LangSelect />
         <div className="h-8 w-px bg-[#dce9ff]" />
         <div className="flex items-center gap-2">
-          <AccountMenu name={currentUser.name} avatar={currentUser.avatar} />
+          <AccountMenu name={user?.username} />
           <div className="hidden md:flex flex-col text-left">
-            <span className="text-xs font-semibold text-scene-content">{currentUser.name}</span>
-            <span className="text-xs font-semibold text-subtle">{currentUser.role}</span>
+            <span className="text-xs font-semibold text-scene-content">{user?.username}</span>
+            <span className="text-xs font-semibold text-subtle">{user?.role}</span>
           </div>
         </div>
       </div>

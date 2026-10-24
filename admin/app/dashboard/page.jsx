@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Icon } from "@/components/ui/Icon";
 import { Spinner } from "@/components/ui/Spinner";
 import { useApiRequest } from "@/hooks/useApiRequest";
@@ -13,18 +13,6 @@ const money = (value) => formatMoney(value, "en-MY", { digits: 0 });
 const pct = (value, digits = 1) => `${Number(value || 0).toFixed(digits)}%`;
 const share = (part, whole) => (whole > 0 ? (part / whole) * 100 : 0);
 const clamp = (value) => Math.min(Math.max(Number(value) || 0, 0), 100);
-
-// Billing cycles offered in the selector: the current month and the 11 before it.
-function recentCycles(count = 12) {
-  const now = new Date();
-  return Array.from({ length: count }, (_, i) => {
-    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-    return {
-      value: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`,
-      label: d.toLocaleString("en-US", { month: "long", year: "numeric" }),
-    };
-  });
-}
 
 function cycleName(cycle) {
   if (!cycle) return "";
@@ -110,7 +98,6 @@ export default function DashboardPage() {
   const { data, loading, error, reload } = useApiRequest("/dashboard/overview", {
     cycle: selectedCycle || undefined,
   });
-  const cycleOptions = useMemo(() => recentCycles(), []);
 
   if (loading && !data) {
     return (
@@ -226,7 +213,7 @@ export default function DashboardPage() {
             label={t("cycle")}
             value={selectedCycle || data.cycle}
             onChange={setSelectedCycle}
-            options={cycleOptions}
+            options={data.cycles ?? []}
           />
         </label>
       </header>
