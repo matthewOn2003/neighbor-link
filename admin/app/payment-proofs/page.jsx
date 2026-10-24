@@ -1,20 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { ConfirmDialog, DataTable, Input, Select, Textarea, useToast } from "@/components/ui";
-import { DatePicker } from "@/components/ui/DatePicker";
-import { Icon } from "@/components/ui/Icon";
-import { Modal } from "@/components/ui/Modal";
-import { Spinner } from "@/components/ui/Spinner";
+import { ConfirmDialog, DataTable, Input, Select, Textarea, useToast, DatePicker, Icon, Modal, Spinner, StatusBadge } from "@/components/ui";
 import { useDraftFilters } from "@/hooks/useDraftFilters";
 import { useDropdown } from "@/hooks/useDropdown";
-import { StatusBadge } from "@/components/ui/StatusBadge";
-import { useApiRequest } from "@/hooks/useApiRequest";
 import { useLocale } from "@/i18n";
 import { request } from "@/services/request";
 import { fdl } from "@/utils/date";
 import { labelFor, money, usePropertyOptions, useUnitOptions } from "@/components/payments/shared";
 import { apiErrorMessage } from "@/utils/errors";
+import { indexBy } from "@/utils/collections";
+import { api } from "@/services/api";
 
 function ProofDetail({ row, statusItems }) {
   const { t, locale } = useLocale();
@@ -61,7 +57,7 @@ function ProofReviewTab() {
   const toast = useToast();
   const { optionsOf } = useDropdown(["payment_proof_status"]);
   const statusItems = optionsOf("payment_proof_status");
-  const statusMap = Object.fromEntries(statusItems.map((item) => [item.value, item]));
+  const statusMap = indexBy(statusItems);
   const statusOptions = [{ value: "", label: t("all_statuses") }, ...statusItems];
   const propertyOptions = usePropertyOptions();
   const { draft, setDraft, applied, apply, reset, clear } = useDraftFilters({
@@ -87,7 +83,7 @@ function ProofReviewTab() {
     const current = dialog;
     setSubmitting(true);
     try {
-      await request(`/payment-proof/${action}/${current.row.id}`, body);
+      await request(api.paymentProof.review(action, current.row.id), body);
       toast.success(t(action === "approve" ? "payment_proof_approved" : "payment_proof_rejected"));
     } catch (err) {
       toast.error(
@@ -115,7 +111,7 @@ function ProofReviewTab() {
   return (
     <>
       <DataTable
-        api="/payment-proof/list"
+        api={api.paymentProof.list}
         params={applied}
         filterValues={draft}
         filterBadges={[

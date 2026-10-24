@@ -2,17 +2,13 @@
 
 import { useState } from "react";
 import { Link } from "@/i18n/navigation";
-import { Icon } from "@/components/ui/Icon";
-import { DataTable, SummaryCard } from "@/components/ui/DataTable";
-import { Input } from "@/components/ui/Input";
-import { Select } from "@/components/ui/Select";
-import { StatusBadge } from "@/components/ui/StatusBadge";
+import { Icon, DataTable, SummaryCard, Input, Select, StatusBadge, PdfPreviewModal } from "@/components/ui";
 import { useDropdown } from "@/hooks/useDropdown";
-import { PdfPreviewModal } from "@/components/ui/PdfPreviewModal";
 import { useDraftFilters } from "@/hooks/useDraftFilters";
 import { useLocale } from "@/i18n";
 import { billRef, buildInvoicePdf } from "@/utils/documents";
 import { formatMoney } from "@/utils/format";
+import { api } from "@/services/api";
 
 
 export default function BillsPage() {
@@ -27,7 +23,7 @@ export default function BillsPage() {
     <main className="flex flex-col w-full">
       <div className="p-4 md:p-8 space-y-6">
         <DataTable
-          api="/bill/list"
+          api={api.bill.list}
           params={applied}
           filterValues={draft}
           filterBadges={[

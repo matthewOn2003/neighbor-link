@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { menu } from "@/config/menu";
-import { Icon } from "@/components/ui/Icon";
+import { Icon } from "@/components/ui";
 
 export default async function SectionPlaceholderPage({ params }) {
   const { section } = await params;

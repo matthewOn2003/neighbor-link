@@ -2,15 +2,15 @@
 
 import { useState } from "react";
 import { Link } from "@/i18n/navigation";
-import { Icon } from "@/components/ui/Icon";
-import { Spinner } from "@/components/ui/Spinner";
+import { Icon, Spinner, Select } from "@/components/ui";
 import { OccupancyBar, PropertyCover, StatBlock } from "@/components/property/parts";
 import { useDragScroll } from "@/hooks/useDragScroll";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useApiRequest } from "@/hooks/useApiRequest";
 import { useDropdown } from "@/hooks/useDropdown";
 import { useLocale } from "@/i18n";
-import { Select } from "@/components/ui";
+import { indexBy } from "@/utils/collections";
+import { api } from "@/services/api";
 
 const EMPTY_FILTERS = { property_type: "", region: "", developer_id: "" };
 
@@ -66,10 +66,10 @@ export default function PropertiesPage() {
   };
 
   const { labelOf, optionsOf } = useDropdown(["property_type", "property_region"]);
-  const { data: facets } = useApiRequest("/property/facets");
-  const { data: listData, loading, error } = useApiRequest("/property/list", { ...filters, keyword: debouncedKeyword, per_page: 100 });
+  const { data: facets } = useApiRequest(api.property.facets);
+  const { data: listData, loading, error } = useApiRequest(api.property.list, { ...filters, keyword: debouncedKeyword, per_page: 100 });
 
-  const typeCounts = Object.fromEntries((facets?.types ?? []).map((f) => [f.value, f.count]));
+  const typeCounts = indexBy(facets?.types ?? [], undefined, (f) => f.count);
   const totalCount = (facets?.types ?? []).reduce((sum, f) => sum + f.count, 0);
   const tabs = [
     { value: "", label: t("all"), count: totalCount },

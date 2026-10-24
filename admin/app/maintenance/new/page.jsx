@@ -3,12 +3,12 @@
 import { useState } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { useLocale } from "@/i18n";
-import { FormPage, FormSection, Input, Select, Textarea, useToast } from "@/components/ui";
-import { Spinner } from "@/components/ui/Spinner";
+import { FormPage, FormSection, Input, Select, Textarea, useToast, Spinner } from "@/components/ui";
 import { useDropdown } from "@/hooks/useDropdown";
 import { useApiRequest } from "@/hooks/useApiRequest";
 import { request } from "@/services/request";
 import { apiErrorMessage } from "@/utils/errors";
+import { api } from "@/services/api";
 
 export default function NewMaintenancePage() {
   const { t } = useLocale();
@@ -17,7 +17,7 @@ export default function NewMaintenancePage() {
   const { optionsOf } = useDropdown(["maintenance_category", "maintenance_priority"]);
   const categoryOptions = optionsOf("maintenance_category");
   const priorityOptions = optionsOf("maintenance_priority");
-  const { data: propertyData } = useApiRequest("/property/list", { per_page: 100 });
+  const { data: propertyData } = useApiRequest(api.property.list, { per_page: 100 });
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -28,7 +28,7 @@ export default function NewMaintenancePage() {
     assignee: "",
   });
   // 单元只在选定物业后加载；维修单必须关联到单元，物业由单元推导
-  const { data: unitData } = useApiRequest("/property/unit/list", { property_id: form.property_id, per_page: 100 });
+  const { data: unitData } = useApiRequest(api.property.unitList, { property_id: form.property_id, per_page: 100 });
   const units = form.property_id ? (unitData?.list ?? []) : [];
   const propertyOptions = (propertyData?.list ?? []).map((property) => ({
     value: String(property.id),
@@ -59,7 +59,7 @@ export default function NewMaintenancePage() {
 
     setSubmitting(true);
     try {
-      const created = await request("/maintenance/create", {
+      const created = await request(api.maintenance.create, {
         title: form.title.trim(),
         description: form.description.trim(),
         category: form.category,

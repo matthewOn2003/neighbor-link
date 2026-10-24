@@ -4,12 +4,11 @@ import { useState } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { useLocale } from "@/i18n";
 import { useApiRequest } from "@/hooks/useApiRequest";
-import { FormPage, FormSection, Input, Select, useToast } from "@/components/ui";
-import { DatePicker } from "@/components/ui/DatePicker";
-import { Spinner } from "@/components/ui/Spinner";
-import { accountCreate, accountUpdate } from "@/services/staff/account";
+import { FormPage, FormSection, Input, Select, useToast, DatePicker, Spinner } from "@/components/ui";
 import { useStatusOptions } from "./common";
 import { apiErrorMessage } from "@/utils/errors";
+import { api } from "@/services/api";
+import { request } from "@/services/request";
 
 const EMPTY_FORM = {
   username: "",
@@ -28,7 +27,7 @@ export function UserForm({ record }) {
   const router = useRouter();
   const toast = useToast();
   const statusOptions = useStatusOptions();
-  const { data: positionData } = useApiRequest("/staff-position/list", { per_page: 100 });
+  const { data: positionData } = useApiRequest(api.staffPosition.list, { per_page: 100 });
   const positions = positionData?.list ?? [];
 
   const [form, setForm] = useState(() =>
@@ -69,9 +68,9 @@ export function UserForm({ record }) {
     setSubmitting(true);
     try {
       if (isEdit) {
-        await accountUpdate(record.id, body);
+        await request(api.staffAccount.update(record.id), body);
       } else {
-        await accountCreate(body);
+        await request(api.staffAccount.create, body);
       }
       toast.success(t("record_saved"));
       router.push("/users");

@@ -3,19 +3,19 @@
 import { use, useState } from "react";
 import { Link } from "@/i18n/navigation";
 import { useLocale } from "@/i18n";
-import { FormPage, FormSection, Input, Select, Textarea, useToast } from "@/components/ui";
-import { Spinner } from "@/components/ui/Spinner";
+import { FormPage, FormSection, Input, Select, Textarea, useToast, Spinner, StatusBadge } from "@/components/ui";
 import { RecordFallback } from "@/components/staff/common";
 import { useDropdown } from "@/hooks/useDropdown";
 import { useApiRequest } from "@/hooks/useApiRequest";
 import { request } from "@/services/request";
 import { fdl } from "@/utils/date";
-import { StatusBadge } from "@/components/ui/StatusBadge";
 import { apiErrorMessage } from "@/utils/errors";
+import { indexBy } from "@/utils/collections";
+import { api } from "@/services/api";
 
 export default function MaintenanceDetailPage({ params }) {
   const { id } = use(params);
-  const { data, loading, reload } = useApiRequest(`/maintenance/detail/${id}`, {});
+  const { data, loading, reload } = useApiRequest(api.maintenance.detail(id), {});
 
   return (
     <RecordFallback loading={loading && !data} found={Boolean(data)}>
@@ -37,7 +37,7 @@ function MaintenanceDetailForm({ record, reload }) {
   const priorityItems = optionsOf("maintenance_priority");
   const statusItems = optionsOf("maintenance_status");
 
-  const categoryMap = Object.fromEntries(categoryItems.map((item) => [item.value, item]));
+  const categoryMap = indexBy(categoryItems);
 
   const [form, setForm] = useState(() => ({
     title: record.title ?? "",
@@ -70,7 +70,7 @@ function MaintenanceDetailForm({ record, reload }) {
 
     setSubmitting(true);
     try {
-      await request(`/maintenance/update/${record.id}`, {
+      await request(api.maintenance.update(record.id), {
         title: form.title.trim(),
         description: form.description.trim(),
         category: form.category,

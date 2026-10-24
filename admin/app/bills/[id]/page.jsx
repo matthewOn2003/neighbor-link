@@ -1,21 +1,17 @@
 "use client";
 
 import { use, useState } from "react";
-import { Input, Select } from "@/components/ui";
+import { Input, Select, StatusBadge, useToast, Spinner, Icon, Modal, PdfPreviewModal } from "@/components/ui";
 import { Link } from "@/i18n/navigation";
 import { useApiRequest } from "@/hooks/useApiRequest";
 import { request } from "@/services/request";
 import { useLocale } from "@/i18n";
 import { useDropdown } from "@/hooks/useDropdown";
-import { StatusBadge } from "@/components/ui/StatusBadge";
-import { useToast } from "@/components/ui";
-import { Spinner } from "@/components/ui/Spinner";
-import { Icon } from "@/components/ui/Icon";
-import { Modal } from "@/components/ui/Modal";
-import { PdfPreviewModal } from "@/components/ui/PdfPreviewModal";
 import { billRef, buildInvoicePdf } from "@/utils/documents";
 import { formatMoney } from "@/utils/format";
 import { apiErrorMessage } from "@/utils/errors";
+import { todayISO } from "@/utils/date";
+import { api } from "@/services/api";
 
 
 export default function BillDetailPage({ params }) {
@@ -26,12 +22,12 @@ export default function BillDetailPage({ params }) {
   const methodOptions = optionsOf("bill_payment_method");
   const toast = useToast();
 
-  const { data, loading, error, reload } = useApiRequest("/bill/detail/" + id);
+  const { data, loading, error, reload } = useApiRequest(api.bill.detail(id));
 
   const [amount, setAmount] = useState("");
   const [method, setMethod] = useState("bank_transfer");
   const [reference, setReference] = useState("");
-  const [paidAt, setPaidAt] = useState(new Date().toISOString().slice(0, 10));
+  const [paidAt, setPaidAt] = useState(todayISO());
   const [adding, setAdding] = useState(false);
 
   const [editOpen, setEditOpen] = useState(false);
@@ -85,7 +81,7 @@ export default function BillDetailPage({ params }) {
     e.preventDefault();
     setUpdating(true);
     try {
-      await request("/bill/update/" + id, {
+      await request(api.bill.update(id), {
         amount: Number(edit.amount),
         late_fee: Number(edit.late_fee || 0),
         due_date: edit.due_date,
@@ -111,7 +107,7 @@ export default function BillDetailPage({ params }) {
     e.preventDefault();
     setAdding(true);
     try {
-      await request("/bill/payment/" + id, {
+      await request(api.bill.payment(id), {
         amount: Number(amount),
         method,
         reference: reference.trim(),
@@ -138,7 +134,7 @@ export default function BillDetailPage({ params }) {
     if (!window.confirm(t("confirm_void_bill"))) return;
     setUpdating(true);
     try {
-      await request("/bill/void/" + id, {});
+      await request(api.bill.void(id), {});
       toast.success(t("bill_voided"));
       reload();
     } catch (err) {

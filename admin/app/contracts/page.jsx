@@ -2,25 +2,20 @@
 
 import { useState } from "react";
 import { Link } from "@/i18n/navigation";
-import { Icon } from "@/components/ui/Icon";
-import { DataTable } from "@/components/ui/DataTable";
-import { Input } from "@/components/ui/Input";
-import { Select } from "@/components/ui/Select";
-import { StatusBadge } from "@/components/ui/StatusBadge";
+import { Icon, DataTable, Input, Select, StatusBadge, useToast, PdfPreviewModal } from "@/components/ui";
 import { useDropdown } from "@/hooks/useDropdown";
 import { useDraftFilters } from "@/hooks/useDraftFilters";
 import { request } from "@/services/request";
 import { useLocale } from "@/i18n";
-import { useToast } from "@/components/ui";
-import { PdfPreviewModal } from "@/components/ui/PdfPreviewModal";
 import { buildContractSummaryPdf, contractRef } from "@/utils/documents";
 import { formatMoney } from "@/utils/format";
 import { apiErrorMessage } from "@/utils/errors";
+import { api } from "@/services/api";
 
 
 
 async function buildContractPdf(contract) {
-  const tenant = await request("/tenant/detail/" + contract.tenant_id).catch(() => null);
+  const tenant = await request(api.tenant.detail(contract.tenant_id)).catch(() => null);
   return buildContractSummaryPdf(contract, tenant);
 }
 
@@ -51,7 +46,7 @@ export default function ContractsPage() {
 
   async function activate(contract, reload) {
     try {
-      await request("/contract/update/" + contract.id, {
+      await request(api.contract.update(contract.id), {
         tenant_id: contract.tenant_id,
         start_date: contract.start_date,
         end_date: contract.end_date,
@@ -78,7 +73,7 @@ export default function ContractsPage() {
     <main className="flex w-full flex-col">
       <div className="space-y-6 p-4 md:p-8">
         <DataTable
-          api="/contract/list"
+          api={api.contract.list}
           params={applied}
           filterValues={draft}
           filterBadges={[

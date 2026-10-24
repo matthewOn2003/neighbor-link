@@ -8,6 +8,8 @@ import { request } from "@/services/request";
 import { useLocale } from "@/i18n";
 import { Input, Select, Textarea, useToast } from "@/components/ui";
 import { apiErrorMessage } from "@/utils/errors";
+import { todayISO } from "@/utils/date";
+import { api } from "@/services/api";
 
 const termFields = [
   ["start_date", "date", true],
@@ -34,7 +36,7 @@ export default function NewContractPage() {
 
   const [f, S] = useState({
     tenant_id: "",
-    start_date: new Date().toISOString().slice(0, 10),
+    start_date: todayISO(),
     end_date: "",
     monthly_rent: "",
     security_deposit: "0",
@@ -45,7 +47,7 @@ export default function NewContractPage() {
   const [submitting, setSubmitting] = useState(false);
   const [errors, se] = useState({});
 
-  const { data, loading } = useApiRequest("/tenant/list", {
+  const { data, loading } = useApiRequest(api.tenant.list, {
     current_page: 1,
     per_page: 100,
     status: "active",
@@ -69,7 +71,7 @@ export default function NewContractPage() {
 
     setSubmitting(true);
     try {
-      const r = await request("/contract/create", {
+      const r = await request(api.contract.create, {
         tenant_id: Number(f.tenant_id),
         start_date: f.start_date,
         end_date: f.end_date,

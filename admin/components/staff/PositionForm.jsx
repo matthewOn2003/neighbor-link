@@ -5,12 +5,12 @@ import { useRouter } from "@/i18n/navigation";
 import { useLocale } from "@/i18n";
 import { useApiRequest } from "@/hooks/useApiRequest";
 import { useDropdown } from "@/hooks/useDropdown";
-import { FormPage, FormSection, Input, Select, Textarea, useToast } from "@/components/ui";
-import { Spinner } from "@/components/ui/Spinner";
-import { positionCreate, positionUpdate } from "@/services/staff/position";
+import { FormPage, FormSection, Input, Select, Textarea, useToast, Spinner } from "@/components/ui";
 import { useStatusOptions } from "./common";
 import { PermissionTree, parsePermissionIds } from "./PermissionTree";
 import { apiErrorMessage } from "@/utils/errors";
+import { api } from "@/services/api";
+import { request } from "@/services/request";
 
 const EMPTY_FORM = {
   department_id: "",
@@ -28,7 +28,7 @@ export function PositionForm({ record }) {
   const router = useRouter();
   const toast = useToast();
   const statusOptions = useStatusOptions();
-  const { data: departmentData } = useApiRequest("/staff-department/list", { per_page: 100 });
+  const { data: departmentData } = useApiRequest(api.staffDepartment.list, { per_page: 100 });
   const departments = departmentData?.list ?? [];
   const { optionsOf } = useDropdown(["position_level", "employment_type"]);
 
@@ -74,9 +74,9 @@ export function PositionForm({ record }) {
     setSubmitting(true);
     try {
       if (isEdit) {
-        await positionUpdate(record.id, body);
+        await request(api.staffPosition.update(record.id), body);
       } else {
-        await positionCreate(body);
+        await request(api.staffPosition.create, body);
       }
       toast.success(t("record_saved"));
       router.push("/positions");

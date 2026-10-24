@@ -1,7 +1,7 @@
 "use client";
 
 import LangSelect from "@/components/LangSelect";
-import { Icon } from "@/components/ui/Icon";
+import { Icon } from "@/components/ui";
 import { useLocale } from "@/i18n";
 import { useGetSessionQuery } from "@/store/authApi";
 import AccountMenu from "@/components/shell/AccountMenu";

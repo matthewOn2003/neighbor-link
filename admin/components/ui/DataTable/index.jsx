@@ -6,6 +6,7 @@ import { useLocale } from "@/i18n";
 import { downloadRowsAsXlsx, fetchAllRows } from "@/utils/excel";
 import { Icon } from "../Icon";
 import { Spinner } from "../Spinner";
+import { EmptyState } from "../EmptyState";
 import { FilterSection } from "./FilterSection";
 import { ImportModal } from "./ImportModal";
 import { apiErrorMessage } from "@/utils/errors";
@@ -175,7 +176,7 @@ export function DataTable({
           bodyNode
         )}
 
-        {status ? <div className="px-6 py-10 text-center text-sm text-subtle">{message}</div> : null}
+        {status ? <EmptyState title={message} /> : null}
       </div>
 
       {importConfig ? (

@@ -2,20 +2,20 @@
 
 import { use, useEffect, useState } from "react";
 import { useRouter } from "@/i18n/navigation";
-import { FormPage, FormSection, Input, Select, useToast } from "@/components/ui";
-import { Spinner } from "@/components/ui/Spinner";
+import { EmptyState, FormPage, FormSection, Input, Select, useToast, Spinner } from "@/components/ui";
 import { useDropdown } from "@/hooks/useDropdown";
 import { useApiRequest } from "@/hooks/useApiRequest";
 import { useLocale } from "@/i18n";
 import { request } from "@/services/request";
 import { apiErrorMessage } from "@/utils/errors";
+import { api } from "@/services/api";
 
 // There is no single-unit endpoint, so page through the floor's units until the id is found.
 async function findUnitOnFloor(floorId, unitId) {
   let page = 1;
   let lastPage = 1;
   do {
-    const res = await request("/property/unit/list", {
+    const res = await request(api.property.unitList, {
       floor_id: String(floorId),
       current_page: page,
       per_page: 100,
@@ -34,7 +34,7 @@ export default function EditUnitPage({ params }) {
   const [unit, setUnit] = useState(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
-  const { data: floor } = useApiRequest(`/property/floor/${floorId}`);
+  const { data: floor } = useApiRequest(api.property.floorDetail(floorId));
   const floorHref = `/properties/${id}/blocks/${blockId}/floors/${floorId}`;
 
   useEffect(() => {
@@ -69,9 +69,7 @@ export default function EditUnitPage({ params }) {
   if (loadError || !unit) {
     return (
       <FormPage title={t("edit_unit")} backLabel={backLabel} backHref={floorHref}>
-        <p className="p-12 text-center text-sm text-subtle">
-          {loadError || t("unit_not_found")}
-        </p>
+        <EmptyState title={loadError || t("unit_not_found")} />
       </FormPage>
     );
   }
@@ -125,7 +123,7 @@ function EditUnitForm({ unit, floorHref, backLabel, unitId }) {
 
     setSubmitting(true);
     try {
-      await request("/property/unit/update/" + unitId, {
+      await request(api.property.unitUpdate(unitId), {
         code: form.code.trim(),
         bedrooms: Number(form.bedrooms),
         size_sqft: Number(form.size_sqft),

@@ -2,12 +2,12 @@
 
 import { use } from "react";
 import { useApiRequest } from "@/hooks/useApiRequest";
-import { Icon } from "@/components/ui/Icon";
-import { Spinner } from "@/components/ui/Spinner";
+import { Icon, Spinner, StatusBadge } from "@/components/ui";
 import { useLocale } from "@/i18n";
 import { useDropdown } from "@/hooks/useDropdown";
-import { StatusBadge } from "@/components/ui/StatusBadge";
 import { formatMoney } from "@/utils/format";
+import { fdl } from "@/utils/date";
+import { api } from "@/services/api";
 
 const money = (value) => formatMoney(value, undefined, { fallback: "—" });
 
@@ -25,7 +25,7 @@ export default function TenantDetailPage({ params }) {
   const { optionsOf } = useDropdown(["tenant_status"]);
   const tenantStatusItems = optionsOf("tenant_status");
   const { id } = use(params);
-  const { data: tenant, loading, error } = useApiRequest(`/tenant/detail/${id}`);
+  const { data: tenant, loading, error } = useApiRequest(api.tenant.detail(id));
 
   if (loading) {
     return <main className="p-4 md:p-8"><div className="flex min-h-48 items-center justify-center"><Spinner size="lg" /></div></main>;
@@ -71,7 +71,7 @@ export default function TenantDetailPage({ params }) {
             <DetailField label={t("outstanding_balance")} value={money(tenant.outstanding_balance)} />
             <DetailField label={t("balance_note")} value={tenant.balance_note} />
             <DetailField label={t("city")} value={tenant.city} />
-            <DetailField label={t("last_updated")} value={tenant.updated_at ? new Date(tenant.updated_at).toLocaleString() : null} />
+            <DetailField label={t("last_updated")} value={fdl(tenant.updated_at) || null} />
           </dl>
         </section>
       </div>

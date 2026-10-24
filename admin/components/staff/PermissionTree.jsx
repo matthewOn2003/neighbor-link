@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Checkbox } from "@/components/ui/Checkbox";
+import { Checkbox } from "@/components/ui";
 import { useLocale } from "@/i18n";
 
 const MODULES = [

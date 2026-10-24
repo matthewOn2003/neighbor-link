@@ -1,10 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { DataTable, Input, Select } from "@/components/ui";
-import { DatePicker } from "@/components/ui/DatePicker";
-import { Icon } from "@/components/ui/Icon";
-import { PdfPreviewModal } from "@/components/ui/PdfPreviewModal";
+import { DataTable, Input, Select, DatePicker, Icon, PdfPreviewModal } from "@/components/ui";
 import { useDraftFilters } from "@/hooks/useDraftFilters";
 import { Link } from "@/i18n/navigation";
 import { useLocale } from "@/i18n";
@@ -18,6 +15,7 @@ import {
   usePropertyOptions,
   useUnitOptions,
 } from "@/components/payments/shared";
+import { api } from "@/services/api";
 
 function ReceiptsTab() {
   const { t, locale } = useLocale();
@@ -42,7 +40,7 @@ function ReceiptsTab() {
   return (
     <>
       <DataTable
-        api="/payment/list"
+        api={api.payment.list}
         params={applied}
         filterValues={draft}
         filterBadges={[

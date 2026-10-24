@@ -1,4 +1,4 @@
-import { Icon } from "@/components/ui/Icon";
+import { Icon } from "@/components/ui";
 
 const COVER_GRADIENTS = [
   "bg-gradient-to-br from-[#6063ee] to-[#a5b4fc]",
