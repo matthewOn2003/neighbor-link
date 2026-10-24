@@ -1,7 +1,6 @@
 "use client";
 
 import { use } from "react";
-import { api } from "@/services/api";
 import { useLocale } from "@/i18n";
 import { useApiRequest } from "@/hooks/useApiRequest";
 import { useDictLabel, MAINTENANCE_ICON } from "@/components/portal/status";
@@ -11,7 +10,7 @@ import RequestDetail from "@/components/portal/RequestDetail";
 export default function MaintenanceDetailPage({ params }) {
   const { id } = use(params);
   const { t, locale } = useLocale();
-  const { data, loading } = useApiRequest(api.maintenance.detail, { id: Number(id) });
+  const { data, loading } = useApiRequest("/tenant-portal/maintenance/detail", { id: Number(id) });
   const label = useDictLabel(["maintenance_category", "maintenance_priority"]);
 
   return (

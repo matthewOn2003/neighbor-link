@@ -1,7 +1,6 @@
 "use client";
 
 import { useLocale } from "@/i18n";
-import { api } from "@/services/api";
 import { Icon } from "@/components/ui/Icon";
 import { useToast } from "@/components/ui/Toast";
 import { request, useApiRequest } from "@/hooks/useApiRequest";
@@ -14,13 +13,13 @@ const KIND_ICON = { billing: "receipt", announcement: "campaign", maintenance: "
 export default function NotificationSheet({ onClose, onChanged }) {
   const { t, locale } = useLocale();
   const toast = useToast();
-  const list = useApiRequest(api.notification.list, { current_page: 1, per_page: 50 });
+  const list = useApiRequest("/tenant-portal/notification/list", { current_page: 1, per_page: 50 });
   const items = list.data?.list ?? [];
   const unread = list.data?.summary?.unread_count ?? 0;
 
   async function markRead(params) {
     try {
-      await request(api.notification.read, params);
+      await request("/tenant-portal/notification/read", params);
       list.reload();
       onChanged();
     } catch {

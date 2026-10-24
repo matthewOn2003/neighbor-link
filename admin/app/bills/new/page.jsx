@@ -8,7 +8,6 @@ import { Input, Textarea, useToast, Select } from "@/components/ui";
 import { contractRef } from "@/utils/documents";
 import { apiErrorMessage } from "@/utils/errors";
 import { todayISO } from "@/utils/date";
-import { api } from "@/services/api";
 
 export default function NewBillPage() {
   const { t } = useLocale();
@@ -23,7 +22,7 @@ export default function NewBillPage() {
   const [notes, setNotes] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  const { data: contractsData, loading } = useApiRequest(api.bill.activeContracts, {});
+  const { data: contractsData, loading } = useApiRequest("/bill/active-contracts", {});
   const contracts = Array.isArray(contractsData) ? contractsData : [];
   const selected = useMemo(
     () => contracts.find((c) => String(c.id) === contractID),
@@ -60,7 +59,7 @@ export default function NewBillPage() {
 
     setSubmitting(true);
     try {
-      const b = await request(api.bill.create, {
+      const b = await request("/bill/create", {
         contract_id: Number(contractID),
         billing_period: period,
         due_date: dueDate,

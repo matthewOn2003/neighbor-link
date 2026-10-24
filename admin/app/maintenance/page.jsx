@@ -9,7 +9,6 @@ import { Icon, DataTable, SummaryCard, Input, Select, DatePicker, StatusBadge } 
 import { fetchAllRows } from "@/utils/excel";
 import { fdl } from "@/utils/date";
 import { indexBy } from "@/utils/collections";
-import { api } from "@/services/api";
 
 export default function MaintenancePage() {
   const { t } = useLocale();
@@ -35,7 +34,7 @@ export default function MaintenancePage() {
   const priorityOptions = [{ value: "", label: t("all_priorities") }, ...priorityItems];
   const statusOptions = [{ value: "", label: t("all_statuses") }, ...statusItems];
 
-  const { data: propertyData } = useApiRequest(api.property.list, { per_page: 100 });
+  const { data: propertyData } = useApiRequest("/property/list", { per_page: 100 });
   const propertyOptions = [
     { value: "", label: t("all_properties") },
     ...(propertyData?.list ?? []).map((property) => ({ value: String(property.id), label: property.name })),
@@ -44,12 +43,12 @@ export default function MaintenancePage() {
 
   // 导入：按物业名称、再按该物业下的单元编号找到 unit_id，找不到则报错
   async function resolveUnit(propertyName, unitCode) {
-    const properties = await fetchAllRows(api.property.list, {});
+    const properties = await fetchAllRows("/property/list", {});
     const name = propertyName.trim().toLowerCase();
     const property = properties.find((item) => String(item.name).trim().toLowerCase() === name);
     if (!property) throw new Error(t("property_not_found", { name: propertyName }));
 
-    const units = await fetchAllRows(api.property.unitList, { property_id: String(property.id) });
+    const units = await fetchAllRows("/property/unit/list", { property_id: String(property.id) });
     const code = unitCode.trim().toLowerCase();
     const unit = units.find((item) => String(item.code).trim().toLowerCase() === code);
     if (!unit) throw new Error(t("unit_not_found", { code: unitCode }));
@@ -60,7 +59,7 @@ export default function MaintenancePage() {
     <main className="flex flex-col w-full">
       <div className="p-4 md:p-8 space-y-6">
         <DataTable
-          api={api.maintenance.list}
+          api={"/maintenance/list"}
           params={applied}
           filterValues={draft}
           filterBadges={[
@@ -102,7 +101,7 @@ export default function MaintenancePage() {
             ],
             onRow: async (values) => {
               const unit = await resolveUnit(values.property_name, values.unit_code);
-              return request(api.maintenance.create, {
+              return request("/maintenance/create", {
                 title: values.title,
                 description: values.description ?? "",
                 category: values.category || "other",

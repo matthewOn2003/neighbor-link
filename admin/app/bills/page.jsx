@@ -8,7 +8,6 @@ import { useDraftFilters } from "@/hooks/useDraftFilters";
 import { useLocale } from "@/i18n";
 import { billRef, buildInvoicePdf } from "@/utils/documents";
 import { formatMoney } from "@/utils/format";
-import { api } from "@/services/api";
 
 
 export default function BillsPage() {
@@ -23,7 +22,7 @@ export default function BillsPage() {
     <main className="flex flex-col w-full">
       <div className="p-4 md:p-8 space-y-6">
         <DataTable
-          api={api.bill.list}
+          api={"/bill/list"}
           params={applied}
           filterValues={draft}
           filterBadges={[

@@ -6,7 +6,6 @@ import { useApiRequest, request } from "@/hooks/useApiRequest";
 import { Link } from "@/i18n/navigation";
 import { useLocale } from "@/i18n";
 import { apiErrorMessage } from "@/utils/errors";
-import { api } from "@/services/api";
 
 const isDay = (value) => Number.isInteger(value) && value >= 1 && value <= 28;
 
@@ -44,7 +43,7 @@ function BillingSettingsForm({ initial, onSaved }) {
 
     setSubmitting(true);
     try {
-      await request(api.billingSettings.update, {
+      await request("/billing-settings/update", {
         due_day: dueDay,
         overdue_day: overdueDay,
         bank_name: form.bank_name.trim(),
@@ -100,7 +99,7 @@ function BillingSettingsForm({ initial, onSaved }) {
 
 export default function CollectionSettingsPage() {
   const { t } = useLocale();
-  const { data, loading, reload } = useApiRequest(api.billingSettings.detail, {});
+  const { data, loading, reload } = useApiRequest("/billing-settings/detail", {});
 
   return (
     <main className="flex flex-col w-full">

@@ -15,7 +15,6 @@ import {
   usePropertyOptions,
   useUnitOptions,
 } from "@/components/payments/shared";
-import { api } from "@/services/api";
 
 function ReceiptsTab() {
   const { t, locale } = useLocale();
@@ -40,7 +39,7 @@ function ReceiptsTab() {
   return (
     <>
       <DataTable
-        api={api.payment.list}
+        api={"/payment/list"}
         params={applied}
         filterValues={draft}
         filterBadges={[

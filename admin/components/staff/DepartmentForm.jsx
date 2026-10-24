@@ -7,7 +7,6 @@ import { FormPage, FormSection, Input, Select, Textarea, useToast, Spinner } fro
 import { useStatusOptions } from "./common";
 import { apiErrorMessage } from "@/utils/errors";
 import { request } from "@/hooks/useApiRequest";
-import { api } from "@/services/api";
 
 const EMPTY_FORM = {
   name: "",
@@ -55,9 +54,9 @@ export function DepartmentForm({ record }) {
     setSubmitting(true);
     try {
       if (isEdit) {
-        await request(api.staffDepartment.update, { id: record.id, ...body });
+        await request("/staff-department/update", { id: record.id, ...body });
       } else {
-        await request(api.staffDepartment.create, body);
+        await request("/staff-department/create", body);
       }
       toast.success(t("record_saved"));
       router.push("/departments");

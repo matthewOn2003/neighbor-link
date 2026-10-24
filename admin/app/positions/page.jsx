@@ -12,7 +12,6 @@ import { fetchAllRows } from "@/utils/excel";
 import { RowActions, useStatusOptions } from "@/components/staff/common";
 import { apiErrorMessage } from "@/utils/errors";
 import { labelMap } from "@/utils/collections";
-import { api } from "@/services/api";
 
 export default function PositionsPage() {
   const { t } = useLocale();
@@ -29,7 +28,7 @@ export default function PositionsPage() {
   const [pending, setPending] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const { data: departmentData } = useApiRequest(api.staffDepartment.list, { per_page: 100 });
+  const { data: departmentData } = useApiRequest("/staff-department/list", { per_page: 100 });
   const departments = departmentData?.list ?? [];
   const { optionsOf, labelOf } = useDropdown(["position_level", "employment_type"]);
 
@@ -49,7 +48,7 @@ export default function PositionsPage() {
   async function confirmDelete() {
     setSubmitting(true);
     try {
-      await request(api.staffPosition.delete, { id: pending.id });
+      await request("/staff-position/delete", { id: pending.id });
       toast.success(t("record_deleted"));
       pending.reload();
     } catch (err) {
@@ -64,7 +63,7 @@ export default function PositionsPage() {
     <main className="flex flex-col w-full">
       <div className="p-4 md:p-8 space-y-6">
         <DataTable
-          api={api.staffPosition.list}
+          api={"/staff-position/list"}
           params={applied}
           filterValues={draft}
           filterBadges={[
@@ -104,10 +103,10 @@ export default function PositionsPage() {
               { key: "status", label: t("status"), sample: "active" },
             ],
             onRow: async (values) => {
-              const all = await fetchAllRows(api.staffDepartment.list, {});
+              const all = await fetchAllRows("/staff-department/list", {});
               const department = all.find((d) => d.name.toLowerCase() === values.department.toLowerCase());
               if (!department) throw new Error(t("import_department_not_found", { name: values.department }));
-              return request(api.staffPosition.create, {
+              return request("/staff-position/create", {
                 department_id: department.id,
                 name: values.name,
                 code: values.code,

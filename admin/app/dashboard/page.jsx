@@ -8,7 +8,6 @@ import { useLocale } from "@/i18n";
 import { formatMoney } from "@/utils/format";
 import { indexBy } from "@/utils/collections";
 import { formatMonth } from "@/utils/date";
-import { api } from "@/services/api";
 
 const money = (value) => formatMoney(value, "en-MY", { digits: 0 });
 const pct = (value, digits = 1) => `${Number(value || 0).toFixed(digits)}%`;
@@ -88,7 +87,7 @@ export default function DashboardPage() {
   const { t } = useLocale();
   const [selectedCycle, setSelectedCycle] = useState("");
   // Empty cycle -> undefined -> dropped by JSON.stringify, so the server returns the current cycle.
-  const { data, loading, error, reload } = useApiRequest(api.dashboard.overview, {
+  const { data, loading, error, reload } = useApiRequest("/dashboard/overview", {
     cycle: selectedCycle || undefined,
   });
 

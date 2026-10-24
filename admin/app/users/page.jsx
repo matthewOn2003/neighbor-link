@@ -11,7 +11,6 @@ import { fetchAllRows } from "@/utils/excel";
 import { RowActions, useStatusOptions } from "@/components/staff/common";
 import { apiErrorMessage } from "@/utils/errors";
 import { labelMap } from "@/utils/collections";
-import { api } from "@/services/api";
 
 export default function UsersPage() {
   const { t } = useLocale();
@@ -29,9 +28,9 @@ export default function UsersPage() {
   const [pending, setPending] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const { data: departmentData } = useApiRequest(api.staffDepartment.list, { per_page: 100 });
+  const { data: departmentData } = useApiRequest("/staff-department/list", { per_page: 100 });
   const departments = departmentData?.list ?? [];
-  const { data: positionData } = useApiRequest(api.staffPosition.list, { per_page: 100 });
+  const { data: positionData } = useApiRequest("/staff-position/list", { per_page: 100 });
   const positions = positionData?.list ?? [];
 
   const departmentOptions = [
@@ -50,7 +49,7 @@ export default function UsersPage() {
   async function confirmDelete() {
     setSubmitting(true);
     try {
-      await request(api.staffAccount.delete, { id: pending.id });
+      await request("/staff-account/delete", { id: pending.id });
       toast.success(t("record_deleted"));
       pending.reload();
     } catch (err) {
@@ -65,7 +64,7 @@ export default function UsersPage() {
     <main className="flex flex-col w-full">
       <div className="p-4 md:p-8 space-y-6">
         <DataTable
-          api={api.staffAccount.list}
+          api={"/staff-account/list"}
           params={applied}
           filterValues={draft}
           filterBadges={[
@@ -109,10 +108,10 @@ export default function UsersPage() {
               { key: "status", label: t("status"), sample: "active" },
             ],
             onRow: async (values) => {
-              const all = await fetchAllRows(api.staffPosition.list, {});
+              const all = await fetchAllRows("/staff-position/list", {});
               const position = all.find((p) => p.code.toLowerCase() === values.position_code.toLowerCase());
               if (!position) throw new Error(t("import_position_not_found", { code: values.position_code }));
-              return request(api.staffAccount.create, {
+              return request("/staff-account/create", {
                 username: values.username,
                 password: values.password,
                 name: values.name,

@@ -10,11 +10,10 @@ import { useApiRequest, request } from "@/hooks/useApiRequest";
 import { fdl } from "@/utils/date";
 import { apiErrorMessage } from "@/utils/errors";
 import { indexBy } from "@/utils/collections";
-import { api } from "@/services/api";
 
 export default function MaintenanceDetailPage({ params }) {
   const { id } = use(params);
-  const { data, loading, reload } = useApiRequest(api.maintenance.detail, { id: Number(id) });
+  const { data, loading, reload } = useApiRequest("/maintenance/detail", { id: Number(id) });
 
   return (
     <RecordFallback loading={loading && !data} found={Boolean(data)}>
@@ -69,7 +68,7 @@ function MaintenanceDetailForm({ record, reload }) {
 
     setSubmitting(true);
     try {
-      await request(api.maintenance.update, {
+      await request("/maintenance/update", {
         id: record.id,
         title: form.title.trim(),
         description: form.description.trim(),
