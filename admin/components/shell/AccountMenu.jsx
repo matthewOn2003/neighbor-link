@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { useLocale } from "@/i18n";
-import { Icon } from "@/components/ui/Icon";
+import { Icon } from "@/components/ui";
 import { useLogoutMutation } from "@/store/authApi";
 
 /** Avatar button that opens a small menu. Closes on outside click or Escape. */

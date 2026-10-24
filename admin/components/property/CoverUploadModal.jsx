@@ -1,12 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Modal } from "@/components/ui/Modal";
-import { FileDropzone } from "@/components/ui/FileDropzone";
-import { Spinner } from "@/components/ui/Spinner";
-import { useToast } from "@/components/ui";
+import { Modal, FileDropzone, Spinner, useToast } from "@/components/ui";
 import { useLocale } from "@/i18n";
-import { uploadPropertyCover } from "@/services/property/cover";
+import { uploadFile } from "@/services/request";
+import { api } from "@/services/api";
 import { apiErrorMessage } from "@/utils/errors";
 
 const MAX_BYTES = 5 * 1024 * 1024;
@@ -52,7 +50,7 @@ export function CoverUploadModal({ open, onClose, propertyId, onUploaded }) {
     setSubmitting(true);
     setError("");
     try {
-      const updated = await uploadPropertyCover(propertyId, file);
+      const updated = await uploadFile(api.property.cover(propertyId), file);
       toast.success(t("cover_uploaded"));
       setFile(null);
       onUploaded?.(updated);

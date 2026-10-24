@@ -2,20 +2,20 @@
 
 import { use, useState } from "react";
 import { Link } from "@/i18n/navigation";
-import { Icon } from "@/components/ui/Icon";
-import { Spinner } from "@/components/ui/Spinner";
+import { Icon, Spinner } from "@/components/ui";
 import { OccupancyBar, PropertyCover, StatBlock } from "@/components/property/parts";
 import { useApiRequest } from "@/hooks/useApiRequest";
 import { CoverUploadModal } from "@/components/property/CoverUploadModal";
 import { useDropdown } from "@/hooks/useDropdown";
 import { useLocale } from "@/i18n";
+import { api } from "@/services/api";
 
 export default function PropertyDetailPage({ params }) {
   const { id } = use(params);
   const { t } = useLocale();
-  const { data: property, loading, error, reload } = useApiRequest(`/property/detail/${id}`);
+  const { data: property, loading, error, reload } = useApiRequest(api.property.detail(id));
   const [coverOpen, setCoverOpen] = useState(false);
-  const { data: blockData } = useApiRequest("/property/block/list", { property_id: id, per_page: 100 });
+  const { data: blockData } = useApiRequest(api.property.blockList, { property_id: id, per_page: 100 });
   const blocks = blockData?.list ?? [];
   const { labelOf } = useDropdown(["property_type"]);
 

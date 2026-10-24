@@ -2,26 +2,19 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Icon } from "@/components/ui/Icon";
-import { Spinner } from "@/components/ui/Spinner";
+import { EmptyState, Icon, Spinner, Select } from "@/components/ui";
 import { useApiRequest } from "@/hooks/useApiRequest";
 import { useLocale } from "@/i18n";
-import { Select } from "@/components/ui";
 import { formatMoney } from "@/utils/format";
+import { indexBy } from "@/utils/collections";
+import { formatMonth } from "@/utils/date";
+import { api } from "@/services/api";
 
 const money = (value) => formatMoney(value, "en-MY", { digits: 0 });
 const pct = (value, digits = 1) => `${Number(value || 0).toFixed(digits)}%`;
 const share = (part, whole) => (whole > 0 ? (part / whole) * 100 : 0);
 const clamp = (value) => Math.min(Math.max(Number(value) || 0, 0), 100);
 
-function cycleName(cycle) {
-  if (!cycle) return "";
-  return new Date(`${cycle}-01T00:00:00`).toLocaleString("en-US", { month: "long", year: "numeric" });
-}
-
-function shortMonth(cycle) {
-  return new Date(`${cycle}-01T00:00:00`).toLocaleString("en-US", { month: "short" }).toUpperCase();
-}
 
 function Panel({ eyebrow, title, badge, children, footer }) {
   return (
@@ -95,7 +88,7 @@ export default function DashboardPage() {
   const { t } = useLocale();
   const [selectedCycle, setSelectedCycle] = useState("");
   // Empty cycle -> undefined -> dropped by JSON.stringify, so the server returns the current cycle.
-  const { data, loading, error, reload } = useApiRequest("/dashboard/overview", {
+  const { data, loading, error, reload } = useApiRequest(api.dashboard.overview, {
     cycle: selectedCycle || undefined,
   });
 
@@ -110,19 +103,23 @@ export default function DashboardPage() {
   if (error || !data) {
     return (
       <div className="p-8">
-        <div className="card card-empty">
-          <p className="text-sm text-error">Could not load the dashboard.</p>
-          <button type="button" className="btn btn-outline mt-4" onClick={reload}>
-            <Icon name="refresh" className="text-lg" />
-            <span>{t("try_again")}</span>
-          </button>
+        <div className="card">
+          <EmptyState
+            title="Could not load the dashboard."
+            action={
+              <button type="button" className="btn btn-outline" onClick={reload}>
+                <Icon name="refresh" className="text-lg" />
+                <span>{t("try_again")}</span>
+              </button>
+            }
+          />
         </div>
       </div>
     );
   }
 
   const s = data.summary;
-  const funnel = Object.fromEntries((data.collectionFunnel || []).map((g) => [g.id, g]));
+  const funnel = indexBy(data.collectionFunnel || [], (g) => g.id);
   const outstanding = s.cycleOutstandingAmount;
   const overdueAmount = s.cycleOverdueAmount;
   const dueAmount = Math.max(outstanding - overdueAmount, 0);
@@ -130,7 +127,7 @@ export default function DashboardPage() {
   const realizedPct = share(s.cycleCollectedAmount, s.cycleBilledAmount);
   const occupancyDelta = s.occupancyRate - s.occupancyRatePrevMonth;
   const vacantExcludingMaintenance = Math.max(s.vacantUnits - s.maintenanceUnits, 0);
-  const cycleLabel = cycleName(data.cycle).toUpperCase();
+  const cycleLabel = formatMonth(data.cycle, "en-US").toUpperCase();
 
   const donutSegments = [
     { label: "Occupied", pct: share(s.occupiedUnits, s.totalUnits), color: "var(--primary)" },
@@ -458,7 +455,7 @@ export default function DashboardPage() {
                     />
                   </div>
                   <span className={`text-[10px] font-semibold ${current ? "text-primary" : "text-subtle"}`}>
-                    {shortMonth(point.month)}
+                    {formatMonth(point.month, "en-US", { month: "short" }).toUpperCase()}
                   </span>
                 </div>
               );

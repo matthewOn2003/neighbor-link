@@ -1,9 +1,8 @@
 "use client";
 
 import { Link } from "@/i18n/navigation";
-import { Icon } from "@/components/ui/Icon";
+import { EmptyState, Icon, Spinner } from "@/components/ui";
 import { useDropdown } from "@/hooks/useDropdown";
-import { Spinner } from "@/components/ui/Spinner";
 import { useLocale } from "@/i18n";
 
 export function useStatusOptions() {
@@ -39,7 +38,7 @@ export function RecordFallback({ loading, found, children }) {
     );
   }
   if (!found) {
-    return <p className="p-12 text-center text-sm text-subtle">{t("record_not_found")}</p>;
+    return <EmptyState title={t("record_not_found")} />;
   }
   return children;
 }

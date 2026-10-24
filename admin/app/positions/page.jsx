@@ -6,17 +6,14 @@ import { useDraftFilters } from "@/hooks/useDraftFilters";
 import { useDropdown } from "@/hooks/useDropdown";
 import { useApiRequest } from "@/hooks/useApiRequest";
 import { useLocale } from "@/i18n";
-import { Icon } from "@/components/ui/Icon";
-import { DataTable, SummaryCard } from "@/components/ui/DataTable";
-import { Input } from "@/components/ui/Input";
-import { Select } from "@/components/ui/Select";
-import { ConfirmDialog, useToast } from "@/components/ui";
-import { positionCreate, positionDelete } from "@/services/staff/position";
+import { Icon, DataTable, SummaryCard, Input, Select, ConfirmDialog, useToast, StatusBadge } from "@/components/ui";
 import { fdl } from "@/utils/date";
 import { fetchAllRows } from "@/utils/excel";
 import { RowActions, useStatusOptions } from "@/components/staff/common";
-import { StatusBadge } from "@/components/ui/StatusBadge";
 import { apiErrorMessage } from "@/utils/errors";
+import { labelMap } from "@/utils/collections";
+import { api } from "@/services/api";
+import { request } from "@/services/request";
 
 export default function PositionsPage() {
   const { t } = useLocale();
@@ -33,7 +30,7 @@ export default function PositionsPage() {
   const [pending, setPending] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const { data: departmentData } = useApiRequest("/staff-department/list", { per_page: 100 });
+  const { data: departmentData } = useApiRequest(api.staffDepartment.list, { per_page: 100 });
   const departments = departmentData?.list ?? [];
   const { optionsOf, labelOf } = useDropdown(["position_level", "employment_type"]);
 
@@ -47,13 +44,13 @@ export default function PositionsPage() {
     ...optionsOf("employment_type"),
   ];
   const filterStatusOptions = [{ value: "", label: t("all_statuses") }, ...statusOptions];
-  const statusLabel = Object.fromEntries(statusOptions.map((option) => [option.value, option.label]));
-  const departmentLabel = Object.fromEntries(departmentOptions.map((option) => [option.value, option.label]));
+  const statusLabel = labelMap(statusOptions);
+  const departmentLabel = labelMap(departmentOptions);
 
   async function confirmDelete() {
     setSubmitting(true);
     try {
-      await positionDelete(pending.id);
+      await request(api.staffPosition.delete(pending.id));
       toast.success(t("record_deleted"));
       pending.reload();
     } catch (err) {
@@ -68,7 +65,7 @@ export default function PositionsPage() {
     <main className="flex flex-col w-full">
       <div className="p-4 md:p-8 space-y-6">
         <DataTable
-          api="/staff-position/list"
+          api={api.staffPosition.list}
           params={applied}
           filterValues={draft}
           filterBadges={[
@@ -108,10 +105,10 @@ export default function PositionsPage() {
               { key: "status", label: t("status"), sample: "active" },
             ],
             onRow: async (values) => {
-              const all = await fetchAllRows("/staff-department/list", {});
+              const all = await fetchAllRows(api.staffDepartment.list, {});
               const department = all.find((d) => d.name.toLowerCase() === values.department.toLowerCase());
               if (!department) throw new Error(t("import_department_not_found", { name: values.department }));
-              return positionCreate({
+              return request(api.staffPosition.create, {
                 department_id: department.id,
                 name: values.name,
                 code: values.code,

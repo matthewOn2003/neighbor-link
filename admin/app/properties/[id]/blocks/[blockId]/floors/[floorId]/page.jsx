@@ -2,24 +2,21 @@
 
 import { use } from "react";
 import { Link } from "@/i18n/navigation";
-import { Icon } from "@/components/ui/Icon";
-import { Spinner } from "@/components/ui/Spinner";
-import { DataTable, SummaryCard } from "@/components/ui/DataTable";
-import { Input } from "@/components/ui/Input";
-import { Select } from "@/components/ui/Select";
-import { StatusBadge } from "@/components/ui/StatusBadge";
+import { Icon, Spinner, DataTable, SummaryCard, Input, Select, StatusBadge } from "@/components/ui";
 import { useDraftFilters } from "@/hooks/useDraftFilters";
 import { useApiRequest } from "@/hooks/useApiRequest";
 import { useDropdown } from "@/hooks/useDropdown";
 import { useLocale } from "@/i18n";
 import { request } from "@/services/request";
 import { fdl } from "@/utils/date";
+import { indexBy, labelMap } from "@/utils/collections";
+import { api } from "@/services/api";
 
 
 export default function FloorDetailPage({ params }) {
   const { id, blockId, floorId } = use(params);
   const { t, locale } = useLocale();
-  const { data: floor, loading, error } = useApiRequest(`/property/floor/${floorId}`);
+  const { data: floor, loading, error } = useApiRequest(api.property.floorDetail(floorId));
   const { labelOf, optionsOf } = useDropdown(["unit_status", "bedroom_count"]);
   const { draft, setDraft, applied, apply, reset, clear } = useDraftFilters({
     status: "",
@@ -31,9 +28,9 @@ export default function FloorDetailPage({ params }) {
   });
 
   const statusOptions = [{ value: "", label: t("all_statuses") }, ...optionsOf("unit_status")];
-  const statusMap = Object.fromEntries(statusOptions.map((option) => [option.value, option]));
+  const statusMap = indexBy(statusOptions);
   const bedroomOptions = [{ value: "", label: t("all_bedrooms") }, ...optionsOf("bedroom_count")];
-  const bedroomLabel = Object.fromEntries(bedroomOptions.map((option) => [option.value, option.label]));
+  const bedroomLabel = labelMap(bedroomOptions);
 
   if (error) {
 
@@ -59,7 +56,7 @@ export default function FloorDetailPage({ params }) {
         </nav>
 
         <DataTable
-          api="/property/unit/list"
+          api={api.property.unitList}
           params={{ ...applied, floor_id: floorId }}
           filterValues={draft}
           filterBadges={[
@@ -95,7 +92,7 @@ export default function FloorDetailPage({ params }) {
               { key: "status", label: t("status"), sample: "vacant" },
             ],
             onRow: (values) =>
-              request("/property/unit/create", {
+              request(api.property.unitCreate, {
                 block_id: Number(blockId),
                 floor_id: Number(floorId),
                 code: values.code,

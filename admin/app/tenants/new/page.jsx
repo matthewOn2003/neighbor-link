@@ -6,9 +6,9 @@ import { useApiRequest } from "@/hooks/useApiRequest";
 import { useDropdown } from "@/hooks/useDropdown";
 import { request } from "@/services/request";
 import { useLocale } from "@/i18n";
-import { FormPage, FormSection, Select, Input, CopyableField, useToast } from "@/components/ui";
-import { Spinner } from "@/components/ui/Spinner";
+import { FormPage, FormSection, Select, Input, CopyableField, useToast, Spinner } from "@/components/ui";
 import { apiErrorMessage } from "@/utils/errors";
+import { api } from "@/services/api";
 
 const EMPTY_FORM = {
   username: "",
@@ -30,8 +30,8 @@ export default function NewTenantPage() {
   const [submitting, setSubmitting] = useState(false);
   const [created, setCreated] = useState(null);
 
-  const { data: propertyData } = useApiRequest("/property/list", { per_page: 100 });
-  const { data: unitData } = useApiRequest("/property/unit/list", {
+  const { data: propertyData } = useApiRequest(api.property.list, { per_page: 100 });
+  const { data: unitData } = useApiRequest(api.property.unitList, {
     property_id: form.property_id,
     status: "vacant",
     per_page: 100,
@@ -63,7 +63,7 @@ export default function NewTenantPage() {
 
     setSubmitting(true);
     try {
-      const result = await request("/tenant/create", {
+      const result = await request(api.tenant.create, {
         username: form.username.trim(),
         name: form.name.trim(),
         phone: form.phone.trim(),

@@ -5,17 +5,18 @@ import { Link, useRouter } from "@/i18n/navigation";
 import { useApiRequest } from "@/hooks/useApiRequest";
 import { request } from "@/services/request";
 import { useLocale } from "@/i18n";
-import { Input, Textarea, useToast } from "@/components/ui";
-import { Select } from "@/components/ui";
+import { Input, Textarea, useToast, Select } from "@/components/ui";
 import { contractRef } from "@/utils/documents";
 import { apiErrorMessage } from "@/utils/errors";
+import { todayISO } from "@/utils/date";
+import { api } from "@/services/api";
 
 export default function NewBillPage() {
   const { t } = useLocale();
   const router = useRouter();
   const toast = useToast();
 
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayISO();
   const [period, setPeriod] = useState(today.slice(0, 7));
   const [contractID, setContractID] = useState("");
   const [dueDate, setDueDate] = useState(today);
@@ -23,7 +24,7 @@ export default function NewBillPage() {
   const [notes, setNotes] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  const { data: contractsData, loading } = useApiRequest("/bill/active-contracts", {});
+  const { data: contractsData, loading } = useApiRequest(api.bill.activeContracts, {});
   const contracts = Array.isArray(contractsData) ? contractsData : [];
   const selected = useMemo(
     () => contracts.find((c) => String(c.id) === contractID),
@@ -60,7 +61,7 @@ export default function NewBillPage() {
 
     setSubmitting(true);
     try {
-      const b = await request("/bill/create", {
+      const b = await request(api.bill.create, {
         contract_id: Number(contractID),
         billing_period: period,
         due_date: dueDate,

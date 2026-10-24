@@ -6,7 +6,7 @@ import Image from "next/image";
 import { useLocale } from "@/i18n";
 import { useLoginMutation } from "@/store/authApi";
 import LangSelect from "@/components/LangSelect";
-import { Input } from "@/components/ui/Input";
+import { Input } from "@/components/ui";
 import { FormButton, FormError, FormGuard } from "@matthew2003/formguard";
 
 function getErrorMessage(error: unknown): string | undefined {

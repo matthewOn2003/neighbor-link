@@ -2,17 +2,14 @@
 
 import { Link } from "@/i18n/navigation";
 import { useDraftFilters } from "@/hooks/useDraftFilters";
-import { Icon } from "@/components/ui/Icon";
-import { DataTable, SummaryCard } from "@/components/ui/DataTable";
-import { Input } from "@/components/ui/Input";
-import { DatePicker } from "@/components/ui/DatePicker";
-import { Select } from "@/components/ui/Select";
+import { Icon, DataTable, SummaryCard, Input, DatePicker, Select, StatusBadge } from "@/components/ui";
 import { useDropdown } from "@/hooks/useDropdown";
-import { StatusBadge } from "@/components/ui/StatusBadge";
 import { useLocale } from "@/i18n";
 import { request } from "@/services/request";
-import { fdl } from "@/utils/date";
+import { fdl, formatMonth } from "@/utils/date";
 import { formatMoney } from "@/utils/format";
+import { indexBy } from "@/utils/collections";
+import { api } from "@/services/api";
 
 const getInitials = (name = "") =>
   name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join("").toUpperCase();
@@ -21,8 +18,6 @@ const formatRent = (value, locale) => formatMoney(value, locale, { digits: 0, fa
 
 const formatBalance = (value, locale) => formatMoney(value, locale);
 
-const formatMonthYear = (date, locale) =>
-  new Date(`${date}T00:00:00`).toLocaleDateString(locale, { month: "short", year: "numeric" });
 
 export default function TenantsPage() {
   const { t, locale } = useLocale();
@@ -39,13 +34,13 @@ export default function TenantsPage() {
   // 状态的文字和颜色来自后端 dropdown：[{ id, tenant_status_display, variant }]
   const { optionsOf } = useDropdown(["tenant_status"]);
   const statusOptions = [{ value: "", label: t("all_statuses") }, ...optionsOf("tenant_status")];
-  const statusMap = Object.fromEntries(statusOptions.map((option) => [option.value, option]));
+  const statusMap = indexBy(statusOptions);
 
   return (
     <main className="flex flex-col w-full">
       <div className="p-4 md:p-8 space-y-6">
         <DataTable
-          api="/tenant/list"
+          api={api.tenant.list}
           params={applied}
           filterValues={draft}
           filterBadges={[
@@ -84,7 +79,7 @@ export default function TenantsPage() {
               { key: "email", label: t("email"), sample: "john@example.com" },
               { key: "status", label: t("status"), sample: "active" },
             ],
-            onRow: (values) => request("/tenant/create", { ...values, status: values.status || "active" }),
+            onRow: (values) => request(api.tenant.create, { ...values, status: values.status || "active" }),
           }}
           title={t("tenants")}
           description={t("manage_tenants_description")}
@@ -225,7 +220,7 @@ export default function TenantsPage() {
                         <span className="font-semibold text-scene-content">{t("former_resident")}</span>
                         {tenant.contract_end ? (
                           <span className="text-subtle">
-                            {t("exited_on", { date: formatMonthYear(tenant.contract_end, locale) })}
+                            {t("exited_on", { date: formatMonth(tenant.contract_end, locale, { month: "short", year: "numeric" }) })}
                           </span>
                         ) : null}
                       </div>

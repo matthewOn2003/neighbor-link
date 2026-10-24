@@ -2,32 +2,27 @@
 
 import { useState } from "react";
 import { Link, useRouter } from "@/i18n/navigation";
-import { Icon } from "@/components/ui/Icon";
-import { DataTable, SummaryCard } from "@/components/ui/DataTable";
-import { Input } from "@/components/ui/Input";
+import { Icon, DataTable, SummaryCard, Input, useToast } from "@/components/ui";
 import { request } from "@/services/request";
 import { useLocale } from "@/i18n";
 import { formatMoney } from "@/utils/format";
-import { useToast } from "@/components/ui";
 import { apiErrorMessage } from "@/utils/errors";
+import { currentMonth } from "@/utils/date";
+import { api } from "@/services/api";
 
-const currentPeriod = () => {
-  const now = new Date();
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
-};
 
 
 export default function GenerateBillsPage() {
   const { t, locale } = useLocale();
   const router = useRouter();
   const toast = useToast();
-  const [period, setPeriod] = useState(currentPeriod);
+  const [period, setPeriod] = useState(currentMonth);
   const [submitting, setSubmitting] = useState(false);
 
   async function generate() {
     setSubmitting(true);
     try {
-      const result = await request("/bill/generate", { billing_period: period });
+      const result = await request(api.bill.generate, { billing_period: period });
       const count = Number(result?.generated_count ?? 0);
       if (count > 0) {
         toast.success(t("bills_generated", { count }));
@@ -52,7 +47,7 @@ export default function GenerateBillsPage() {
     <main className="flex w-full flex-col">
       <div className="p-4 md:p-8 space-y-6">
         <DataTable
-          api="/bill/active-contracts"
+          api={api.bill.activeContracts}
           title={t("generate_monthly_bills")}
           description={t("generate_bills_description")}
           buttons={(

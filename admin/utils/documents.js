@@ -1,5 +1,6 @@
 import { buildSimplePdf } from "@/utils/pdf";
 import { formatRef } from "@/utils/format";
+import { todayISO } from "@/utils/date";
 
 // PDF 里只能用内置字体（Latin），所以这里的标签和值统一用英文。
 
@@ -55,7 +56,7 @@ export function buildInvoicePdf(bill) {
         ],
       },
     ],
-    footer: "Generated " + new Date().toISOString().slice(0, 10),
+    footer: "Generated " + todayISO(),
   });
 }
 
@@ -98,6 +99,6 @@ export function buildContractSummaryPdf(contract, tenant) {
       },
       { heading: "Notes", rows: [["Notes", contract.notes]] },
     ],
-    footer: "Generated " + new Date().toISOString().slice(0, 10),
+    footer: "Generated " + todayISO(),
   });
 }

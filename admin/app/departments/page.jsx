@@ -4,17 +4,13 @@ import { useState } from "react";
 import { Link } from "@/i18n/navigation";
 import { useDraftFilters } from "@/hooks/useDraftFilters";
 import { useLocale } from "@/i18n";
-import { Icon } from "@/components/ui/Icon";
-import { DataTable, SummaryCard } from "@/components/ui/DataTable";
-import { Input } from "@/components/ui/Input";
-import { Select } from "@/components/ui/Select";
-import { DatePicker } from "@/components/ui/DatePicker";
-import { ConfirmDialog, useToast } from "@/components/ui";
-import { departmentCreate, departmentDelete } from "@/services/staff/department";
+import { Icon, DataTable, SummaryCard, Input, Select, DatePicker, ConfirmDialog, useToast, StatusBadge } from "@/components/ui";
 import { fdl } from "@/utils/date";
 import { RowActions, useStatusOptions } from "@/components/staff/common";
-import { StatusBadge } from "@/components/ui/StatusBadge";
 import { apiErrorMessage } from "@/utils/errors";
+import { labelMap } from "@/utils/collections";
+import { api } from "@/services/api";
+import { request } from "@/services/request";
 
 export default function DepartmentsPage() {
   const { t } = useLocale();
@@ -33,12 +29,12 @@ export default function DepartmentsPage() {
   const [submitting, setSubmitting] = useState(false);
 
   const filterStatusOptions = [{ value: "", label: t("all_statuses") }, ...statusOptions];
-  const statusLabel = Object.fromEntries(statusOptions.map((option) => [option.value, option.label]));
+  const statusLabel = labelMap(statusOptions);
 
   async function confirmDelete() {
     setSubmitting(true);
     try {
-      await departmentDelete(pending.id);
+      await request(api.staffDepartment.delete(pending.id));
       toast.success(t("record_deleted"));
       pending.reload();
     } catch (err) {
@@ -53,7 +49,7 @@ export default function DepartmentsPage() {
     <main className="flex flex-col w-full">
       <div className="p-4 md:p-8 space-y-6">
         <DataTable
-          api="/staff-department/list"
+          api={api.staffDepartment.list}
           params={applied}
           filterValues={draft}
           filterBadges={[
@@ -93,7 +89,7 @@ export default function DepartmentsPage() {
               { key: "description", label: t("description"), sample: "" },
               { key: "status", label: t("status"), sample: "active" },
             ],
-            onRow: (values) => departmentCreate({ ...values, status: values.status || "active" }),
+            onRow: (values) => request(api.staffDepartment.create, { ...values, status: values.status || "active" }),
           }}
           title={t("departments")}
           description={t("departments_description")}

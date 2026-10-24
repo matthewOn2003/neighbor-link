@@ -3,11 +3,11 @@
 import { useState } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { useLocale } from "@/i18n";
-import { FormPage, FormSection, Input, Select, Textarea, useToast } from "@/components/ui";
-import { Spinner } from "@/components/ui/Spinner";
-import { departmentCreate, departmentUpdate } from "@/services/staff/department";
+import { FormPage, FormSection, Input, Select, Textarea, useToast, Spinner } from "@/components/ui";
 import { useStatusOptions } from "./common";
 import { apiErrorMessage } from "@/utils/errors";
+import { request } from "@/services/request";
+import { api } from "@/services/api";
 
 const EMPTY_FORM = {
   name: "",
@@ -55,9 +55,9 @@ export function DepartmentForm({ record }) {
     setSubmitting(true);
     try {
       if (isEdit) {
-        await departmentUpdate(record.id, body);
+        await request(api.staffDepartment.update(record.id), body);
       } else {
-        await departmentCreate(body);
+        await request(api.staffDepartment.create, body);
       }
       toast.success(t("record_saved"));
       router.push("/departments");

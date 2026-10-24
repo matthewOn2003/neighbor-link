@@ -5,18 +5,14 @@ import { Link } from "@/i18n/navigation";
 import { useDraftFilters } from "@/hooks/useDraftFilters";
 import { useApiRequest } from "@/hooks/useApiRequest";
 import { useLocale } from "@/i18n";
-import { Icon } from "@/components/ui/Icon";
-import { DataTable, SummaryCard } from "@/components/ui/DataTable";
-import { Input } from "@/components/ui/Input";
-import { Select } from "@/components/ui/Select";
-import { DatePicker } from "@/components/ui/DatePicker";
-import { ConfirmDialog, useToast } from "@/components/ui";
-import { accountCreate, accountDelete } from "@/services/staff/account";
+import { Icon, DataTable, SummaryCard, Input, Select, DatePicker, ConfirmDialog, useToast, StatusBadge } from "@/components/ui";
 import { fdl, fds } from "@/utils/date";
 import { fetchAllRows } from "@/utils/excel";
 import { RowActions, useStatusOptions } from "@/components/staff/common";
-import { StatusBadge } from "@/components/ui/StatusBadge";
 import { apiErrorMessage } from "@/utils/errors";
+import { labelMap } from "@/utils/collections";
+import { api } from "@/services/api";
+import { request } from "@/services/request";
 
 export default function UsersPage() {
   const { t } = useLocale();
@@ -34,9 +30,9 @@ export default function UsersPage() {
   const [pending, setPending] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const { data: departmentData } = useApiRequest("/staff-department/list", { per_page: 100 });
+  const { data: departmentData } = useApiRequest(api.staffDepartment.list, { per_page: 100 });
   const departments = departmentData?.list ?? [];
-  const { data: positionData } = useApiRequest("/staff-position/list", { per_page: 100 });
+  const { data: positionData } = useApiRequest(api.staffPosition.list, { per_page: 100 });
   const positions = positionData?.list ?? [];
 
   const departmentOptions = [
@@ -48,14 +44,14 @@ export default function UsersPage() {
     ...positions.map((p) => ({ value: String(p.id), label: `${p.department_name} / ${p.name}` })),
   ];
   const filterStatusOptions = [{ value: "", label: t("all_statuses") }, ...statusOptions];
-  const statusLabel = Object.fromEntries(statusOptions.map((option) => [option.value, option.label]));
-  const departmentLabel = Object.fromEntries(departmentOptions.map((option) => [option.value, option.label]));
-  const positionLabel = Object.fromEntries(positionOptions.map((option) => [option.value, option.label]));
+  const statusLabel = labelMap(statusOptions);
+  const departmentLabel = labelMap(departmentOptions);
+  const positionLabel = labelMap(positionOptions);
 
   async function confirmDelete() {
     setSubmitting(true);
     try {
-      await accountDelete(pending.id);
+      await request(api.staffAccount.delete(pending.id));
       toast.success(t("record_deleted"));
       pending.reload();
     } catch (err) {
@@ -70,7 +66,7 @@ export default function UsersPage() {
     <main className="flex flex-col w-full">
       <div className="p-4 md:p-8 space-y-6">
         <DataTable
-          api="/staff-account/list"
+          api={api.staffAccount.list}
           params={applied}
           filterValues={draft}
           filterBadges={[
@@ -114,10 +110,10 @@ export default function UsersPage() {
               { key: "status", label: t("status"), sample: "active" },
             ],
             onRow: async (values) => {
-              const all = await fetchAllRows("/staff-position/list", {});
+              const all = await fetchAllRows(api.staffPosition.list, {});
               const position = all.find((p) => p.code.toLowerCase() === values.position_code.toLowerCase());
               if (!position) throw new Error(t("import_position_not_found", { code: values.position_code }));
-              return accountCreate({
+              return request(api.staffAccount.create, {
                 username: values.username,
                 password: values.password,
                 name: values.name,
