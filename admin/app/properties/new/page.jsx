@@ -30,7 +30,7 @@ export default function NewPropertyPage() {
 
   const [form, setForm] = useState(EMPTY_FORM);
   const [errors, setErrors] = useState({});
-  const [saving, setSaving] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const { data: facets } = useApiRequest("/property/facets");
   const { optionsOf } = useDropdown(["property_type", "property_region"]);
@@ -50,7 +50,7 @@ export default function NewPropertyPage() {
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) return;
 
-    setSaving(true);
+    setSubmitting(true);
     try {
       const property = await request("/property/create", {
         name: form.name.trim(),
@@ -69,7 +69,7 @@ export default function NewPropertyPage() {
       router.push(`/properties/${property.id}`);
     } catch {
       toast.error(t("failed_to_create_property"));
-      setSaving(false);
+      setSubmitting(false);
     }
   }
 
@@ -87,12 +87,12 @@ export default function NewPropertyPage() {
             type="button"
             className="btn btn-outline"
             onClick={() => router.push("/properties")}
-            disabled={saving}
+            disabled={submitting}
           >
             {t("cancel")}
           </button>
-          <button type="submit" className="btn btn-primary" disabled={saving}>
-            {saving ? (
+          <button type="submit" className="btn btn-primary" disabled={submitting}>
+            {submitting ? (
               <>
                 <Spinner size="sm" label={t("saving")} /> {t("saving")}
               </>

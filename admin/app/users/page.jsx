@@ -14,8 +14,9 @@ import { ConfirmDialog, useToast } from "@/components/ui";
 import { accountCreate, accountDelete } from "@/services/staff/account";
 import { fdl, fds } from "@/utils/date";
 import { fetchAllRows } from "@/utils/excel";
-import { RowActions, saveErrorMessage, useStatusOptions } from "@/components/staff/common";
+import { RowActions, useStatusOptions } from "@/components/staff/common";
 import { StatusBadge } from "@/components/ui/StatusBadge";
+import { apiErrorMessage } from "@/utils/errors";
 
 export default function UsersPage() {
   const { t } = useLocale();
@@ -31,7 +32,7 @@ export default function UsersPage() {
     hire_date_to: "",
   });
   const [pending, setPending] = useState(null);
-  const [deleting, setDeleting] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const { data: departmentData } = useApiRequest("/staff-department/list", { per_page: 100 });
   const departments = departmentData?.list ?? [];
@@ -52,15 +53,15 @@ export default function UsersPage() {
   const positionLabel = Object.fromEntries(positionOptions.map((option) => [option.value, option.label]));
 
   async function confirmDelete() {
-    setDeleting(true);
+    setSubmitting(true);
     try {
       await accountDelete(pending.id);
       toast.success(t("record_deleted"));
       pending.reload();
     } catch (err) {
-      toast.error(saveErrorMessage(err, t, "delete_failed"));
+      toast.error(apiErrorMessage(err, t, { fallbackKey: "delete_failed" }));
     } finally {
-      setDeleting(false);
+      setSubmitting(false);
       setPending(null);
     }
   }
@@ -263,7 +264,7 @@ export default function UsersPage() {
         title={t("delete")}
         message={t("confirm_delete")}
         danger
-        loading={deleting}
+        loading={submitting}
         onConfirm={confirmDelete}
         onCancel={() => setPending(null)}
       />

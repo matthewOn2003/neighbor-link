@@ -14,11 +14,7 @@ import { useLocale } from "@/i18n";
 import { request } from "@/services/request";
 import { fdl } from "@/utils/date";
 import { labelFor, money, usePropertyOptions, useUnitOptions } from "@/components/payments/shared";
-
-function reviewErrorMessage(err, t) {
-  if (err?.code === "INVALID_STATE") return t("proof_already_reviewed");
-  return err?.message || t("payment_proof_action_failed");
-}
+import { apiErrorMessage } from "@/utils/errors";
 
 function ProofDetail({ row, statusItems }) {
   const { t, locale } = useLocale();
@@ -83,20 +79,25 @@ function ProofReviewTab() {
   const [dialog, setDialog] = useState(null);
   const [reason, setReason] = useState("");
   const [reasonError, setReasonError] = useState("");
-  const [busy, setBusy] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const update = (key) => (value) => setDraft((current) => ({ ...current, [key]: value }));
 
   async function review(action, body) {
     const current = dialog;
-    setBusy(true);
+    setSubmitting(true);
     try {
       await request(`/payment-proof/${action}/${current.row.id}`, body);
       toast.success(t(action === "approve" ? "payment_proof_approved" : "payment_proof_rejected"));
     } catch (err) {
-      toast.error(reviewErrorMessage(err, t));
+      toast.error(
+        apiErrorMessage(err, t, {
+          fallbackKey: "payment_proof_action_failed",
+          codes: { INVALID_STATE: "proof_already_reviewed" },
+        })
+      );
     } finally {
-      setBusy(false);
+      setSubmitting(false);
       current.reload();
       setDialog(null);
     }
@@ -263,7 +264,7 @@ function ProofReviewTab() {
         title={t("approve_payment_proof")}
         message={t("confirm_approve_payment_proof")}
         confirmLabel={t("approve")}
-        loading={busy}
+        loading={submitting}
         onConfirm={() => review("approve", {})}
         onCancel={() => setDialog({ ...dialog, mode: "view" })}
       />
@@ -275,11 +276,11 @@ function ProofReviewTab() {
         size="md"
         footer={(
           <>
-            <button type="button" className="btn btn-outline" onClick={() => setDialog({ ...dialog, mode: "view" })} disabled={busy}>
+            <button type="button" className="btn btn-outline" onClick={() => setDialog({ ...dialog, mode: "view" })} disabled={submitting}>
               {t("cancel")}
             </button>
-            <button type="button" className="btn btn-danger" onClick={submitReject} disabled={busy}>
-              {busy ? <Spinner size="sm" label={t("saving")} /> : t("reject")}
+            <button type="button" className="btn btn-danger" onClick={submitReject} disabled={submitting}>
+              {submitting ? <Spinner size="sm" label={t("saving")} /> : t("reject")}
             </button>
           </>
         )}

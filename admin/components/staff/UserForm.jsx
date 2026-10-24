@@ -8,7 +8,8 @@ import { FormPage, FormSection, Input, Select, useToast } from "@/components/ui"
 import { DatePicker } from "@/components/ui/DatePicker";
 import { Spinner } from "@/components/ui/Spinner";
 import { accountCreate, accountUpdate } from "@/services/staff/account";
-import { saveErrorMessage, useStatusOptions } from "./common";
+import { useStatusOptions } from "./common";
+import { apiErrorMessage } from "@/utils/errors";
 
 const EMPTY_FORM = {
   username: "",
@@ -34,7 +35,7 @@ export function UserForm({ record }) {
     record ? { ...EMPTY_FORM, ...record, password: "", position_id: String(record.position_id) } : EMPTY_FORM,
   );
   const [errors, setErrors] = useState({});
-  const [saving, setSaving] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const isEdit = Boolean(record);
 
   function updateField(key, value) {
@@ -65,7 +66,7 @@ export function UserForm({ record }) {
     // 编辑时密码留空表示不修改
     if (form.password) body.password = form.password;
 
-    setSaving(true);
+    setSubmitting(true);
     try {
       if (isEdit) {
         await accountUpdate(record.id, body);
@@ -75,9 +76,9 @@ export function UserForm({ record }) {
       toast.success(t("record_saved"));
       router.push("/users");
     } catch (err) {
-      toast.error(saveErrorMessage(err, t, "save_failed"));
+      toast.error(apiErrorMessage(err, t, { fallbackKey: "save_failed" }));
     } finally {
-      setSaving(false);
+      setSubmitting(false);
     }
   }
 
@@ -91,11 +92,11 @@ export function UserForm({ record }) {
       size="md"
       actions={(
         <div className="flex gap-3">
-          <button type="button" className="btn btn-outline" onClick={() => router.push("/users")} disabled={saving}>
+          <button type="button" className="btn btn-outline" onClick={() => router.push("/users")} disabled={submitting}>
             {t("cancel")}
           </button>
-          <button type="submit" className="btn btn-primary" disabled={saving}>
-            {saving ? <><Spinner size="sm" label={t("saving")} /> {t("saving")}</> : t("save_changes")}
+          <button type="submit" className="btn btn-primary" disabled={submitting}>
+            {submitting ? <><Spinner size="sm" label={t("saving")} /> {t("saving")}</> : t("save_changes")}
           </button>
         </div>
       )}

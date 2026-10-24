@@ -45,8 +45,3 @@ export function RecordFallback({ loading, found, children }) {
 }
 
 // 后端返回的业务错误码映射为对应的提示文字
-export function saveErrorMessage(err, t, fallbackKey) {
-  if (err?.code === "DUPLICATE") return t("duplicate_record");
-  if (err?.code === "IN_USE") return t("record_in_use");
-  return err?.message || t(fallbackKey);
-}

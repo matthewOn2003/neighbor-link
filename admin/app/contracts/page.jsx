@@ -15,6 +15,7 @@ import { useToast } from "@/components/ui";
 import { PdfPreviewModal } from "@/components/ui/PdfPreviewModal";
 import { buildContractSummaryPdf, contractRef } from "@/utils/documents";
 import { formatMoney } from "@/utils/format";
+import { apiErrorMessage } from "@/utils/errors";
 
 
 
@@ -64,9 +65,11 @@ export default function ContractsPage() {
       reload();
     } catch (error) {
       toast.error(
-        error.code === "ACTIVE_CONTRACT_EXISTS"
-          ? t("contract_active_exists")
-          : t("contract_save_failed")
+        apiErrorMessage(error, t, {
+          fallbackKey: "contract_save_failed",
+          codes: { ACTIVE_CONTRACT_EXISTS: "contract_active_exists" },
+          serverMessage: false,
+        })
       );
     }
   }

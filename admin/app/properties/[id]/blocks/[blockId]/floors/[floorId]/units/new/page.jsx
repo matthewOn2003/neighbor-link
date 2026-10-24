@@ -8,15 +8,9 @@ import { useDropdown } from "@/hooks/useDropdown";
 import { useApiRequest } from "@/hooks/useApiRequest";
 import { useLocale } from "@/i18n";
 import { request } from "@/services/request";
+import { apiErrorMessage } from "@/utils/errors";
 
 const EMPTY_FORM = { code: "", bedrooms: "", size_sqft: "", status: "vacant" };
-
-function unitErrorMessage(err, t) {
-  if (err?.code === "CODE_EXISTS") return t("unit_code_exists");
-  if (err?.code === "INVALID_FLOOR") return t("invalid_floor");
-  if (err?.code === "INVALID_STATUS") return t("invalid_unit_status");
-  return t("unit_save_failed");
-}
 
 export default function NewUnitPage({ params }) {
   const { id, blockId, floorId } = use(params);
@@ -28,7 +22,7 @@ export default function NewUnitPage({ params }) {
   const statusOptions = optionsOf("unit_status");
   const [form, setForm] = useState(EMPTY_FORM);
   const [errors, setErrors] = useState({});
-  const [saving, setSaving] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const floorHref = `/properties/${id}/blocks/${blockId}/floors/${floorId}`;
 
   function updateField(key, value) {
@@ -50,7 +44,7 @@ export default function NewUnitPage({ params }) {
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) return;
 
-    setSaving(true);
+    setSubmitting(true);
     try {
       await request("/property/unit/create", {
         block_id: Number(blockId),
@@ -63,9 +57,15 @@ export default function NewUnitPage({ params }) {
       toast.success(t("record_saved"));
       router.push(floorHref);
     } catch (err) {
-      toast.error(unitErrorMessage(err, t));
+      toast.error(
+        apiErrorMessage(err, t, {
+          fallbackKey: "unit_save_failed",
+          codes: { CODE_EXISTS: "unit_code_exists", INVALID_FLOOR: "invalid_floor", INVALID_STATUS: "invalid_unit_status" },
+          serverMessage: false,
+        })
+      );
     } finally {
-      setSaving(false);
+      setSubmitting(false);
     }
   }
 
@@ -83,12 +83,12 @@ export default function NewUnitPage({ params }) {
             type="button"
             className="btn btn-outline"
             onClick={() => router.push(floorHref)}
-            disabled={saving}
+            disabled={submitting}
           >
             {t("cancel")}
           </button>
-          <button type="submit" className="btn btn-primary" disabled={saving}>
-            {saving ? (
+          <button type="submit" className="btn btn-primary" disabled={submitting}>
+            {submitting ? (
               <>
                 <Spinner size="sm" label={t("saving")} /> {t("saving")}
               </>

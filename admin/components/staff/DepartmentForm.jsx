@@ -6,7 +6,8 @@ import { useLocale } from "@/i18n";
 import { FormPage, FormSection, Input, Select, Textarea, useToast } from "@/components/ui";
 import { Spinner } from "@/components/ui/Spinner";
 import { departmentCreate, departmentUpdate } from "@/services/staff/department";
-import { saveErrorMessage, useStatusOptions } from "./common";
+import { useStatusOptions } from "./common";
+import { apiErrorMessage } from "@/utils/errors";
 
 const EMPTY_FORM = {
   name: "",
@@ -25,7 +26,7 @@ export function DepartmentForm({ record }) {
   const statusOptions = useStatusOptions();
   const [form, setForm] = useState(() => (record ? { ...EMPTY_FORM, ...record } : EMPTY_FORM));
   const [errors, setErrors] = useState({});
-  const [saving, setSaving] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const isEdit = Boolean(record);
 
   function updateField(key, value) {
@@ -51,7 +52,7 @@ export function DepartmentForm({ record }) {
       status: form.status,
     };
 
-    setSaving(true);
+    setSubmitting(true);
     try {
       if (isEdit) {
         await departmentUpdate(record.id, body);
@@ -61,9 +62,9 @@ export function DepartmentForm({ record }) {
       toast.success(t("record_saved"));
       router.push("/departments");
     } catch (err) {
-      toast.error(saveErrorMessage(err, t, "save_failed"));
+      toast.error(apiErrorMessage(err, t, { fallbackKey: "save_failed" }));
     } finally {
-      setSaving(false);
+      setSubmitting(false);
     }
   }
 
@@ -77,11 +78,11 @@ export function DepartmentForm({ record }) {
       size="md"
       actions={(
         <div className="flex gap-3">
-          <button type="button" className="btn btn-outline" onClick={() => router.push("/departments")} disabled={saving}>
+          <button type="button" className="btn btn-outline" onClick={() => router.push("/departments")} disabled={submitting}>
             {t("cancel")}
           </button>
-          <button type="submit" className="btn btn-primary" disabled={saving}>
-            {saving ? <><Spinner size="sm" label={t("saving")} /> {t("saving")}</> : t("save_changes")}
+          <button type="submit" className="btn btn-primary" disabled={submitting}>
+            {submitting ? <><Spinner size="sm" label={t("saving")} /> {t("saving")}</> : t("save_changes")}
           </button>
         </div>
       )}

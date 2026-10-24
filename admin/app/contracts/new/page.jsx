@@ -7,6 +7,7 @@ import { useDropdown } from "@/hooks/useDropdown";
 import { request } from "@/services/request";
 import { useLocale } from "@/i18n";
 import { Input, Select, Textarea, useToast } from "@/components/ui";
+import { apiErrorMessage } from "@/utils/errors";
 
 const termFields = [
   ["start_date", "date", true],
@@ -41,7 +42,7 @@ export default function NewContractPage() {
     status: "draft",
     notes: "",
   });
-  const [saving, ss] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [errors, se] = useState({});
 
   const { data, loading } = useApiRequest("/tenant/list", {
@@ -66,7 +67,7 @@ export default function NewContractPage() {
     se(er);
     if (Object.keys(er).length) return;
 
-    ss(true);
+    setSubmitting(true);
     try {
       const r = await request("/contract/create", {
         tenant_id: Number(f.tenant_id),
@@ -82,10 +83,14 @@ export default function NewContractPage() {
       router.push("/contracts/" + r.id);
     } catch (e) {
       toast.error(
-        e.code === "ACTIVE_CONTRACT_EXISTS" ? t("contract_active_exists") : t("contract_save_failed")
+        apiErrorMessage(e, t, {
+          fallbackKey: "contract_save_failed",
+          codes: { ACTIVE_CONTRACT_EXISTS: "contract_active_exists" },
+          serverMessage: false,
+        })
       );
     } finally {
-      ss(false);
+      setSubmitting(false);
     }
   }
 
@@ -187,8 +192,8 @@ export default function NewContractPage() {
           <Link href="/contracts" className="btn btn-outline">
             {t("cancel")}
           </Link>
-          <button disabled={saving} type="submit" className="btn btn-primary">
-            {saving ? t("saving") : t("save_contract")}
+          <button disabled={submitting} type="submit" className="btn btn-primary">
+            {submitting ? t("saving") : t("save_contract")}
           </button>
         </div>
       </form>

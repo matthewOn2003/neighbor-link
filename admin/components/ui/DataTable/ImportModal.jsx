@@ -6,6 +6,7 @@ import { FileDropzone } from "../FileDropzone";
 import { Spinner } from "../Spinner";
 import { useLocale } from "@/i18n";
 import { downloadSampleXlsx, readSpreadsheet } from "@/utils/excel";
+import { apiErrorMessage } from "@/utils/errors";
 
 // 把表格的一行映射为 { key: value }，表头可以是 label 或 key（不区分大小写）。
 function resolveRow(raw, columns) {
@@ -29,7 +30,7 @@ export function ImportModal({ open, onClose, title, columns, sampleName, onRow, 
   const [fileName, setFileName] = useState("");
   const [rows, setRows] = useState([]);
   const [headerError, setHeaderError] = useState("");
-  const [running, setRunning] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [progress, setProgress] = useState({ done: 0, total: 0 });
   const [results, setResults] = useState(null);
 
@@ -42,7 +43,7 @@ export function ImportModal({ open, onClose, title, columns, sampleName, onRow, 
   }
 
   function handleClose() {
-    if (running) return;
+    if (submitting) return;
     reset();
     onClose?.();
   }
@@ -68,7 +69,7 @@ export function ImportModal({ open, onClose, title, columns, sampleName, onRow, 
   }
 
   async function runImport() {
-    setRunning(true);
+    setSubmitting(true);
     setResults(null);
     const failures = [];
     let succeeded = 0;
@@ -83,12 +84,12 @@ export function ImportModal({ open, onClose, title, columns, sampleName, onRow, 
           await onRow(values);
           succeeded += 1;
         } catch (err) {
-          failures.push({ line: index + 2, message: err?.message || t("import_row_failed") });
+          failures.push({ line: index + 2, message: apiErrorMessage(err, t, { fallbackKey: "import_row_failed" }) });
         }
       }
       setProgress({ done: index + 1, total: rows.length });
     }
-    setRunning(false);
+    setSubmitting(false);
     setResults({ succeeded, failures });
     onFinished?.();
   }
@@ -101,12 +102,12 @@ export function ImportModal({ open, onClose, title, columns, sampleName, onRow, 
       size="lg"
       footer={(
         <>
-          <button type="button" className="btn btn-outline" onClick={handleClose} disabled={running}>
+          <button type="button" className="btn btn-outline" onClick={handleClose} disabled={submitting}>
             {results ? t("close") : t("cancel")}
           </button>
           {!results ? (
-            <button type="button" className="btn btn-primary" onClick={runImport} disabled={running || rows.length === 0}>
-              {running ? <><Spinner size="sm" label={t("importing")} /> {t("importing")}</> : t("import_start", { count: rows.length })}
+            <button type="button" className="btn btn-primary" onClick={runImport} disabled={submitting || rows.length === 0}>
+              {submitting ? <><Spinner size="sm" label={t("importing")} /> {t("importing")}</> : t("import_start", { count: rows.length })}
             </button>
           ) : null}
         </>
@@ -132,17 +133,17 @@ export function ImportModal({ open, onClose, title, columns, sampleName, onRow, 
         <FileDropzone
           accept=".xlsx,.xls,.csv"
           onFile={handleFile}
-          disabled={running}
+          disabled={submitting}
           hint={t("import_drop_hint")}
           fileName={fileName}
         />
 
         {headerError ? <p className="text-sm text-error">{headerError}</p> : null}
-        {rows.length > 0 && !running && !results ? (
+        {rows.length > 0 && !submitting && !results ? (
           <p className="text-sm text-subtle">{t("import_rows_ready", { count: rows.length })}</p>
         ) : null}
 
-        {running ? (
+        {submitting ? (
           <p className="text-sm text-subtle">
             {t("import_progress", { done: progress.done, total: progress.total })}
           </p>
