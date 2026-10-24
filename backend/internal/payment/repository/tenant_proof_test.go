@@ -32,7 +32,7 @@ func setupProofDB(t *testing.T) *gorm.DB {
 		t.Fatalf("migrate payment_proofs: %v", err)
 	}
 	seed := `INSERT INTO bills (id, tenant_id, status, amount, late_fee, amount_paid) VALUES
-		(1, 10, 'unpaid', 1000, 50, http.StatusOK),
+		(1, 10, 'unpaid', 1000, 50, 200),
 		(2, 10, 'paid', 800, 0, 800),
 		(3, 11, 'unpaid', 900, 0, 0)`
 	if err := db.Exec(seed).Error; err != nil {
