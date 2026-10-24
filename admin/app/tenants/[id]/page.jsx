@@ -5,6 +5,8 @@ import { useApiRequest } from "@/hooks/useApiRequest";
 import { Icon } from "@/components/ui/Icon";
 import { Spinner } from "@/components/ui/Spinner";
 import { useLocale } from "@/i18n";
+import { useDropdown } from "@/hooks/useDropdown";
+import { StatusBadge } from "@/components/ui/StatusBadge";
 import { formatMoney } from "@/utils/format";
 
 const money = (value) => formatMoney(value, undefined, { fallback: "—" });
@@ -20,6 +22,8 @@ function DetailField({ label, value }) {
 
 export default function TenantDetailPage({ params }) {
   const { t } = useLocale();
+  const { optionsOf } = useDropdown(["tenant_status"]);
+  const tenantStatusItems = optionsOf("tenant_status");
   const { id } = use(params);
   const { data: tenant, loading, error } = useApiRequest(`/tenant/detail/${id}`);
 
@@ -47,9 +51,7 @@ export default function TenantDetailPage({ params }) {
             <h1 className="mt-1 text-2xl font-semibold text-scene-content">{tenant.name}</h1>
             <p className="mt-1 text-sm text-subtle">Tenant #{tenant.id}</p>
           </div>
-          <span className={`status-pill ${tenant.status === "active" ? "success" : "neutral"}`}>
-            {tenant.status || "Unknown"}
-          </span>
+          <StatusBadge value={tenant.status} options={tenantStatusItems} />
         </header>
 
         <section className="rounded-xl bg-accent p-6 shadow">

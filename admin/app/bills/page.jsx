@@ -6,30 +6,22 @@ import { Icon } from "@/components/ui/Icon";
 import { DataTable, SummaryCard } from "@/components/ui/DataTable";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
+import { StatusBadge } from "@/components/ui/StatusBadge";
+import { useDropdown } from "@/hooks/useDropdown";
 import { PdfPreviewModal } from "@/components/ui/PdfPreviewModal";
 import { useDraftFilters } from "@/hooks/useDraftFilters";
 import { useLocale } from "@/i18n";
 import { billRef, buildInvoicePdf } from "@/utils/documents";
 import { formatMoney } from "@/utils/format";
 
-const statusKeys = {
-  unpaid: "bill_status_unpaid",
-  partial: "bill_status_partial",
-  paid: "bill_status_paid",
-  overdue: "bill_status_overdue",
-  void: "bill_status_void",
-  pending_review: "bill_status_pending_review",
-};
-const statusClass = { unpaid: "neutral", partial: "warning", paid: "success", overdue: "danger", void: "neutral", pending_review: "warning" };
 
 export default function BillsPage() {
   const { t, locale } = useLocale();
   const { draft, setDraft, applied, apply, reset, clear } = useDraftFilters({ keyword: "", status: "", period: "" });
   const [pdfBill, setPdfBill] = useState(null);
-  const statusOptions = [
-    { value: "", label: t("all_bill_statuses") },
-    ...["unpaid", "partial", "paid", "overdue", "void"].map((value) => ({ value, label: t(statusKeys[value]) })),
-  ];
+  const { optionsOf, labelOf } = useDropdown(["bill_status"]);
+  const billStatusItems = optionsOf("bill_status");
+  const statusOptions = [{ value: "", label: t("all_bill_statuses") }, ...billStatusItems];
 
   return (
     <main className="flex flex-col w-full">
@@ -40,7 +32,7 @@ export default function BillsPage() {
           filterValues={draft}
           filterBadges={[
             { key: "keyword", label: t("search_keyword") },
-            { key: "status", label: t("status"), display: (value) => t(statusKeys[value] ?? value) },
+            { key: "status", label: t("status"), display: (value) => labelOf("bill_status", value) },
             { key: "period", label: t("billing_period") },
           ]}
           onClearFilter={clear}
@@ -125,7 +117,7 @@ export default function BillsPage() {
                   <td className="whitespace-nowrap">{bill.due_date}</td>
                   <td className="whitespace-nowrap font-semibold">{formatMoney(Number(bill.amount) + Number(bill.late_fee), locale)}</td>
                   <td className="whitespace-nowrap">{formatMoney(bill.amount_paid, locale)}</td>
-                  <td><span className={"status-pill " + (statusClass[displayStatus] || "neutral")}>{t(statusKeys[displayStatus] || statusKeys.unpaid)}</span></td>
+                  <td><StatusBadge value={displayStatus} options={billStatusItems} /></td>
                   <td className="whitespace-nowrap">
                     <div className="flex items-center gap-3">
                       <Link href={"/bills/" + bill.id} className="link-inline">{t("view_details")}</Link>

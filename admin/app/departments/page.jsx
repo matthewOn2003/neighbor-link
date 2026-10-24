@@ -12,7 +12,8 @@ import { DatePicker } from "@/components/ui/DatePicker";
 import { ConfirmDialog, useToast } from "@/components/ui";
 import { departmentCreate, departmentDelete } from "@/services/staff/department";
 import { fdl } from "@/utils/date";
-import { RowActions, StatusPill, saveErrorMessage, useStatusOptions } from "@/components/staff/common";
+import { RowActions, saveErrorMessage, useStatusOptions } from "@/components/staff/common";
+import { StatusBadge } from "@/components/ui/StatusBadge";
 
 export default function DepartmentsPage() {
   const { t } = useLocale();
@@ -202,7 +203,7 @@ export default function DepartmentsPage() {
                 <td className="text-subtle">{department.location || "-"}</td>
                 <td className="text-scene-content">{department.headcount}</td>
                 <td>
-                  <StatusPill status={department.status} />
+                  <StatusBadge value={department.status} options={statusOptions} />
                 </td>
                 <td>
                   <RowActions

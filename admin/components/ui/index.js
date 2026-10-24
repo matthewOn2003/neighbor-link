@@ -14,3 +14,4 @@ export { Textarea } from "./Textarea";
 export { Input } from "./Input";
 export { FormPage } from "./FormPage";
 export { Icon } from "./Icon";
+export { StatusBadge } from "./StatusBadge";

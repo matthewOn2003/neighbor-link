@@ -8,12 +8,6 @@ const COVER_GRADIENTS = [
   "bg-gradient-to-br from-[#334155] to-[#94a3b8]",
 ];
 
-const UNIT_STATUS_STYLES = {
-  occupied: "bg-[#ecfdf5] text-success",
-  vacant: "bg-scene text-primary",
-  maintenance: "bg-[#fffbeb] text-highlight",
-};
-
 export function PropertyCover({ id, coverImage, className = "" }) {
   return (
     <div className={`relative w-full overflow-hidden ${className}`}>
@@ -52,7 +46,3 @@ export function StatBlock({ value, label }) {
   );
 }
 
-export function UnitStatusBadge({ status, label }) {
-  const style = UNIT_STATUS_STYLES[status] ?? "bg-[#f1f5f9] text-[#475569]";
-  return <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${style}`}>{label}</span>;
-}

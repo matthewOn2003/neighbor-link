@@ -118,8 +118,15 @@ type ActivityItem struct {
 	Property   *string `json:"property"`
 }
 
+// CycleOption is one entry of the billing-cycle selector.
+type CycleOption struct {
+	Value string `json:"value"`
+	Label string `json:"label"`
+}
+
 type Overview struct {
 	Cycle             string             `json:"cycle"`
+	Cycles            []CycleOption      `json:"cycles"`
 	Summary           Summary            `json:"summary"`
 	Focus             Focus              `json:"focus"`
 	Properties        []PropertyStat     `json:"properties"`
@@ -176,6 +183,7 @@ func (uc *DashboardUsecase) Overview(now time.Time, cycle string) (*Overview, er
 
 	out := &Overview{
 		Cycle:             cycle,
+		Cycles:            recentCycles(now, 12),
 		Properties:        []PropertyStat{},
 		Revenue:           []RevenuePoint{},
 		CollectionFunnel:  []FunnelGroup{},
@@ -418,4 +426,17 @@ func (uc *DashboardUsecase) activity(now time.Time) []ActivityItem {
 		items = items[:activityLimit]
 	}
 	return items
+}
+
+// recentCycles returns the current month and the count-1 months before it, newest first.
+func recentCycles(now time.Time, count int) []CycleOption {
+	options := make([]CycleOption, 0, count)
+	for i := 0; i < count; i++ {
+		month := time.Date(now.Year(), now.Month()-time.Month(i), 1, 0, 0, 0, 0, now.Location())
+		options = append(options, CycleOption{
+			Value: month.Format("2006-01"),
+			Label: month.Format("January 2006"),
+		})
+	}
+	return options
 }

@@ -12,36 +12,21 @@ import { PdfPreviewModal } from "@/components/ui/PdfPreviewModal";
 import { buildContractSummaryPdf, contractRef } from "@/utils/documents";
 import { formatMoney } from "@/utils/format";
 import { Select } from "@/components/ui";
-
-const contractStatusOptions = ["draft", "active", "expired", "terminated"].map((s) => ({
-  value: s,
-  label: s.charAt(0).toUpperCase() + s.slice(1),
-}));
+import { StatusBadge } from "@/components/ui/StatusBadge";
+import { useDropdown } from "@/hooks/useDropdown";
 
 async function buildContractPdf(contract) {
   const tenant = await request("/tenant/detail/" + contract.tenant_id).catch(() => null);
   return buildContractSummaryPdf(contract, tenant);
 }
 
-const keys = {
-  draft: "contract_status_draft",
-  active: "contract_status_active",
-  expired: "contract_status_expired",
-  terminated: "contract_status_terminated",
-};
-
-const variants = {
-  draft: "neutral",
-  active: "success",
-  expired: "warning",
-  terminated: "danger",
-};
-
 
 export default function ContractDetailPage({ params }) {
   const { id } = use(params);
   const { t, locale } = useLocale();
   const toast = useToast();
+  const { optionsOf } = useDropdown(["contract_status"]);
+  const contractStatusItems = optionsOf("contract_status");
 
   const { data, loading, error, reload } = useApiRequest("/contract/detail/" + id);
 
@@ -157,9 +142,7 @@ export default function ContractDetailPage({ params }) {
               </div>
 
               <div className="flex flex-wrap items-center gap-2">
-                <span className={"status-pill " + (variants[data.status] || "neutral")}>
-                  {t(keys[data.status] || keys.draft)}
-                </span>
+                <StatusBadge value={data.status} options={contractStatusItems} />
                 <button
                   type="button"
                   onClick={() => setPdfOpen(true)}
@@ -217,10 +200,7 @@ export default function ContractDetailPage({ params }) {
                     label={t("status")}
                     value={form.status}
                     onChange={(status) => setDraft({ ...form, status })}
-                    options={contractStatusOptions.map((s) => ({
-                      value: s,
-                      label: t(keys[s]),
-                    }))}
+                    options={contractStatusItems}
                   />
                 </div>
               </div>

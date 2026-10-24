@@ -7,7 +7,7 @@ import { Spinner } from "@/components/ui/Spinner";
 import { DataTable, SummaryCard } from "@/components/ui/DataTable";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
-import { UnitStatusBadge } from "@/components/property/parts";
+import { StatusBadge } from "@/components/ui/StatusBadge";
 import { useDraftFilters } from "@/hooks/useDraftFilters";
 import { useApiRequest } from "@/hooks/useApiRequest";
 import { useDropdown } from "@/hooks/useDropdown";
@@ -15,13 +15,12 @@ import { useLocale } from "@/i18n";
 import { request } from "@/services/request";
 import { fdl } from "@/utils/date";
 
-const BEDROOM_OPTIONS = [1, 2, 3, 4, 5];
 
 export default function FloorDetailPage({ params }) {
   const { id, blockId, floorId } = use(params);
   const { t, locale } = useLocale();
   const { data: floor, loading, error } = useApiRequest(`/property/floor/${floorId}`);
-  const { labelOf, optionsOf } = useDropdown(["unit_status"]);
+  const { labelOf, optionsOf } = useDropdown(["unit_status", "bedroom_count"]);
   const { draft, setDraft, applied, apply, reset, clear } = useDraftFilters({
     status: "",
     keyword: "",
@@ -33,10 +32,7 @@ export default function FloorDetailPage({ params }) {
 
   const statusOptions = [{ value: "", label: t("all_statuses") }, ...optionsOf("unit_status")];
   const statusMap = Object.fromEntries(statusOptions.map((option) => [option.value, option]));
-  const bedroomOptions = [
-    { value: "", label: t("all_bedrooms") },
-    ...BEDROOM_OPTIONS.map((count) => ({ value: String(count), label: String(count) })),
-  ];
+  const bedroomOptions = [{ value: "", label: t("all_bedrooms") }, ...optionsOf("bedroom_count")];
   const bedroomLabel = Object.fromEntries(bedroomOptions.map((option) => [option.value, option.label]));
 
   if (error) {
@@ -194,7 +190,7 @@ export default function FloorDetailPage({ params }) {
                 <td>{unit.bedrooms}</td>
                 <td>{Number(unit.size_sqft).toLocaleString(locale)}</td>
                 <td>
-                  <UnitStatusBadge status={unit.status} label={labelOf("unit_status", unit.status)} />
+                  <StatusBadge value={unit.status} options={statusOptions} />
                 </td>
                 <td className="text-scene-content">{unit.tenant_name ?? "-"}</td>
                 <td>

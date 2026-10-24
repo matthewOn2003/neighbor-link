@@ -14,7 +14,8 @@ import { ConfirmDialog, useToast } from "@/components/ui";
 import { accountCreate, accountDelete } from "@/services/staff/account";
 import { fdl, fds } from "@/utils/date";
 import { fetchAllRows } from "@/utils/excel";
-import { RowActions, StatusPill, saveErrorMessage, useStatusOptions } from "@/components/staff/common";
+import { RowActions, saveErrorMessage, useStatusOptions } from "@/components/staff/common";
+import { StatusBadge } from "@/components/ui/StatusBadge";
 
 export default function UsersPage() {
   const { t } = useLocale();
@@ -242,7 +243,7 @@ export default function UsersPage() {
                 </td>
                 <td className="text-subtle">{fds(user.hire_date) || "-"}</td>
                 <td>
-                  <StatusPill status={user.status} />
+                  <StatusBadge value={user.status} options={statusOptions} />
                 </td>
                 <td>
                   <RowActions

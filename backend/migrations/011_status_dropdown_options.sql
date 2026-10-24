@@ -1,0 +1,23 @@
+-- Dropdown options that the admin UI used to hardcode. Values must match the backend enums.
+INSERT INTO options (slug, value, label, variant, sort_order) VALUES
+    ('bill_status', 'unpaid', 'Unpaid', 'neutral', 1),
+    ('bill_status', 'partial', 'Partially Paid', 'warning', 2),
+    ('bill_status', 'paid', 'Paid', 'success', 3),
+    ('bill_status', 'overdue', 'Overdue', 'danger', 4),
+    ('bill_status', 'void', 'Void', 'neutral', 5),
+    ('bill_status', 'pending_review', 'Pending Review', 'warning', 6),
+    ('bill_payment_method', 'bank_transfer', 'Bank Transfer', 'neutral', 1),
+    ('bill_payment_method', 'cash', 'Cash', 'neutral', 2),
+    ('bill_payment_method', 'online', 'Online', 'neutral', 3),
+    ('bill_payment_method', 'other', 'Other', 'neutral', 4),
+    ('contract_status', 'draft', 'Draft', 'neutral', 1),
+    ('contract_status', 'active', 'Active', 'success', 2),
+    ('contract_status', 'expired', 'Expired', 'warning', 3),
+    ('contract_status', 'terminated', 'Terminated', 'danger', 4),
+    ('staff_status', 'active', 'Active', 'success', 1),
+    ('staff_status', 'inactive', 'Inactive', 'neutral', 2),
+    ('bedroom_count', '1', '1', 'neutral', 1),
+    ('bedroom_count', '2', '2', 'neutral', 2),
+    ('bedroom_count', '3', '3', 'neutral', 3),
+    ('bedroom_count', '4', '4', 'neutral', 4),
+    ('bedroom_count', '5', '5', 'neutral', 5);

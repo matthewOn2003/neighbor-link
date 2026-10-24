@@ -2,25 +2,12 @@
 
 import { Link } from "@/i18n/navigation";
 import { Icon } from "@/components/ui/Icon";
+import { useDropdown } from "@/hooks/useDropdown";
 import { Spinner } from "@/components/ui/Spinner";
 import { useLocale } from "@/i18n";
 
 export function useStatusOptions() {
-  const { t } = useLocale();
-  return [
-    { value: "active", label: t("active") },
-    { value: "inactive", label: t("inactive") },
-  ];
-}
-
-export function StatusPill({ status }) {
-  const { t } = useLocale();
-  const active = status === "active";
-  return (
-    <span className={`status-pill ${active ? "success" : "neutral"}`}>
-      {t(active ? "active" : "inactive")}
-    </span>
-  );
+  return useDropdown(["staff_status"]).optionsOf("staff_status");
 }
 
 export function RowActions({ editHref, editLabel, onDelete }) {

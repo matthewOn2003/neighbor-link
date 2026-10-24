@@ -6,6 +6,8 @@ import { Icon } from "@/components/ui/Icon";
 import { DataTable } from "@/components/ui/DataTable";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
+import { StatusBadge } from "@/components/ui/StatusBadge";
+import { useDropdown } from "@/hooks/useDropdown";
 import { useDraftFilters } from "@/hooks/useDraftFilters";
 import { request } from "@/services/request";
 import { useLocale } from "@/i18n";
@@ -15,12 +17,6 @@ import { buildContractSummaryPdf, contractRef } from "@/utils/documents";
 import { formatMoney } from "@/utils/format";
 
 
-const statusKeys = {
-  draft: "contract_status_draft",
-  active: "contract_status_active",
-  expired: "contract_status_expired",
-  terminated: "contract_status_terminated",
-};
 
 async function buildContractPdf(contract) {
   const tenant = await request("/tenant/detail/" + contract.tenant_id).catch(() => null);
@@ -38,13 +34,9 @@ export default function ContractsPage() {
 
   const [pdfContract, setPdfContract] = useState(null);
 
-  const statusOptions = [
-    { value: "", label: t("all_contract_statuses") },
-    ...["draft", "active", "expired", "terminated"].map((value) => ({
-      value,
-      label: t(statusKeys[value]),
-    })),
-  ];
+  const { optionsOf, labelOf } = useDropdown(["contract_status"]);
+  const contractStatusItems = optionsOf("contract_status");
+  const statusOptions = [{ value: "", label: t("all_contract_statuses") }, ...contractStatusItems];
 
   const headerKeys = [
     "contract_number",
@@ -91,7 +83,7 @@ export default function ContractsPage() {
             {
               key: "status",
               label: t("status"),
-              display: (value) => t(statusKeys[value] ?? value),
+              display: (value) => labelOf("contract_status", value),
             },
           ]}
           onClearFilter={clear}
@@ -160,18 +152,7 @@ export default function ContractsPage() {
                   {formatMoney(contract.monthly_rent, locale)}
                 </td>
                 <td>
-                  <span
-                    className={
-                      "status-pill " +
-                      (contract.status === "active"
-                        ? "success"
-                        : contract.status === "expired"
-                          ? "warning"
-                          : "neutral")
-                    }
-                  >
-                    {t(statusKeys[contract.status] || statusKeys.draft)}
-                  </span>
+                  <StatusBadge value={contract.status} options={contractStatusItems} />
                 </td>
                 <td className="whitespace-nowrap">
                   <Link

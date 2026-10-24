@@ -8,6 +8,7 @@ import { Modal } from "@/components/ui/Modal";
 import { Spinner } from "@/components/ui/Spinner";
 import { useDraftFilters } from "@/hooks/useDraftFilters";
 import { useDropdown } from "@/hooks/useDropdown";
+import { StatusBadge } from "@/components/ui/StatusBadge";
 import { useApiRequest } from "@/hooks/useApiRequest";
 import { useLocale } from "@/i18n";
 import { request } from "@/services/request";
@@ -19,7 +20,7 @@ function reviewErrorMessage(err, t) {
   return err?.message || t("payment_proof_action_failed");
 }
 
-function ProofDetail({ row, status }) {
+function ProofDetail({ row, statusItems }) {
   const { t, locale } = useLocale();
   const items = [
     [t("tenant_name"), row.tenant_name],
@@ -28,7 +29,7 @@ function ProofDetail({ row, status }) {
     [t("payment_amount"), money(row.amount, locale)],
     [t("paid_at"), fdl(row.paid_at) || "-"],
     [t("payment_reference"), row.reference || "-"],
-    [t("status"), <span key="status" className={`status-pill ${status?.variant || "neutral"}`}>{status?.label ?? row.status}</span>],
+    [t("status"), <StatusBadge key="status" value={row.status} options={statusItems} />],
     [t("reviewed_at"), fdl(row.reviewed_at) || "-"],
     [t("reviewed_by"), row.reviewed_by || "-"],
   ];
@@ -190,7 +191,6 @@ function ProofReviewTab() {
         )}
         body={({ rows, reload }) =>
           rows.map((row) => {
-            const status = statusMap[row.status];
             return (
               <tr key={row.id} className="group">
                 <td className="font-semibold text-scene-content">{row.tenant_name}</td>
@@ -205,7 +205,7 @@ function ProofReviewTab() {
                 <td className="whitespace-nowrap text-subtle">{fdl(row.paid_at)}</td>
                 <td className="text-subtle">{row.reference || "-"}</td>
                 <td>
-                  <span className={`status-pill ${status?.variant || "neutral"}`}>{status?.label ?? row.status}</span>
+                  <StatusBadge value={row.status} options={statusItems} />
                 </td>
                 <td className="whitespace-nowrap text-subtle">{fdl(row.reviewed_at) || "-"}</td>
                 <td>
@@ -255,7 +255,7 @@ function ProofReviewTab() {
           </>
         )}
       >
-        {dialog?.mode === "view" ? <ProofDetail row={dialog.row} status={statusMap[dialog.row.status]} /> : null}
+        {dialog?.mode === "view" ? <ProofDetail row={dialog.row} statusItems={statusItems} /> : null}
       </Modal>
 
       <ConfirmDialog
