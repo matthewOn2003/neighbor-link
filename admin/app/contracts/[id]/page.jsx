@@ -6,7 +6,7 @@ import { useApiRequest } from "@/hooks/useApiRequest";
 import { request } from "@/services/request";
 import { useLocale } from "@/i18n";
 import { Spinner } from "@/components/ui/Spinner";
-import { Input, useToast } from "@/components/ui";
+import { Input, Textarea, useToast } from "@/components/ui";
 import { Icon } from "@/components/ui/Icon";
 import { PdfPreviewModal } from "@/components/ui/PdfPreviewModal";
 import { buildContractSummaryPdf, contractRef } from "@/utils/documents";
@@ -115,7 +115,6 @@ export default function ContractDetailPage({ params }) {
 
   const field = "field";
   const label = "field-label";
-  const input = "input";
 
   const fields = [
     ["start_date", "contract_start", "date"],
@@ -226,18 +225,13 @@ export default function ContractDetailPage({ params }) {
                 </div>
               </div>
 
-              <div className={field}>
-                <label className={label} htmlFor="notes">
-                  {t("notes")}
-                </label>
-                <textarea
-                  id="notes"
-                  rows={4}
-                  className={input + " w-full"}
-                  value={form.notes}
-                  onChange={(e) => setDraft({ ...form, notes: e.target.value })}
-                />
-              </div>
+              <Textarea
+                name="notes"
+                label={t("notes")}
+                rows={4}
+                value={form.notes}
+                onChange={(v) => setDraft({ ...form, notes: v })}
+              />
             </section>
 
             <div className="flex flex-wrap justify-end gap-3 border-t border-scene pt-5">
