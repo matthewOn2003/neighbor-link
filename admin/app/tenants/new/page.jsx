@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { Link, useRouter } from "@/i18n/navigation";
-import { useApiRequest, request } from "@/hooks/useApiRequest";
+import { useApiRequest } from "@/hooks/useApiRequest";
+import { request } from "@/utils/request";
 import { useDropdown } from "@/hooks/useDropdown";
 import { useLocale } from "@/i18n";
 import { FormPage, FormSection, Select, Input, CopyableField, useToast, Spinner } from "@/components/ui";
@@ -33,7 +34,7 @@ export default function NewTenantPage() {
     property_id: form.property_id,
     status: "vacant",
     per_page: 100,
-  });
+  }, { skip: !form.property_id });
   const { optionsOf } = useDropdown(["tenant_status"]);
 
   const properties = propertyData?.list ?? [];

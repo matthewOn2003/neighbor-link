@@ -5,7 +5,7 @@ import { ConfirmDialog, DataTable, Input, Select, Textarea, useToast, DatePicker
 import { useDraftFilters } from "@/hooks/useDraftFilters";
 import { useDropdown } from "@/hooks/useDropdown";
 import { useLocale } from "@/i18n";
-import { request } from "@/hooks/useApiRequest";
+import { request } from "@/utils/request";
 import { fdl } from "@/utils/date";
 import { labelFor, money, usePropertyOptions, useUnitOptions } from "@/components/payments/shared";
 import { apiErrorMessage } from "@/utils/errors";

@@ -19,7 +19,7 @@ export default function PropertyDetailPage({ params }) {
   const { labelOf } = useDropdown(["property_type"]);
 
   if (error) {
-    return <main className="p-4 md:p-8 text-error">{error}</main>;
+    return <main className="p-4 md:p-8 text-error">{error.message}</main>;
   }
   if (loading || !property) {
     return <main className="flex justify-center p-8 text-subtle"><Spinner size="lg" label={t("loading")} /></main>;

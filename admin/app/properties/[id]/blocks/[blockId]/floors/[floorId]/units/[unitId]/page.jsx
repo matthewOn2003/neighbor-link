@@ -4,7 +4,8 @@ import { use, useEffect, useState } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { EmptyState, FormPage, FormSection, Input, Select, useToast, Spinner } from "@/components/ui";
 import { useDropdown } from "@/hooks/useDropdown";
-import { useApiRequest, request } from "@/hooks/useApiRequest";
+import { useApiRequest } from "@/hooks/useApiRequest";
+import { request } from "@/utils/request";
 import { useLocale } from "@/i18n";
 import { apiErrorMessage } from "@/utils/errors";
 

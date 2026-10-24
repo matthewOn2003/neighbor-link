@@ -3,7 +3,8 @@
 import { use, useState } from "react";
 import { Input, Select, StatusBadge, useToast, Spinner, Icon, Modal, PdfPreviewModal } from "@/components/ui";
 import { Link } from "@/i18n/navigation";
-import { useApiRequest, request } from "@/hooks/useApiRequest";
+import { useApiRequest } from "@/hooks/useApiRequest";
+import { request } from "@/utils/request";
 import { useLocale } from "@/i18n";
 import { useDropdown } from "@/hooks/useDropdown";
 import { billRef, buildInvoicePdf } from "@/utils/documents";
@@ -49,7 +50,7 @@ export default function BillDetailPage({ params }) {
       <main className="p-4 md:p-8">
         <section className="panel">
           <p role="alert" className="text-error">
-            {error || t("bill_not_found")}
+            {error?.message || t("bill_not_found")}
           </p>
           <Link href="/bills" className="btn btn-outline mt-4">
             {t("back_to_bills")}

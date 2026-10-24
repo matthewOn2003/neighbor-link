@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { useLocale } from "@/i18n";
-import { useApiRequest, request } from "@/hooks/useApiRequest";
+import { useApiRequest } from "@/hooks/useApiRequest";
+import { request } from "@/utils/request";
 import { useDropdown } from "@/hooks/useDropdown";
 import { FormPage, FormSection, Input, Select, Textarea, useToast, Spinner } from "@/components/ui";
 import { useStatusOptions } from "./common";

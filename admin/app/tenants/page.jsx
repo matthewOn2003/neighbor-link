@@ -5,7 +5,7 @@ import { useDraftFilters } from "@/hooks/useDraftFilters";
 import { Icon, DataTable, SummaryCard, Input, DatePicker, Select, StatusBadge } from "@/components/ui";
 import { useDropdown } from "@/hooks/useDropdown";
 import { useLocale } from "@/i18n";
-import { request } from "@/hooks/useApiRequest";
+import { request } from "@/utils/request";
 import { fdl, formatMonth } from "@/utils/date";
 import { formatMoney } from "@/utils/format";
 import { indexBy } from "@/utils/collections";

@@ -6,7 +6,7 @@ import { useLocale } from "@/i18n";
 import { FormPage, FormSection, Input, Select, Textarea, useToast, Spinner } from "@/components/ui";
 import { useStatusOptions } from "./common";
 import { apiErrorMessage } from "@/utils/errors";
-import { request } from "@/hooks/useApiRequest";
+import { request } from "@/utils/request";
 
 const EMPTY_FORM = {
   name: "",

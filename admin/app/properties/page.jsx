@@ -77,7 +77,7 @@ export default function PropertiesPage() {
 
   const items = listData?.list ?? [];
   const isInitialLoading = loading && items.length === 0;
-  const message = error ? error : items.length === 0 ? t("no_properties_match_current_filters") : null;
+  const message = error ? error.message : items.length === 0 ? t("no_properties_match_current_filters") : null;
 
   const regionOptions = [
     { value: "", label: t("all_regions") },

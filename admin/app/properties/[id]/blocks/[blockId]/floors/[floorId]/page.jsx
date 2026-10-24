@@ -4,7 +4,8 @@ import { use } from "react";
 import { Link } from "@/i18n/navigation";
 import { Icon, Spinner, DataTable, SummaryCard, Input, Select, StatusBadge } from "@/components/ui";
 import { useDraftFilters } from "@/hooks/useDraftFilters";
-import { useApiRequest, request } from "@/hooks/useApiRequest";
+import { useApiRequest } from "@/hooks/useApiRequest";
+import { request } from "@/utils/request";
 import { useDropdown } from "@/hooks/useDropdown";
 import { useLocale } from "@/i18n";
 import { fdl } from "@/utils/date";
@@ -32,7 +33,7 @@ export default function FloorDetailPage({ params }) {
 
   if (error) {
 
-    return <main className="p-4 md:p-8 text-error">{error}</main>;
+    return <main className="p-4 md:p-8 text-error">{error.message}</main>;
   }
   if (loading || !floor) {
     return <main className="flex justify-center p-8 text-subtle"><Spinner size="lg" label={t("loading")} /></main>;

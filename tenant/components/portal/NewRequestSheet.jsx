@@ -5,7 +5,8 @@ import { useLocale } from "@/i18n";
 import { Icon } from "@/components/ui/Icon";
 import { useToast } from "@/components/ui/Toast";
 import { useDropdown } from "@/hooks/useDropdown";
-import { request, uploadFile } from "@/hooks/useApiRequest";
+import { request } from "@/utils/request";
+import { uploadFile } from "@/utils/uploadFile";
 import { Input, Select } from "@/components/ui";
 
 const MAX_PHOTOS = 5;

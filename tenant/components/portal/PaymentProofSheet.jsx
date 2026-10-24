@@ -5,7 +5,7 @@ import { useLocale } from "@/i18n";
 import { Icon } from "@/components/ui/Icon";
 import { useToast } from "@/components/ui/Toast";
 import { money } from "@/components/payments/shared";
-import { uploadFile } from "@/hooks/useApiRequest";
+import { uploadFile } from "@/utils/uploadFile";
 import { todayKL } from "./format";
 import { useTOr } from "./status";
 import { Field, GhostButton, PrimaryButton, Sheet, inputClass } from "./primitives";

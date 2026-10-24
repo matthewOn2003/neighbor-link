@@ -9,7 +9,7 @@ import { fdl } from "@/utils/date";
 import { RowActions, useStatusOptions } from "@/components/staff/common";
 import { apiErrorMessage } from "@/utils/errors";
 import { labelMap } from "@/utils/collections";
-import { request } from "@/hooks/useApiRequest";
+import { request } from "@/utils/request";
 
 export default function DepartmentsPage() {
   const { t } = useLocale();
