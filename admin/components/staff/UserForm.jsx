@@ -7,7 +7,6 @@ import { useApiRequest, request } from "@/hooks/useApiRequest";
 import { FormPage, FormSection, Input, Select, useToast, DatePicker, Spinner } from "@/components/ui";
 import { useStatusOptions } from "./common";
 import { apiErrorMessage } from "@/utils/errors";
-import { api } from "@/services/api";
 
 const EMPTY_FORM = {
   username: "",
@@ -26,7 +25,7 @@ export function UserForm({ record }) {
   const router = useRouter();
   const toast = useToast();
   const statusOptions = useStatusOptions();
-  const { data: positionData } = useApiRequest(api.staffPosition.list, { per_page: 100 });
+  const { data: positionData } = useApiRequest("/staff-position/list", { per_page: 100 });
   const positions = positionData?.list ?? [];
 
   const [form, setForm] = useState(() =>
@@ -67,9 +66,9 @@ export function UserForm({ record }) {
     setSubmitting(true);
     try {
       if (isEdit) {
-        await request(api.staffAccount.update, { id: record.id, ...body });
+        await request("/staff-account/update", { id: record.id, ...body });
       } else {
-        await request(api.staffAccount.create, body);
+        await request("/staff-account/create", body);
       }
       toast.success(t("record_saved"));
       router.push("/users");

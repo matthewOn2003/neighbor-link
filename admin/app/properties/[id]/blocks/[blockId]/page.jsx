@@ -6,13 +6,12 @@ import { Icon, Spinner } from "@/components/ui";
 import { OccupancyBar, StatBlock } from "@/components/property/parts";
 import { useApiRequest } from "@/hooks/useApiRequest";
 import { useLocale } from "@/i18n";
-import { api } from "@/services/api";
 
 export default function BlockDetailPage({ params }) {
   const { id, blockId } = use(params);
   const { t } = useLocale();
-  const { data: block, loading, error } = useApiRequest(api.property.blockDetail, { id: Number(blockId) });
-  const { data: floorData } = useApiRequest(api.property.floorList, {
+  const { data: block, loading, error } = useApiRequest("/property/block/detail", { id: Number(blockId) });
+  const { data: floorData } = useApiRequest("/property/floor/list", {
     block_id: blockId,
     per_page: 100,
   });

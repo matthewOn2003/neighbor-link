@@ -8,7 +8,6 @@ import { useLocale } from "@/i18n";
 import { formatMoney } from "@/utils/format";
 import { apiErrorMessage } from "@/utils/errors";
 import { currentMonth } from "@/utils/date";
-import { api } from "@/services/api";
 
 
 
@@ -22,7 +21,7 @@ export default function GenerateBillsPage() {
   async function generate() {
     setSubmitting(true);
     try {
-      const result = await request(api.bill.generate, { billing_period: period });
+      const result = await request("/bill/generate", { billing_period: period });
       const count = Number(result?.generated_count ?? 0);
       if (count > 0) {
         toast.success(t("bills_generated", { count }));
@@ -47,7 +46,7 @@ export default function GenerateBillsPage() {
     <main className="flex w-full flex-col">
       <div className="p-4 md:p-8 space-y-6">
         <DataTable
-          api={api.bill.activeContracts}
+          api={"/bill/active-contracts"}
           title={t("generate_monthly_bills")}
           description={t("generate_bills_description")}
           buttons={(

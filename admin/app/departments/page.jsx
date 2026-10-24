@@ -9,7 +9,6 @@ import { fdl } from "@/utils/date";
 import { RowActions, useStatusOptions } from "@/components/staff/common";
 import { apiErrorMessage } from "@/utils/errors";
 import { labelMap } from "@/utils/collections";
-import { api } from "@/services/api";
 import { request } from "@/hooks/useApiRequest";
 
 export default function DepartmentsPage() {
@@ -34,7 +33,7 @@ export default function DepartmentsPage() {
   async function confirmDelete() {
     setSubmitting(true);
     try {
-      await request(api.staffDepartment.delete, { id: pending.id });
+      await request("/staff-department/delete", { id: pending.id });
       toast.success(t("record_deleted"));
       pending.reload();
     } catch (err) {
@@ -49,7 +48,7 @@ export default function DepartmentsPage() {
     <main className="flex flex-col w-full">
       <div className="p-4 md:p-8 space-y-6">
         <DataTable
-          api={api.staffDepartment.list}
+          api={"/staff-department/list"}
           params={applied}
           filterValues={draft}
           filterBadges={[
@@ -89,7 +88,7 @@ export default function DepartmentsPage() {
               { key: "description", label: t("description"), sample: "" },
               { key: "status", label: t("status"), sample: "active" },
             ],
-            onRow: (values) => request(api.staffDepartment.create, { ...values, status: values.status || "active" }),
+            onRow: (values) => request("/staff-department/create", { ...values, status: values.status || "active" }),
           }}
           title={t("departments")}
           description={t("departments_description")}

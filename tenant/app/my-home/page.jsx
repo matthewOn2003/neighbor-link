@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { api } from "@/services/api";
 import Image from "next/image";
 import { useLocale } from "@/i18n";
 import { Icon } from "@/components/ui/Icon";
@@ -18,9 +17,9 @@ export default function MyHomePage() {
   const { t, locale } = useLocale();
   const toast = useToast();
   const optionLabel = useOptionLabel();
-  const me = useApiRequest(api.portal.me, {});
-  const wifi = useApiRequest(api.portal.wifi, {});
-  const announcements = useApiRequest(api.portal.announcementList, { current_page: 1, per_page: 3 });
+  const me = useApiRequest("/tenant-portal/me", {});
+  const wifi = useApiRequest("/tenant-portal/wifi", {});
+  const announcements = useApiRequest("/tenant-portal/announcement/list", { current_page: 1, per_page: 3 });
   const dict = useDropdown(["property_type"]);
   const [showQr, setShowQr] = useState(false);
 

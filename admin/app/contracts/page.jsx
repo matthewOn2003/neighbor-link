@@ -10,12 +10,11 @@ import { useLocale } from "@/i18n";
 import { buildContractSummaryPdf, contractRef } from "@/utils/documents";
 import { formatMoney } from "@/utils/format";
 import { apiErrorMessage } from "@/utils/errors";
-import { api } from "@/services/api";
 
 
 
 async function buildContractPdf(contract) {
-  const tenant = await request(api.tenant.detail, { id: contract.tenant_id }).catch(() => null);
+  const tenant = await request("/tenant/detail", { id: contract.tenant_id }).catch(() => null);
   return buildContractSummaryPdf(contract, tenant);
 }
 
@@ -46,7 +45,7 @@ export default function ContractsPage() {
 
   async function activate(contract, reload) {
     try {
-      await request(api.contract.update, {
+      await request("/contract/update", {
         id: contract.id,
         tenant_id: contract.tenant_id,
         start_date: contract.start_date,
@@ -74,7 +73,7 @@ export default function ContractsPage() {
     <main className="flex w-full flex-col">
       <div className="space-y-6 p-4 md:p-8">
         <DataTable
-          api={api.contract.list}
+          api={"/contract/list"}
           params={applied}
           filterValues={draft}
           filterBadges={[

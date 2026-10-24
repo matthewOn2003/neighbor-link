@@ -7,7 +7,6 @@ import { useDropdown } from "@/hooks/useDropdown";
 import { useApiRequest, request } from "@/hooks/useApiRequest";
 import { useLocale } from "@/i18n";
 import { apiErrorMessage } from "@/utils/errors";
-import { api } from "@/services/api";
 
 const EMPTY_FORM = { code: "", bedrooms: "", size_sqft: "", status: "vacant" };
 
@@ -16,7 +15,7 @@ export default function NewUnitPage({ params }) {
   const { t } = useLocale();
   const router = useRouter();
   const toast = useToast();
-  const { data: floor } = useApiRequest(api.property.floorDetail, { id: Number(floorId) });
+  const { data: floor } = useApiRequest("/property/floor/detail", { id: Number(floorId) });
   const { optionsOf } = useDropdown(["unit_status"]);
   const statusOptions = optionsOf("unit_status");
   const [form, setForm] = useState(EMPTY_FORM);
@@ -45,7 +44,7 @@ export default function NewUnitPage({ params }) {
 
     setSubmitting(true);
     try {
-      await request(api.property.unitCreate, {
+      await request("/property/unit/create", {
         block_id: Number(blockId),
         floor_id: Number(floorId),
         code: form.code.trim(),

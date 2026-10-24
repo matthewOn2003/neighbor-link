@@ -6,7 +6,6 @@ import { useApiRequest, request } from "@/hooks/useApiRequest";
 import { useDropdown } from "@/hooks/useDropdown";
 import { useLocale } from "@/i18n";
 import { FormPage, FormSection, Select, Textarea, Input, useToast, Spinner } from "@/components/ui";
-import { api } from "@/services/api";
 
 const EMPTY_FORM = {
   name: "",
@@ -31,7 +30,7 @@ export default function NewPropertyPage() {
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
 
-  const { data: facets } = useApiRequest(api.property.facets);
+  const { data: facets } = useApiRequest("/property/facets");
   const { optionsOf } = useDropdown(["property_type", "property_region"]);
   const developers = facets?.developers ?? [];
 
@@ -51,7 +50,7 @@ export default function NewPropertyPage() {
 
     setSubmitting(true);
     try {
-      const property = await request(api.property.create, {
+      const property = await request("/property/create", {
         name: form.name.trim(),
         developer_id: form.developer_id ? Number(form.developer_id) : null,
         property_type: form.property_type,

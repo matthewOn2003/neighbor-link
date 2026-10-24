@@ -9,13 +9,12 @@ import { useDropdown } from "@/hooks/useDropdown";
 import { useLocale } from "@/i18n";
 import { fdl } from "@/utils/date";
 import { indexBy, labelMap } from "@/utils/collections";
-import { api } from "@/services/api";
 
 
 export default function FloorDetailPage({ params }) {
   const { id, blockId, floorId } = use(params);
   const { t, locale } = useLocale();
-  const { data: floor, loading, error } = useApiRequest(api.property.floorDetail, { id: Number(floorId) });
+  const { data: floor, loading, error } = useApiRequest("/property/floor/detail", { id: Number(floorId) });
   const { labelOf, optionsOf } = useDropdown(["unit_status", "bedroom_count"]);
   const { draft, setDraft, applied, apply, reset, clear } = useDraftFilters({
     status: "",
@@ -55,7 +54,7 @@ export default function FloorDetailPage({ params }) {
         </nav>
 
         <DataTable
-          api={api.property.unitList}
+          api={"/property/unit/list"}
           params={{ ...applied, floor_id: floorId }}
           filterValues={draft}
           filterBadges={[
@@ -91,7 +90,7 @@ export default function FloorDetailPage({ params }) {
               { key: "status", label: t("status"), sample: "vacant" },
             ],
             onRow: (values) =>
-              request(api.property.unitCreate, {
+              request("/property/unit/create", {
                 block_id: Number(blockId),
                 floor_id: Number(floorId),
                 code: values.code,

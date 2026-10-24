@@ -9,10 +9,9 @@ import { buildContractSummaryPdf, contractRef } from "@/utils/documents";
 import { formatMoney } from "@/utils/format";
 import { useDropdown } from "@/hooks/useDropdown";
 import { apiErrorMessage } from "@/utils/errors";
-import { api } from "@/services/api";
 
 async function buildContractPdf(contract) {
-  const tenant = await request(api.tenant.detail, { id: contract.tenant_id }).catch(() => null);
+  const tenant = await request("/tenant/detail", { id: contract.tenant_id }).catch(() => null);
   return buildContractSummaryPdf(contract, tenant);
 }
 
@@ -24,7 +23,7 @@ export default function ContractDetailPage({ params }) {
   const { optionsOf } = useDropdown(["contract_status"]);
   const contractStatusItems = optionsOf("contract_status");
 
-  const { data, loading, error, reload } = useApiRequest(api.contract.detail, { id: Number(id) });
+  const { data, loading, error, reload } = useApiRequest("/contract/detail", { id: Number(id) });
 
   const [draft, setDraft] = useState(null);
   const [submitting, setSubmitting] = useState(false);
@@ -51,7 +50,7 @@ export default function ContractDetailPage({ params }) {
 
     setSubmitting(true);
     try {
-      await request(api.contract.update, {
+      await request("/contract/update", {
         id: Number(id),
         ...form,
         tenant_id: Number(form.tenant_id),

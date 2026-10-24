@@ -9,7 +9,6 @@ import { FormPage, FormSection, Input, Select, Textarea, useToast, Spinner } fro
 import { useStatusOptions } from "./common";
 import { PermissionTree, parsePermissionIds } from "./PermissionTree";
 import { apiErrorMessage } from "@/utils/errors";
-import { api } from "@/services/api";
 
 const EMPTY_FORM = {
   department_id: "",
@@ -27,7 +26,7 @@ export function PositionForm({ record }) {
   const router = useRouter();
   const toast = useToast();
   const statusOptions = useStatusOptions();
-  const { data: departmentData } = useApiRequest(api.staffDepartment.list, { per_page: 100 });
+  const { data: departmentData } = useApiRequest("/staff-department/list", { per_page: 100 });
   const departments = departmentData?.list ?? [];
   const { optionsOf } = useDropdown(["position_level", "employment_type"]);
 
@@ -73,9 +72,9 @@ export function PositionForm({ record }) {
     setSubmitting(true);
     try {
       if (isEdit) {
-        await request(api.staffPosition.update, { id: record.id, ...body });
+        await request("/staff-position/update", { id: record.id, ...body });
       } else {
-        await request(api.staffPosition.create, body);
+        await request("/staff-position/create", body);
       }
       toast.success(t("record_saved"));
       router.push("/positions");

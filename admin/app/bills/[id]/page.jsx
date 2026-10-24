@@ -10,7 +10,6 @@ import { billRef, buildInvoicePdf } from "@/utils/documents";
 import { formatMoney } from "@/utils/format";
 import { apiErrorMessage } from "@/utils/errors";
 import { todayISO } from "@/utils/date";
-import { api } from "@/services/api";
 
 
 export default function BillDetailPage({ params }) {
@@ -21,7 +20,7 @@ export default function BillDetailPage({ params }) {
   const methodOptions = optionsOf("bill_payment_method");
   const toast = useToast();
 
-  const { data, loading, error, reload } = useApiRequest(api.bill.detail, { id: Number(id) });
+  const { data, loading, error, reload } = useApiRequest("/bill/detail", { id: Number(id) });
 
   const [amount, setAmount] = useState("");
   const [method, setMethod] = useState("bank_transfer");
@@ -80,7 +79,7 @@ export default function BillDetailPage({ params }) {
     e.preventDefault();
     setUpdating(true);
     try {
-      await request(api.bill.update, {
+      await request("/bill/update", {
         id: Number(id),
         amount: Number(edit.amount),
         late_fee: Number(edit.late_fee || 0),
@@ -107,7 +106,7 @@ export default function BillDetailPage({ params }) {
     e.preventDefault();
     setAdding(true);
     try {
-      await request(api.bill.payment, {
+      await request("/bill/payment", {
         id: Number(id),
         amount: Number(amount),
         method,
@@ -135,7 +134,7 @@ export default function BillDetailPage({ params }) {
     if (!window.confirm(t("confirm_void_bill"))) return;
     setUpdating(true);
     try {
-      await request(api.bill.void, { id: Number(id) });
+      await request("/bill/void", { id: Number(id) });
       toast.success(t("bill_voided"));
       reload();
     } catch (err) {

@@ -9,7 +9,6 @@ import { request } from "@/hooks/useApiRequest";
 import { fdl, formatMonth } from "@/utils/date";
 import { formatMoney } from "@/utils/format";
 import { indexBy } from "@/utils/collections";
-import { api } from "@/services/api";
 
 const getInitials = (name = "") =>
   name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join("").toUpperCase();
@@ -40,7 +39,7 @@ export default function TenantsPage() {
     <main className="flex flex-col w-full">
       <div className="p-4 md:p-8 space-y-6">
         <DataTable
-          api={api.tenant.list}
+          api={"/tenant/list"}
           params={applied}
           filterValues={draft}
           filterBadges={[
@@ -79,7 +78,7 @@ export default function TenantsPage() {
               { key: "email", label: t("email"), sample: "john@example.com" },
               { key: "status", label: t("status"), sample: "active" },
             ],
-            onRow: (values) => request(api.tenant.create, { ...values, status: values.status || "active" }),
+            onRow: (values) => request("/tenant/create", { ...values, status: values.status || "active" }),
           }}
           title={t("tenants")}
           description={t("manage_tenants_description")}

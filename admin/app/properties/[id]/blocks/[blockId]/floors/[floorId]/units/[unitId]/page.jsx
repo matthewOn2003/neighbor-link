@@ -7,14 +7,13 @@ import { useDropdown } from "@/hooks/useDropdown";
 import { useApiRequest, request } from "@/hooks/useApiRequest";
 import { useLocale } from "@/i18n";
 import { apiErrorMessage } from "@/utils/errors";
-import { api } from "@/services/api";
 
 // There is no single-unit endpoint, so page through the floor's units until the id is found.
 async function findUnitOnFloor(floorId, unitId) {
   let page = 1;
   let lastPage = 1;
   do {
-    const res = await request(api.property.unitList, {
+    const res = await request("/property/unit/list", {
       floor_id: String(floorId),
       current_page: page,
       per_page: 100,
@@ -33,7 +32,7 @@ export default function EditUnitPage({ params }) {
   const [unit, setUnit] = useState(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
-  const { data: floor } = useApiRequest(api.property.floorDetail, { id: Number(floorId) });
+  const { data: floor } = useApiRequest("/property/floor/detail", { id: Number(floorId) });
   const floorHref = `/properties/${id}/blocks/${blockId}/floors/${floorId}`;
 
   useEffect(() => {
@@ -122,7 +121,7 @@ function EditUnitForm({ unit, floorHref, backLabel, unitId }) {
 
     setSubmitting(true);
     try {
-      await request(api.property.unitUpdate, {
+      await request("/property/unit/update", {
         id: Number(unitId),
         code: form.code.trim(),
         bedrooms: Number(form.bedrooms),

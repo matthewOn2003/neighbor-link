@@ -10,7 +10,6 @@ import { fdl } from "@/utils/date";
 import { labelFor, money, usePropertyOptions, useUnitOptions } from "@/components/payments/shared";
 import { apiErrorMessage } from "@/utils/errors";
 import { indexBy } from "@/utils/collections";
-import { api } from "@/services/api";
 
 function ProofDetail({ row, statusItems }) {
   const { t, locale } = useLocale();
@@ -83,7 +82,7 @@ function ProofReviewTab() {
     const current = dialog;
     setSubmitting(true);
     try {
-      await request(api.paymentProof[action], { id: current.row.id, ...body });
+      await request(`/payment-proof/${action}`, { id: current.row.id, ...body });
       toast.success(t(action === "approve" ? "payment_proof_approved" : "payment_proof_rejected"));
     } catch (err) {
       toast.error(
@@ -111,7 +110,7 @@ function ProofReviewTab() {
   return (
     <>
       <DataTable
-        api={api.paymentProof.list}
+        api={"/payment-proof/list"}
         params={applied}
         filterValues={draft}
         filterBadges={[

@@ -7,7 +7,6 @@ import { useLocale } from "@/i18n";
 import { useDropdown } from "@/hooks/useDropdown";
 import { formatMoney } from "@/utils/format";
 import { fdl } from "@/utils/date";
-import { api } from "@/services/api";
 
 const money = (value) => formatMoney(value, undefined, { fallback: "—" });
 
@@ -25,7 +24,7 @@ export default function TenantDetailPage({ params }) {
   const { optionsOf } = useDropdown(["tenant_status"]);
   const tenantStatusItems = optionsOf("tenant_status");
   const { id } = use(params);
-  const { data: tenant, loading, error } = useApiRequest(api.tenant.detail, { id: Number(id) });
+  const { data: tenant, loading, error } = useApiRequest("/tenant/detail", { id: Number(id) });
 
   if (loading) {
     return <main className="p-4 md:p-8"><div className="flex min-h-48 items-center justify-center"><Spinner size="lg" /></div></main>;

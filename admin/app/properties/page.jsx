@@ -10,7 +10,6 @@ import { useApiRequest } from "@/hooks/useApiRequest";
 import { useDropdown } from "@/hooks/useDropdown";
 import { useLocale } from "@/i18n";
 import { indexBy } from "@/utils/collections";
-import { api } from "@/services/api";
 
 const EMPTY_FILTERS = { property_type: "", region: "", developer_id: "" };
 
@@ -66,8 +65,8 @@ export default function PropertiesPage() {
   };
 
   const { labelOf, optionsOf } = useDropdown(["property_type", "property_region"]);
-  const { data: facets } = useApiRequest(api.property.facets);
-  const { data: listData, loading, error } = useApiRequest(api.property.list, { ...filters, keyword: debouncedKeyword, per_page: 100 });
+  const { data: facets } = useApiRequest("/property/facets");
+  const { data: listData, loading, error } = useApiRequest("/property/list", { ...filters, keyword: debouncedKeyword, per_page: 100 });
 
   const typeCounts = indexBy(facets?.types ?? [], undefined, (f) => f.count);
   const totalCount = (facets?.types ?? []).reduce((sum, f) => sum + f.count, 0);
