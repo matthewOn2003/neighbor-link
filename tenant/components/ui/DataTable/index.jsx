@@ -93,7 +93,7 @@ export function DataTable({
       </span>
     ) : status === "error" ? (
       <span className="inline-flex items-center gap-3 text-error">
-        {error}
+        {error.message}
         <button className="underline" type="button" onClick={reload}>{t("retry")}</button>
       </span>
     ) : (

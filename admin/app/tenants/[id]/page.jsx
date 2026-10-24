@@ -35,7 +35,7 @@ export default function TenantDetailPage({ params }) {
       <main className="p-4 md:p-8">
         <div role="alert" className="rounded-xl border border-error/30 bg-error/5 p-5">
           <h1 className="font-semibold text-scene-content">{t("tenant_unable_to_load")}</h1>
-          <p className="mt-1 text-sm text-subtle">{error || "Tenant not found."}</p>
+          <p className="mt-1 text-sm text-subtle">{error?.message || "Tenant not found."}</p>
         </div>
       </main>
     );

@@ -5,7 +5,8 @@ import { useRouter } from "@/i18n/navigation";
 import { useLocale } from "@/i18n";
 import { FormPage, FormSection, Input, Select, Textarea, useToast, Spinner } from "@/components/ui";
 import { useDropdown } from "@/hooks/useDropdown";
-import { useApiRequest, request } from "@/hooks/useApiRequest";
+import { useApiRequest } from "@/hooks/useApiRequest";
+import { request } from "@/utils/request";
 import { apiErrorMessage } from "@/utils/errors";
 
 export default function NewMaintenancePage() {
@@ -26,7 +27,7 @@ export default function NewMaintenancePage() {
     assignee: "",
   });
   // 单元只在选定物业后加载；维修单必须关联到单元，物业由单元推导
-  const { data: unitData } = useApiRequest("/property/unit/list", { property_id: form.property_id, per_page: 100 });
+  const { data: unitData } = useApiRequest("/property/unit/list", { property_id: form.property_id, per_page: 100 }, { skip: !form.property_id });
   const units = form.property_id ? (unitData?.list ?? []) : [];
   const propertyOptions = (propertyData?.list ?? []).map((property) => ({
     value: String(property.id),

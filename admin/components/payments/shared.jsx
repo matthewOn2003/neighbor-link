@@ -37,7 +37,7 @@ export function usePropertyOptions() {
 // 未选物业时不展示单元，选定物业后才列出该物业的单元
 export function useUnitOptions(propertyId) {
   const { t } = useLocale();
-  const { data } = useApiRequest("/property/unit/list", { property_id: propertyId, per_page: 100 });
+  const { data } = useApiRequest("/property/unit/list", { property_id: propertyId, per_page: 100 }, { skip: !propertyId });
   const units = propertyId ? (data?.list ?? []) : [];
   return [
     { value: "", label: t("all_units") },

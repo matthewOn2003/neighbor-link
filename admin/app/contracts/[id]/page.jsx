@@ -2,7 +2,8 @@
 
 import { use, useState } from "react";
 import { Link } from "@/i18n/navigation";
-import { useApiRequest, request } from "@/hooks/useApiRequest";
+import { useApiRequest } from "@/hooks/useApiRequest";
+import { request } from "@/utils/request";
 import { useLocale } from "@/i18n";
 import { Spinner, Input, Textarea, useToast, Icon, PdfPreviewModal, Select, StatusBadge } from "@/components/ui";
 import { buildContractSummaryPdf, contractRef } from "@/utils/documents";
@@ -88,7 +89,7 @@ export default function ContractDetailPage({ params }) {
       <main className="p-4 md:p-8">
         <section className="panel">
           <p role="alert" className="text-error">
-            {error || t("contract_not_found")}
+            {error?.message || t("contract_not_found")}
           </p>
           <Link href="/contracts" className="btn btn-outline mt-4">
             {t("back_to_contracts")}

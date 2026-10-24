@@ -5,7 +5,7 @@ import { Link } from "@/i18n/navigation";
 import { Icon, DataTable, Input, Select, StatusBadge, useToast, PdfPreviewModal } from "@/components/ui";
 import { useDropdown } from "@/hooks/useDropdown";
 import { useDraftFilters } from "@/hooks/useDraftFilters";
-import { request } from "@/hooks/useApiRequest";
+import { request } from "@/utils/request";
 import { useLocale } from "@/i18n";
 import { buildContractSummaryPdf, contractRef } from "@/utils/documents";
 import { formatMoney } from "@/utils/format";

@@ -18,7 +18,7 @@ export default function BlockDetailPage({ params }) {
   const floors = floorData?.list ?? [];
 
   if (error) {
-    return <main className="p-4 md:p-8 text-error">{error}</main>;
+    return <main className="p-4 md:p-8 text-error">{error.message}</main>;
   }
 
   if (loading || !block) {
