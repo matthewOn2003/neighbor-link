@@ -5,7 +5,7 @@ import { Link, useRouter } from "@/i18n/navigation";
 import { useApiRequest } from "@/hooks/useApiRequest";
 import { request } from "@/services/request";
 import { useLocale } from "@/i18n";
-import { Input, Select, useToast } from "@/components/ui";
+import { Input, Select, Textarea, useToast } from "@/components/ui";
 
 const termFields = [
   ["start_date", "date", true],
@@ -93,7 +93,6 @@ export default function NewContractPage() {
 
   const field = "field";
   const label = "field-label";
-  const input = "input";
   const tenantOptions = [
     { value: "", label: loading ? t("loading") : t("select_tenant") },
     ...tenants.map((x) => ({
@@ -176,19 +175,14 @@ export default function NewContractPage() {
             </div>
           </div>
 
-          <div className={field}>
-            <label className={label} htmlFor="notes">
-              {t("notes")}
-            </label>
-            <textarea
-              id="notes"
-              rows={4}
-              className={input + " w-full"}
-              value={f.notes}
-              onChange={(e) => set("notes", e.target.value)}
-              placeholder={t("contract_notes_placeholder")}
-            />
-          </div>
+          <Textarea
+            name="notes"
+            label={t("notes")}
+            rows={4}
+            value={f.notes}
+            onChange={(v) => set("notes", v)}
+            placeholder={t("contract_notes_placeholder")}
+          />
         </section>
 
         <div className="flex justify-end gap-3">

@@ -5,7 +5,7 @@ import { Link, useRouter } from "@/i18n/navigation";
 import { useApiRequest } from "@/hooks/useApiRequest";
 import { request } from "@/services/request";
 import { useLocale } from "@/i18n";
-import { Input, useToast } from "@/components/ui";
+import { Input, Textarea, useToast } from "@/components/ui";
 import { Select } from "@/components/ui";
 import { contractRef } from "@/utils/documents";
 
@@ -78,7 +78,6 @@ export default function NewBillPage() {
 
   const field = "field";
   const label = "field-label";
-  const input = "input";
 
   return (
     <main className="mx-auto flex w-full max-w-3xl flex-col gap-6 p-8">
@@ -148,18 +147,13 @@ export default function NewBillPage() {
           />
         </div>
 
-        <div className={field}>
-          <label htmlFor="notes" className={label}>
-            {t("notes")}
-          </label>
-          <textarea
-            id="notes"
-            rows={3}
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            className={input + " w-full"}
-          />
-        </div>
+        <Textarea
+          name="notes"
+          label={t("notes")}
+          rows={3}
+          value={notes}
+          onChange={setNotes}
+        />
 
         <div className="flex justify-end gap-3">
           <Link href="/bills" className="btn btn-outline">
