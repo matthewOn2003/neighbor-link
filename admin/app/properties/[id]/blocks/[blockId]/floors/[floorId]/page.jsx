@@ -4,7 +4,7 @@ import { use } from "react";
 import { Link } from "@/i18n/navigation";
 import { Icon, Spinner, DataTable, SummaryCard, Input, Select, StatusBadge } from "@/components/ui";
 import { useDraftFilters } from "@/hooks/useDraftFilters";
-import { useApiRequest } from "@/hooks/useApiRequest";
+import { useApiData } from "@/hooks/useApiData";
 import { request } from "@/utils/request";
 import { useDropdown } from "@/hooks/useDropdown";
 import { useLocale } from "@/i18n";
@@ -15,7 +15,7 @@ import { indexBy, labelMap } from "@/utils/collections";
 export default function FloorDetailPage({ params }) {
   const { id, blockId, floorId } = use(params);
   const { t, locale } = useLocale();
-  const { data: floor, loading, error } = useApiRequest("/property/floor/detail", { id: Number(floorId) });
+  const { data: floor, loading, error } = useApiData("/property/floor/detail", { id: Number(floorId) });
   const { labelOf, optionsOf } = useDropdown(["unit_status", "bedroom_count"]);
   const { draft, setDraft, applied, apply, reset, clear } = useDraftFilters({
     status: "",

@@ -11,7 +11,7 @@ const EMPTY = { key: null, data: null, error: null };
  * - skip 为 true 时不发请求，例如要等另一个接口的结果才知道参数。
  * - reload() 用同样的参数重新请求。
  */
-export function useApiRequest(path, params, { skip = false } = {}) {
+export function useApiData(path, params, { skip = false } = {}) {
   const paramsKey = JSON.stringify(params ?? {});
   const [reloadToken, setReloadToken] = useState(0);
   const requestKey = `${path}|${paramsKey}|${reloadToken}`;

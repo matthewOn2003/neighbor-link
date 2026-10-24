@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { Link, useRouter } from "@/i18n/navigation";
-import { useApiRequest } from "@/hooks/useApiRequest";
+import { useApiData } from "@/hooks/useApiData";
 import { request } from "@/utils/request";
 import { useLocale } from "@/i18n";
 import { Input, Textarea, useToast, Select } from "@/components/ui";
@@ -23,7 +23,7 @@ export default function NewBillPage() {
   const [notes, setNotes] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  const { data: contractsData, loading } = useApiRequest("/bill/active-contracts", {});
+  const { data: contractsData, loading } = useApiData("/bill/active-contracts", {});
   const contracts = Array.isArray(contractsData) ? contractsData : [];
   const selected = useMemo(
     () => contracts.find((c) => String(c.id) === contractID),

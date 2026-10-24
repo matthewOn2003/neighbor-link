@@ -2,7 +2,7 @@
 
 import { use, useState } from "react";
 import { Link } from "@/i18n/navigation";
-import { useApiRequest } from "@/hooks/useApiRequest";
+import { useApiData } from "@/hooks/useApiData";
 import { request } from "@/utils/request";
 import { useLocale } from "@/i18n";
 import { Spinner, Input, Textarea, useToast, Icon, PdfPreviewModal, Select, StatusBadge } from "@/components/ui";
@@ -24,7 +24,7 @@ export default function ContractDetailPage({ params }) {
   const { optionsOf } = useDropdown(["contract_status"]);
   const contractStatusItems = optionsOf("contract_status");
 
-  const { data, loading, error, reload } = useApiRequest("/contract/detail", { id: Number(id) });
+  const { data, loading, error, reload } = useApiData("/contract/detail", { id: Number(id) });
 
   const [draft, setDraft] = useState(null);
   const [submitting, setSubmitting] = useState(false);

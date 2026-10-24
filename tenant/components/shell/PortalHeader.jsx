@@ -4,7 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { useLocale } from "@/i18n";
 import { Icon } from "@/components/ui/Icon";
-import { useApiRequest } from "@/hooks/useApiRequest";
+import { useApiData } from "@/hooks/useApiData";
 import NotificationSheet from "@/components/portal/NotificationSheet";
 import AccountMenu from "@/components/shell/AccountMenu";
 
@@ -20,8 +20,8 @@ function initialsOf(name) {
 
 export default function PortalHeader() {
   const { t } = useLocale();
-  const { data } = useApiRequest("/tenant-portal/me", {});
-  const notices = useApiRequest("/tenant-portal/notification/list", { current_page: 1, per_page: 1 });
+  const { data } = useApiData("/tenant-portal/me", {});
+  const notices = useApiData("/tenant-portal/notification/list", { current_page: 1, per_page: 1 });
   const [open, setOpen] = useState(false);
   // The dot marks only notifications that need action; announcements stay quiet.
   const actionCount = notices.data?.summary?.action_count ?? 0;

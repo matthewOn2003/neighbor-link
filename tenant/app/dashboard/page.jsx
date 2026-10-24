@@ -4,7 +4,7 @@ import { Link } from "@/i18n/navigation";
 import { useEffect, useState } from "react";
 import { useLocale } from "@/i18n";
 import { Icon } from "@/components/ui/Icon";
-import { useApiRequest } from "@/hooks/useApiRequest";
+import { useApiData } from "@/hooks/useApiData";
 import { ordinal, wholeMoney } from "@/components/portal/format";
 import { BILL_LABEL_KEY, MAINTENANCE_ICON, REQUEST_STAGE, REQUEST_STAGE_TOTAL, useDictLabel } from "@/components/portal/status";
 import { EmptyState, GlassCard, IconTile, LoadingBlock, Pill, ProgressBar, Stagger } from "@/components/portal/primitives";
@@ -14,7 +14,7 @@ const ATTENTION_LIMIT = 2;
 
 export default function DashboardPage() {
   const { t, locale } = useLocale();
-  const { data, loading } = useApiRequest("/tenant-portal/home", {});
+  const { data, loading } = useApiData("/tenant-portal/home", {});
   const dictLabel = useDictLabel(["maintenance_category"]);
 
   if (loading && !data) return <LoadingBlock rows={3} />;

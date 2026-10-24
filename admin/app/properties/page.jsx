@@ -6,7 +6,7 @@ import { Icon, Spinner, Select } from "@/components/ui";
 import { OccupancyBar, PropertyCover, StatBlock } from "@/components/property/parts";
 import { useDragScroll } from "@/hooks/useDragScroll";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
-import { useApiRequest } from "@/hooks/useApiRequest";
+import { useApiData } from "@/hooks/useApiData";
 import { useDropdown } from "@/hooks/useDropdown";
 import { useLocale } from "@/i18n";
 import { indexBy } from "@/utils/collections";
@@ -65,8 +65,8 @@ export default function PropertiesPage() {
   };
 
   const { labelOf, optionsOf } = useDropdown(["property_type", "property_region"]);
-  const { data: facets } = useApiRequest("/property/facets");
-  const { data: listData, loading, error } = useApiRequest("/property/list", { ...filters, keyword: debouncedKeyword, per_page: 100 });
+  const { data: facets } = useApiData("/property/facets");
+  const { data: listData, loading, error } = useApiData("/property/list", { ...filters, keyword: debouncedKeyword, per_page: 100 });
 
   const typeCounts = indexBy(facets?.types ?? [], undefined, (f) => f.count);
   const totalCount = (facets?.types ?? []).reduce((sum, f) => sum + f.count, 0);

@@ -3,7 +3,7 @@
 import { use, useState } from "react";
 import { Input, Select, StatusBadge, useToast, Spinner, Icon, Modal, PdfPreviewModal } from "@/components/ui";
 import { Link } from "@/i18n/navigation";
-import { useApiRequest } from "@/hooks/useApiRequest";
+import { useApiData } from "@/hooks/useApiData";
 import { request } from "@/utils/request";
 import { useLocale } from "@/i18n";
 import { useDropdown } from "@/hooks/useDropdown";
@@ -21,7 +21,7 @@ export default function BillDetailPage({ params }) {
   const methodOptions = optionsOf("bill_payment_method");
   const toast = useToast();
 
-  const { data, loading, error, reload } = useApiRequest("/bill/detail", { id: Number(id) });
+  const { data, loading, error, reload } = useApiData("/bill/detail", { id: Number(id) });
 
   const [amount, setAmount] = useState("");
   const [method, setMethod] = useState("bank_transfer");
