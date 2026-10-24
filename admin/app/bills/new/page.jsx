@@ -8,6 +8,7 @@ import { useLocale } from "@/i18n";
 import { Input, Textarea, useToast } from "@/components/ui";
 import { Select } from "@/components/ui";
 import { contractRef } from "@/utils/documents";
+import { apiErrorMessage } from "@/utils/errors";
 
 export default function NewBillPage() {
   const { t } = useLocale();
@@ -20,7 +21,7 @@ export default function NewBillPage() {
   const [dueDate, setDueDate] = useState(today);
   const [lateFee, setLateFee] = useState("0");
   const [notes, setNotes] = useState("");
-  const [saving, setSaving] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const { data: contractsData, loading } = useApiRequest("/bill/active-contracts", {});
   const contracts = Array.isArray(contractsData) ? contractsData : [];
@@ -57,7 +58,7 @@ export default function NewBillPage() {
     e.preventDefault();
     if (!selected) return;
 
-    setSaving(true);
+    setSubmitting(true);
     try {
       const b = await request("/bill/create", {
         contract_id: Number(contractID),
@@ -70,9 +71,15 @@ export default function NewBillPage() {
       toast.success(t("bill_created"));
       router.push("/bills/" + b.id);
     } catch (e) {
-      toast.error(e.code === "BILL_EXISTS" ? t("bill_exists") : t("bill_create_failed"));
+      toast.error(
+        apiErrorMessage(e, t, {
+          fallbackKey: "bill_create_failed",
+          codes: { BILL_EXISTS: "bill_exists" },
+          serverMessage: false,
+        })
+      );
     } finally {
-      setSaving(false);
+      setSubmitting(false);
     }
   }
 
@@ -159,8 +166,8 @@ export default function NewBillPage() {
           <Link href="/bills" className="btn btn-outline">
             {t("cancel")}
           </Link>
-          <button type="submit" disabled={saving || !selected} className="btn btn-primary">
-            {saving ? t("saving") : t("create_bill")}
+          <button type="submit" disabled={submitting || !selected} className="btn btn-primary">
+            {submitting ? t("saving") : t("create_bill")}
           </button>
         </div>
       </form>

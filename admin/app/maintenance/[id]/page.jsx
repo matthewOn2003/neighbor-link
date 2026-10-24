@@ -11,6 +11,7 @@ import { useApiRequest } from "@/hooks/useApiRequest";
 import { request } from "@/services/request";
 import { fdl } from "@/utils/date";
 import { StatusBadge } from "@/components/ui/StatusBadge";
+import { apiErrorMessage } from "@/utils/errors";
 
 export default function MaintenanceDetailPage({ params }) {
   const { id } = use(params);
@@ -48,7 +49,7 @@ function MaintenanceDetailForm({ record, reload }) {
     resolution_notes: record.resolution_notes ?? "",
   }));
   const [errors, setErrors] = useState({});
-  const [saving, setSaving] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   function updateField(key, value) {
     setForm((current) => ({ ...current, [key]: value }));
@@ -67,7 +68,7 @@ function MaintenanceDetailForm({ record, reload }) {
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) return;
 
-    setSaving(true);
+    setSubmitting(true);
     try {
       await request(`/maintenance/update/${record.id}`, {
         title: form.title.trim(),
@@ -81,9 +82,9 @@ function MaintenanceDetailForm({ record, reload }) {
       toast.success(t("record_saved"));
       reload();
     } catch (err) {
-      toast.error(err?.message || t("save_failed"));
+      toast.error(apiErrorMessage(err, t, { fallbackKey: "save_failed" }));
     } finally {
-      setSaving(false);
+      setSubmitting(false);
     }
   }
 
@@ -120,8 +121,8 @@ function MaintenanceDetailForm({ record, reload }) {
           <Link className="btn btn-outline" href="/maintenance">
             {t("back_to_maintenance")}
           </Link>
-          <button type="submit" className="btn btn-primary" disabled={saving}>
-            {saving ? (
+          <button type="submit" className="btn btn-primary" disabled={submitting}>
+            {submitting ? (
               <>
                 <Spinner size="sm" label={t("saving")} /> {t("saving")}
               </>

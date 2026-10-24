@@ -15,6 +15,7 @@ import { Modal } from "@/components/ui/Modal";
 import { PdfPreviewModal } from "@/components/ui/PdfPreviewModal";
 import { billRef, buildInvoicePdf } from "@/utils/documents";
 import { formatMoney } from "@/utils/format";
+import { apiErrorMessage } from "@/utils/errors";
 
 
 export default function BillDetailPage({ params }) {
@@ -31,10 +32,10 @@ export default function BillDetailPage({ params }) {
   const [method, setMethod] = useState("bank_transfer");
   const [reference, setReference] = useState("");
   const [paidAt, setPaidAt] = useState(new Date().toISOString().slice(0, 10));
-  const [saving, setSaving] = useState(false);
+  const [adding, setAdding] = useState(false);
 
   const [editOpen, setEditOpen] = useState(false);
-  const [editSaving, setEditSaving] = useState(false);
+  const [updating, setUpdating] = useState(false);
   const [edit, setEdit] = useState({ amount: "", late_fee: "", due_date: "", notes: "" });
 
   const [pdfOpen, setPdfOpen] = useState(false);
@@ -82,7 +83,7 @@ export default function BillDetailPage({ params }) {
 
   async function saveEdit(e) {
     e.preventDefault();
-    setEditSaving(true);
+    setUpdating(true);
     try {
       await request("/bill/update/" + id, {
         amount: Number(edit.amount),
@@ -95,20 +96,20 @@ export default function BillDetailPage({ params }) {
       reload();
     } catch (err) {
       toast.error(
-        err?.code === "INVALID_STATE"
-          ? t("bill_not_editable")
-          : err?.code === "INVALID_BILL"
-            ? t("invalid_bill")
-            : t("bill_update_failed")
+        apiErrorMessage(err, t, {
+          fallbackKey: "bill_update_failed",
+          codes: { INVALID_STATE: "bill_not_editable", INVALID_BILL: "invalid_bill" },
+          serverMessage: false,
+        })
       );
     } finally {
-      setEditSaving(false);
+      setUpdating(false);
     }
   }
 
   async function pay(e) {
     e.preventDefault();
-    setSaving(true);
+    setAdding(true);
     try {
       await request("/bill/payment/" + id, {
         amount: Number(amount),
@@ -121,23 +122,29 @@ export default function BillDetailPage({ params }) {
       setReference("");
       reload();
     } catch (e) {
-      toast.error(e.code === "INVALID_PAYMENT" ? t("invalid_payment") : t("payment_failed"));
+      toast.error(
+        apiErrorMessage(e, t, {
+          fallbackKey: "payment_failed",
+          codes: { INVALID_PAYMENT: "invalid_payment" },
+          serverMessage: false,
+        })
+      );
     } finally {
-      setSaving(false);
+      setAdding(false);
     }
   }
 
   async function voidBill() {
     if (!window.confirm(t("confirm_void_bill"))) return;
-    setSaving(true);
+    setUpdating(true);
     try {
       await request("/bill/void/" + id, {});
       toast.success(t("bill_voided"));
       reload();
-    } catch {
-      toast.error(t("bill_cannot_void"));
+    } catch (err) {
+      toast.error(apiErrorMessage(err, t, { fallbackKey: "bill_cannot_void", serverMessage: false }));
     } finally {
-      setSaving(false);
+      setUpdating(false);
     }
   }
 
@@ -323,7 +330,7 @@ export default function BillDetailPage({ params }) {
               <div className="flex flex-wrap justify-end gap-3 border-t border-scene pt-5">
                 <button
                   type="button"
-                  disabled={saving || Number(data.amount_paid) > 0}
+                  disabled={adding || Number(data.amount_paid) > 0}
                   onClick={voidBill}
                   className="btn btn-outline disabled:opacity-40"
                 >
@@ -331,10 +338,10 @@ export default function BillDetailPage({ params }) {
                 </button>
                 <button
                   type="submit"
-                  disabled={saving || outstanding <= 0}
+                  disabled={adding || outstanding <= 0}
                   className="btn btn-primary disabled:opacity-40"
                 >
-                  {saving ? t("saving") : t("record_payment")}
+                  {adding ? t("saving") : t("record_payment")}
                 </button>
               </div>
             </form>
@@ -359,7 +366,7 @@ export default function BillDetailPage({ params }) {
               type="button"
               className="btn btn-outline"
               onClick={() => setEditOpen(false)}
-              disabled={editSaving}
+              disabled={updating}
             >
               {t("cancel")}
             </button>
@@ -367,9 +374,9 @@ export default function BillDetailPage({ params }) {
               type="submit"
               form="bill-edit-form"
               className="btn btn-primary"
-              disabled={editSaving}
+              disabled={updating}
             >
-              {editSaving ? t("saving") : t("save_changes")}
+              {updating ? t("saving") : t("save_changes")}
             </button>
           </>
         }

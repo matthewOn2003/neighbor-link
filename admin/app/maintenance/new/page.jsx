@@ -8,6 +8,7 @@ import { Spinner } from "@/components/ui/Spinner";
 import { useDropdown } from "@/hooks/useDropdown";
 import { useApiRequest } from "@/hooks/useApiRequest";
 import { request } from "@/services/request";
+import { apiErrorMessage } from "@/utils/errors";
 
 export default function NewMaintenancePage() {
   const { t } = useLocale();
@@ -35,7 +36,7 @@ export default function NewMaintenancePage() {
   }));
   const unitOptions = units.map((unit) => ({ value: String(unit.id), label: unit.code }));
   const [errors, setErrors] = useState({});
-  const [saving, setSaving] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   function updateField(key, value) {
     setForm((current) => ({ ...current, [key]: value }));
@@ -56,7 +57,7 @@ export default function NewMaintenancePage() {
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) return;
 
-    setSaving(true);
+    setSubmitting(true);
     try {
       const created = await request("/maintenance/create", {
         title: form.title.trim(),
@@ -69,8 +70,8 @@ export default function NewMaintenancePage() {
       toast.success(t("record_saved"));
       router.push(created?.id ? `/maintenance/${created.id}` : "/maintenance");
     } catch (err) {
-      toast.error(err?.message || t("save_failed"));
-      setSaving(false);
+      toast.error(apiErrorMessage(err, t, { fallbackKey: "save_failed" }));
+      setSubmitting(false);
     }
   }
 
@@ -84,11 +85,11 @@ export default function NewMaintenancePage() {
       size="md"
       actions={(
         <div className="flex gap-3">
-          <button type="button" className="btn btn-outline" onClick={() => router.push("/maintenance")} disabled={saving}>
+          <button type="button" className="btn btn-outline" onClick={() => router.push("/maintenance")} disabled={submitting}>
             {t("cancel")}
           </button>
-          <button type="submit" className="btn btn-primary" disabled={saving}>
-            {saving ? <><Spinner size="sm" label={t("saving")} /> {t("saving")}</> : t("submit_request")}
+          <button type="submit" className="btn btn-primary" disabled={submitting}>
+            {submitting ? <><Spinner size="sm" label={t("saving")} /> {t("saving")}</> : t("submit_request")}
           </button>
         </div>
       )}

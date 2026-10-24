@@ -12,8 +12,9 @@ import { DatePicker } from "@/components/ui/DatePicker";
 import { ConfirmDialog, useToast } from "@/components/ui";
 import { departmentCreate, departmentDelete } from "@/services/staff/department";
 import { fdl } from "@/utils/date";
-import { RowActions, saveErrorMessage, useStatusOptions } from "@/components/staff/common";
+import { RowActions, useStatusOptions } from "@/components/staff/common";
 import { StatusBadge } from "@/components/ui/StatusBadge";
+import { apiErrorMessage } from "@/utils/errors";
 
 export default function DepartmentsPage() {
   const { t } = useLocale();
@@ -29,21 +30,21 @@ export default function DepartmentsPage() {
     created_to: "",
   });
   const [pending, setPending] = useState(null);
-  const [deleting, setDeleting] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const filterStatusOptions = [{ value: "", label: t("all_statuses") }, ...statusOptions];
   const statusLabel = Object.fromEntries(statusOptions.map((option) => [option.value, option.label]));
 
   async function confirmDelete() {
-    setDeleting(true);
+    setSubmitting(true);
     try {
       await departmentDelete(pending.id);
       toast.success(t("record_deleted"));
       pending.reload();
     } catch (err) {
-      toast.error(saveErrorMessage(err, t, "delete_failed"));
+      toast.error(apiErrorMessage(err, t, { fallbackKey: "delete_failed" }));
     } finally {
-      setDeleting(false);
+      setSubmitting(false);
       setPending(null);
     }
   }
@@ -223,7 +224,7 @@ export default function DepartmentsPage() {
         title={t("delete")}
         message={t("confirm_delete")}
         danger
-        loading={deleting}
+        loading={submitting}
         onConfirm={confirmDelete}
         onCancel={() => setPending(null)}
       />

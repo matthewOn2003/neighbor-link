@@ -14,6 +14,7 @@ import { formatMoney } from "@/utils/format";
 import { Select } from "@/components/ui";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { useDropdown } from "@/hooks/useDropdown";
+import { apiErrorMessage } from "@/utils/errors";
 
 async function buildContractPdf(contract) {
   const tenant = await request("/tenant/detail/" + contract.tenant_id).catch(() => null);
@@ -31,7 +32,7 @@ export default function ContractDetailPage({ params }) {
   const { data, loading, error, reload } = useApiRequest("/contract/detail/" + id);
 
   const [draft, setDraft] = useState(null);
-  const [saving, setSaving] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [pdfOpen, setPdfOpen] = useState(false);
 
   const form =
@@ -53,7 +54,7 @@ export default function ContractDetailPage({ params }) {
     e.preventDefault();
     if (!form) return;
 
-    setSaving(true);
+    setSubmitting(true);
     try {
       await request("/contract/update/" + id, {
         ...form,
@@ -66,10 +67,14 @@ export default function ContractDetailPage({ params }) {
       reload();
     } catch (e) {
       toast.error(
-        e.code === "ACTIVE_CONTRACT_EXISTS" ? t("contract_active_exists") : t("contract_save_failed")
+        apiErrorMessage(e, t, {
+          fallbackKey: "contract_save_failed",
+          codes: { ACTIVE_CONTRACT_EXISTS: "contract_active_exists" },
+          serverMessage: false,
+        })
       );
     } finally {
-      setSaving(false);
+      setSubmitting(false);
     }
   }
 
@@ -218,8 +223,8 @@ export default function ContractDetailPage({ params }) {
               <Link href="/contracts" className="btn btn-outline">
                 {t("cancel")}
               </Link>
-              <button type="submit" disabled={saving} className="btn btn-primary disabled:opacity-50">
-                {saving ? t("saving") : t("save_changes")}
+              <button type="submit" disabled={submitting} className="btn btn-primary disabled:opacity-50">
+                {submitting ? t("saving") : t("save_changes")}
               </button>
             </div>
           </form>

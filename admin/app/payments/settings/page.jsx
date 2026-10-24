@@ -8,6 +8,7 @@ import { useApiRequest } from "@/hooks/useApiRequest";
 import { Link } from "@/i18n/navigation";
 import { useLocale } from "@/i18n";
 import { request } from "@/services/request";
+import { apiErrorMessage } from "@/utils/errors";
 
 const isDay = (value) => Number.isInteger(value) && value >= 1 && value <= 28;
 
@@ -22,7 +23,7 @@ function BillingSettingsForm({ initial, onSaved }) {
     bank_account_holder: initial.bank_account_holder ?? "",
   }));
   const [errors, setErrors] = useState({});
-  const [saving, setSaving] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   function updateField(key, value) {
     setForm((current) => ({ ...current, [key]: value }));
@@ -43,7 +44,7 @@ function BillingSettingsForm({ initial, onSaved }) {
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) return;
 
-    setSaving(true);
+    setSubmitting(true);
     try {
       await request("/billing-settings/update", {
         due_day: dueDay,
@@ -55,9 +56,9 @@ function BillingSettingsForm({ initial, onSaved }) {
       toast.success(t("billing_settings_saved"));
       onSaved();
     } catch (err) {
-      toast.error(err?.message || t("save_failed"));
+      toast.error(apiErrorMessage(err, t, { fallbackKey: "save_failed" }));
     } finally {
-      setSaving(false);
+      setSubmitting(false);
     }
   }
 
@@ -91,8 +92,8 @@ function BillingSettingsForm({ initial, onSaved }) {
       </FormSection>
 
       <div className="flex justify-end">
-        <button type="submit" className="btn btn-primary" disabled={saving}>
-          {saving ? <><Spinner size="sm" label={t("saving")} /> {t("saving")}</> : t("save_changes")}
+        <button type="submit" className="btn btn-primary" disabled={submitting}>
+          {submitting ? <><Spinner size="sm" label={t("saving")} /> {t("saving")}</> : t("save_changes")}
         </button>
       </div>
     </form>

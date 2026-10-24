@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import { useList } from "@/hooks/useList";
@@ -8,6 +8,7 @@ import { Icon } from "../Icon";
 import { Spinner } from "../Spinner";
 import { FilterSection } from "./FilterSection";
 import { ImportModal } from "./ImportModal";
+import { apiErrorMessage } from "@/utils/errors";
 
 export { SummaryCard } from "./SummaryCard";
 export { FilterSection } from "./FilterSection";
@@ -105,7 +106,7 @@ export function DataTable({
       const all = await fetchAllRows(api, params ?? {});
       downloadRowsAsXlsx(exportConfig.filename, exportConfig.columns, all);
     } catch (err) {
-      window.alert(err?.message || t("export_failed"));
+      window.alert(apiErrorMessage(err, t, { fallbackKey: "export_failed" }));
     } finally {
       setExporting(false);
     }

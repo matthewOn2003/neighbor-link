@@ -8,14 +8,7 @@ import { useDropdown } from "@/hooks/useDropdown";
 import { useApiRequest } from "@/hooks/useApiRequest";
 import { useLocale } from "@/i18n";
 import { request } from "@/services/request";
-
-function unitErrorMessage(err, t) {
-  if (err?.code === "CODE_EXISTS") return t("unit_code_exists");
-  if (err?.code === "INVALID_STATE") return t("unit_vacant_blocked");
-  if (err?.code === "INVALID_STATUS") return t("invalid_unit_status");
-  if (err?.code === "NOT_FOUND") return t("unit_not_found");
-  return t("unit_save_failed");
-}
+import { apiErrorMessage } from "@/utils/errors";
 
 // There is no single-unit endpoint, so page through the floor's units until the id is found.
 async function findUnitOnFloor(floorId, unitId) {
@@ -109,7 +102,7 @@ function EditUnitForm({ unit, floorHref, backLabel, unitId }) {
     status: unit.status ?? "vacant",
   });
   const [errors, setErrors] = useState({});
-  const [saving, setSaving] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   function updateField(key, value) {
     setForm((current) => ({ ...current, [key]: value }));
@@ -130,7 +123,7 @@ function EditUnitForm({ unit, floorHref, backLabel, unitId }) {
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) return;
 
-    setSaving(true);
+    setSubmitting(true);
     try {
       await request("/property/unit/update/" + unitId, {
         code: form.code.trim(),
@@ -141,9 +134,20 @@ function EditUnitForm({ unit, floorHref, backLabel, unitId }) {
       toast.success(t("record_saved"));
       router.push(floorHref);
     } catch (err) {
-      toast.error(unitErrorMessage(err, t));
+      toast.error(
+        apiErrorMessage(err, t, {
+          fallbackKey: "unit_save_failed",
+          codes: {
+            CODE_EXISTS: "unit_code_exists",
+            INVALID_STATE: "unit_vacant_blocked",
+            INVALID_STATUS: "invalid_unit_status",
+            NOT_FOUND: "unit_not_found",
+          },
+          serverMessage: false,
+        })
+      );
     } finally {
-      setSaving(false);
+      setSubmitting(false);
     }
   }
 
@@ -161,12 +165,12 @@ function EditUnitForm({ unit, floorHref, backLabel, unitId }) {
             type="button"
             className="btn btn-outline"
             onClick={() => router.push(floorHref)}
-            disabled={saving}
+            disabled={submitting}
           >
             {t("cancel")}
           </button>
-          <button type="submit" className="btn btn-primary" disabled={saving}>
-            {saving ? (
+          <button type="submit" className="btn btn-primary" disabled={submitting}>
+            {submitting ? (
               <>
                 <Spinner size="sm" label={t("saving")} /> {t("saving")}
               </>

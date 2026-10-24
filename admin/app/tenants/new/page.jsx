@@ -8,6 +8,7 @@ import { request } from "@/services/request";
 import { useLocale } from "@/i18n";
 import { FormPage, FormSection, Select, Input, CopyableField, useToast } from "@/components/ui";
 import { Spinner } from "@/components/ui/Spinner";
+import { apiErrorMessage } from "@/utils/errors";
 
 const EMPTY_FORM = {
   username: "",
@@ -26,7 +27,7 @@ export default function NewTenantPage() {
 
   const [form, setForm] = useState(EMPTY_FORM);
   const [errors, setErrors] = useState({});
-  const [saving, setSaving] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [created, setCreated] = useState(null);
 
   const { data: propertyData } = useApiRequest("/property/list", { per_page: 100 });
@@ -60,7 +61,7 @@ export default function NewTenantPage() {
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) return;
 
-    setSaving(true);
+    setSubmitting(true);
     try {
       const result = await request("/tenant/create", {
         username: form.username.trim(),
@@ -75,10 +76,14 @@ export default function NewTenantPage() {
       toast.success(t("tenant_created"));
     } catch (err) {
       toast.error(
-        err.code === "UNIT_NOT_VACANT" ? t("unit_not_vacant") : t("failed_to_create_tenant")
+        apiErrorMessage(err, t, {
+          fallbackKey: "failed_to_create_tenant",
+          codes: { UNIT_NOT_VACANT: "unit_not_vacant" },
+          serverMessage: false,
+        })
       );
     } finally {
-      setSaving(false);
+      setSubmitting(false);
     }
   }
 
@@ -123,12 +128,12 @@ export default function NewTenantPage() {
             type="button"
             className="btn btn-outline"
             onClick={() => router.push("/tenants")}
-            disabled={saving}
+            disabled={submitting}
           >
             {t("cancel")}
           </button>
-          <button type="submit" className="btn btn-primary" disabled={saving}>
-            {saving ? (
+          <button type="submit" className="btn btn-primary" disabled={submitting}>
+            {submitting ? (
               <>
                 <Spinner size="sm" label={t("saving")} /> {t("saving")}
               </>

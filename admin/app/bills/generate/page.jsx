@@ -9,6 +9,7 @@ import { request } from "@/services/request";
 import { useLocale } from "@/i18n";
 import { formatMoney } from "@/utils/format";
 import { useToast } from "@/components/ui";
+import { apiErrorMessage } from "@/utils/errors";
 
 const currentPeriod = () => {
   const now = new Date();
@@ -21,10 +22,10 @@ export default function GenerateBillsPage() {
   const router = useRouter();
   const toast = useToast();
   const [period, setPeriod] = useState(currentPeriod);
-  const [saving, setSaving] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   async function generate() {
-    setSaving(true);
+    setSubmitting(true);
     try {
       const result = await request("/bill/generate", { billing_period: period });
       const count = Number(result?.generated_count ?? 0);
@@ -35,11 +36,15 @@ export default function GenerateBillsPage() {
       }
       router.push("/bills");
     } catch (err) {
-      if (err?.code === "BILL_EXISTS") toast.error(t("bill_exists"));
-      else if (err?.code === "INVALID_PERIOD") toast.error(t("invalid_billing_period"));
-      else toast.error(t("bill_generate_failed"));
+      toast.error(
+        apiErrorMessage(err, t, {
+          fallbackKey: "bill_generate_failed",
+          codes: { BILL_EXISTS: "bill_exists", INVALID_PERIOD: "invalid_billing_period" },
+          serverMessage: false,
+        })
+      );
     } finally {
-      setSaving(false);
+      setSubmitting(false);
     }
   }
 
@@ -67,11 +72,11 @@ export default function GenerateBillsPage() {
               <button
                 type="button"
                 onClick={generate}
-                disabled={saving || !period}
+                disabled={submitting || !period}
                 className="btn btn-primary disabled:opacity-40"
               >
                 <Icon name="autorenew" className="text-lg" />
-                <span>{saving ? t("generating_bills") : t("confirm_generate_bills")}</span>
+                <span>{submitting ? t("generating_bills") : t("confirm_generate_bills")}</span>
               </button>
             </>
           )}

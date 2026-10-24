@@ -7,6 +7,7 @@ import { Spinner } from "@/components/ui/Spinner";
 import { useToast } from "@/components/ui";
 import { useLocale } from "@/i18n";
 import { uploadPropertyCover } from "@/services/property/cover";
+import { apiErrorMessage } from "@/utils/errors";
 
 const MAX_BYTES = 5 * 1024 * 1024;
 const ACCEPT_TYPES = ["image/jpeg", "image/png", "image/webp"];
@@ -17,7 +18,7 @@ export function CoverUploadModal({ open, onClose, propertyId, onUploaded }) {
   const toast = useToast();
   const [file, setFile] = useState(null);
   const [error, setError] = useState("");
-  const [saving, setSaving] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const previewUrl = useMemo(() => (file ? URL.createObjectURL(file) : ""), [file]);
   useEffect(() => () => {
@@ -25,7 +26,7 @@ export function CoverUploadModal({ open, onClose, propertyId, onUploaded }) {
   }, [previewUrl]);
 
   function handleClose() {
-    if (saving) return;
+    if (submitting) return;
     setFile(null);
     setError("");
     onClose?.();
@@ -48,7 +49,7 @@ export function CoverUploadModal({ open, onClose, propertyId, onUploaded }) {
 
   async function handleSave() {
     if (!file) return;
-    setSaving(true);
+    setSubmitting(true);
     setError("");
     try {
       const updated = await uploadPropertyCover(propertyId, file);
@@ -57,13 +58,14 @@ export function CoverUploadModal({ open, onClose, propertyId, onUploaded }) {
       onUploaded?.(updated);
       onClose?.();
     } catch (err) {
-      const message = err?.code === "STORAGE_NOT_CONFIGURED"
-        ? t("cover_storage_not_configured")
-        : err?.message || t("cover_upload_failed");
+      const message = apiErrorMessage(err, t, {
+        fallbackKey: "cover_upload_failed",
+        codes: { STORAGE_NOT_CONFIGURED: "cover_storage_not_configured" },
+      });
       setError(message);
       toast.error(message);
     } finally {
-      setSaving(false);
+      setSubmitting(false);
     }
   }
 
@@ -75,9 +77,9 @@ export function CoverUploadModal({ open, onClose, propertyId, onUploaded }) {
       size="lg"
       footer={(
         <>
-          <button type="button" className="btn btn-outline" onClick={handleClose} disabled={saving}>{t("cancel")}</button>
-          <button type="button" className="btn btn-primary" onClick={handleSave} disabled={!file || saving}>
-            {saving ? <><Spinner size="sm" label={t("saving")} /> {t("saving")}</> : t("save_cover")}
+          <button type="button" className="btn btn-outline" onClick={handleClose} disabled={submitting}>{t("cancel")}</button>
+          <button type="button" className="btn btn-primary" onClick={handleSave} disabled={!file || submitting}>
+            {submitting ? <><Spinner size="sm" label={t("saving")} /> {t("saving")}</> : t("save_cover")}
           </button>
         </>
       )}
@@ -91,7 +93,7 @@ export function CoverUploadModal({ open, onClose, propertyId, onUploaded }) {
         <FileDropzone
           accept={ACCEPT_TYPES.join(",")}
           onFile={handleFile}
-          disabled={saving}
+          disabled={submitting}
           hint={t("cover_upload_hint")}
           fileName={file?.name}
         />
