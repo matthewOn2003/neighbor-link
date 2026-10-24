@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Link } from "@/i18n/navigation";
 import { useDraftFilters } from "@/hooks/useDraftFilters";
 import { useDropdown } from "@/hooks/useDropdown";
-import { useApiRequest } from "@/hooks/useApiRequest";
+import { useApiData } from "@/hooks/useApiData";
 import { request } from "@/utils/request";
 import { useLocale } from "@/i18n";
 import { Icon, DataTable, SummaryCard, Input, Select, ConfirmDialog, useToast, StatusBadge } from "@/components/ui";
@@ -29,7 +29,7 @@ export default function PositionsPage() {
   const [pending, setPending] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const { data: departmentData } = useApiRequest("/staff-department/list", { per_page: 100 });
+  const { data: departmentData } = useApiData("/staff-department/list", { per_page: 100 });
   const departments = departmentData?.list ?? [];
   const { optionsOf, labelOf } = useDropdown(["position_level", "employment_type"]);
 

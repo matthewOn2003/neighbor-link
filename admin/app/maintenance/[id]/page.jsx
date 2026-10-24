@@ -6,7 +6,7 @@ import { useLocale } from "@/i18n";
 import { FormPage, FormSection, Input, Select, Textarea, useToast, Spinner, StatusBadge } from "@/components/ui";
 import { RecordFallback } from "@/components/staff/common";
 import { useDropdown } from "@/hooks/useDropdown";
-import { useApiRequest } from "@/hooks/useApiRequest";
+import { useApiData } from "@/hooks/useApiData";
 import { request } from "@/utils/request";
 import { fdl } from "@/utils/date";
 import { apiErrorMessage } from "@/utils/errors";
@@ -14,7 +14,7 @@ import { indexBy } from "@/utils/collections";
 
 export default function MaintenanceDetailPage({ params }) {
   const { id } = use(params);
-  const { data, loading, reload } = useApiRequest("/maintenance/detail", { id: Number(id) });
+  const { data, loading, reload } = useApiData("/maintenance/detail", { id: Number(id) });
 
   return (
     <RecordFallback loading={loading && !data} found={Boolean(data)}>

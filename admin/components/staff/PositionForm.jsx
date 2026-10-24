@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { useLocale } from "@/i18n";
-import { useApiRequest } from "@/hooks/useApiRequest";
+import { useApiData } from "@/hooks/useApiData";
 import { request } from "@/utils/request";
 import { useDropdown } from "@/hooks/useDropdown";
 import { FormPage, FormSection, Input, Select, Textarea, useToast, Spinner } from "@/components/ui";
@@ -27,7 +27,7 @@ export function PositionForm({ record }) {
   const router = useRouter();
   const toast = useToast();
   const statusOptions = useStatusOptions();
-  const { data: departmentData } = useApiRequest("/staff-department/list", { per_page: 100 });
+  const { data: departmentData } = useApiData("/staff-department/list", { per_page: 100 });
   const departments = departmentData?.list ?? [];
   const { optionsOf } = useDropdown(["position_level", "employment_type"]);
 

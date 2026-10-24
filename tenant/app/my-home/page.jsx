@@ -6,7 +6,7 @@ import { useLocale } from "@/i18n";
 import { Icon } from "@/components/ui/Icon";
 import { useToast } from "@/components/ui/Toast";
 import { money } from "@/components/payments/shared";
-import { useApiRequest } from "@/hooks/useApiRequest";
+import { useApiData } from "@/hooks/useApiData";
 import { useDropdown } from "@/hooks/useDropdown";
 import { formatBytes, formatDate, ordinal } from "@/components/portal/format";
 import { useOptionLabel } from "@/components/portal/status";
@@ -17,9 +17,9 @@ export default function MyHomePage() {
   const { t, locale } = useLocale();
   const toast = useToast();
   const optionLabel = useOptionLabel();
-  const me = useApiRequest("/tenant-portal/me", {});
-  const wifi = useApiRequest("/tenant-portal/wifi", {});
-  const announcements = useApiRequest("/tenant-portal/announcement/list", { current_page: 1, per_page: 3 });
+  const me = useApiData("/tenant-portal/me", {});
+  const wifi = useApiData("/tenant-portal/wifi", {});
+  const announcements = useApiData("/tenant-portal/announcement/list", { current_page: 1, per_page: 3 });
   const dict = useDropdown(["property_type"]);
   const [showQr, setShowQr] = useState(false);
 

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Link, useRouter } from "@/i18n/navigation";
-import { useApiRequest } from "@/hooks/useApiRequest";
+import { useApiData } from "@/hooks/useApiData";
 import { request } from "@/utils/request";
 import { useDropdown } from "@/hooks/useDropdown";
 import { useLocale } from "@/i18n";
@@ -46,7 +46,7 @@ export default function NewContractPage() {
   const [submitting, setSubmitting] = useState(false);
   const [errors, se] = useState({});
 
-  const { data, loading } = useApiRequest("/tenant/list", {
+  const { data, loading } = useApiData("/tenant/list", {
     current_page: 1,
     per_page: 100,
     status: "active",

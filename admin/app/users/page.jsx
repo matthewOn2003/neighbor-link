@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Link } from "@/i18n/navigation";
 import { useDraftFilters } from "@/hooks/useDraftFilters";
-import { useApiRequest } from "@/hooks/useApiRequest";
+import { useApiData } from "@/hooks/useApiData";
 import { request } from "@/utils/request";
 import { useLocale } from "@/i18n";
 import { Icon, DataTable, SummaryCard, Input, Select, DatePicker, ConfirmDialog, useToast, StatusBadge } from "@/components/ui";
@@ -29,9 +29,9 @@ export default function UsersPage() {
   const [pending, setPending] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const { data: departmentData } = useApiRequest("/staff-department/list", { per_page: 100 });
+  const { data: departmentData } = useApiData("/staff-department/list", { per_page: 100 });
   const departments = departmentData?.list ?? [];
-  const { data: positionData } = useApiRequest("/staff-position/list", { per_page: 100 });
+  const { data: positionData } = useApiData("/staff-position/list", { per_page: 100 });
   const positions = positionData?.list ?? [];
 
   const departmentOptions = [

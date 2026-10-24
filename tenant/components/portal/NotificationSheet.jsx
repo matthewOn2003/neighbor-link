@@ -3,7 +3,7 @@
 import { useLocale } from "@/i18n";
 import { Icon } from "@/components/ui/Icon";
 import { useToast } from "@/components/ui/Toast";
-import { useApiRequest } from "@/hooks/useApiRequest";
+import { useApiData } from "@/hooks/useApiData";
 import { request } from "@/utils/request";
 import { formatDateTime } from "./format";
 import { EmptyState, GhostButton, LoadingBlock, Sheet } from "./primitives";
@@ -14,7 +14,7 @@ const KIND_ICON = { billing: "receipt", announcement: "campaign", maintenance: "
 export default function NotificationSheet({ onClose, onChanged }) {
   const { t, locale } = useLocale();
   const toast = useToast();
-  const list = useApiRequest("/tenant-portal/notification/list", { current_page: 1, per_page: 50 });
+  const list = useApiData("/tenant-portal/notification/list", { current_page: 1, per_page: 50 });
   const items = list.data?.list ?? [];
   const unread = list.data?.summary?.unread_count ?? 0;
 

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { useLocale } from "@/i18n";
-import { useApiRequest } from "@/hooks/useApiRequest";
+import { useApiData } from "@/hooks/useApiData";
 import { request } from "@/utils/request";
 import { FormPage, FormSection, Input, Select, useToast, DatePicker, Spinner } from "@/components/ui";
 import { useStatusOptions } from "./common";
@@ -26,7 +26,7 @@ export function UserForm({ record }) {
   const router = useRouter();
   const toast = useToast();
   const statusOptions = useStatusOptions();
-  const { data: positionData } = useApiRequest("/staff-position/list", { per_page: 100 });
+  const { data: positionData } = useApiData("/staff-position/list", { per_page: 100 });
   const positions = positionData?.list ?? [];
 
   const [form, setForm] = useState(() =>

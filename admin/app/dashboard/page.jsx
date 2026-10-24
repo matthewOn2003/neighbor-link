@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { EmptyState, Icon, Spinner, Select } from "@/components/ui";
-import { useApiRequest } from "@/hooks/useApiRequest";
+import { useApiData } from "@/hooks/useApiData";
 import { useLocale } from "@/i18n";
 import { formatMoney } from "@/utils/format";
 import { indexBy } from "@/utils/collections";
@@ -87,7 +87,7 @@ export default function DashboardPage() {
   const { t } = useLocale();
   const [selectedCycle, setSelectedCycle] = useState("");
   // Empty cycle -> undefined -> dropped by JSON.stringify, so the server returns the current cycle.
-  const { data, loading, error, reload } = useApiRequest("/dashboard/overview", {
+  const { data, loading, error, reload } = useApiData("/dashboard/overview", {
     cycle: selectedCycle || undefined,
   });
 

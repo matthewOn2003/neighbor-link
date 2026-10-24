@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { useLocale } from "@/i18n";
 import { Icon } from "@/components/ui/Icon";
 import { wholeMoney } from "@/components/portal/format";
-import { useApiRequest } from "@/hooks/useApiRequest";
+import { useApiData } from "@/hooks/useApiData";
 import BillCard from "@/components/portal/BillCard";
 import ProofCard from "@/components/portal/ProofCard";
 import PaymentProofSheet from "@/components/portal/PaymentProofSheet";
@@ -28,8 +28,8 @@ function BillingContent() {
   const [invoiceBillId, setInvoiceBillId] = useState(null);
   // The home screen's "Submit Proof" action opens this sheet with ?sheet=proof.
   const [sheet, setSheet] = useState(() => (searchParams.get("sheet") === "proof" ? { billId: null } : null)); // null when closed; { billId } when open
-  const bills = useApiRequest("/tenant-portal/bills", { current_page: 1, per_page: 100 });
-  const proofs = useApiRequest("/tenant-portal/payment-proof/list", { current_page: 1, per_page: 100 });
+  const bills = useApiData("/tenant-portal/bills", { current_page: 1, per_page: 100 });
+  const proofs = useApiData("/tenant-portal/payment-proof/list", { current_page: 1, per_page: 100 });
 
   const billList = bills.data?.list ?? [];
   const proofList = proofs.data?.list ?? [];

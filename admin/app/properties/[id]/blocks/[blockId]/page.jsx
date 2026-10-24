@@ -4,14 +4,14 @@ import { use } from "react";
 import { Link } from "@/i18n/navigation";
 import { Icon, Spinner } from "@/components/ui";
 import { OccupancyBar, StatBlock } from "@/components/property/parts";
-import { useApiRequest } from "@/hooks/useApiRequest";
+import { useApiData } from "@/hooks/useApiData";
 import { useLocale } from "@/i18n";
 
 export default function BlockDetailPage({ params }) {
   const { id, blockId } = use(params);
   const { t } = useLocale();
-  const { data: block, loading, error } = useApiRequest("/property/block/detail", { id: Number(blockId) });
-  const { data: floorData } = useApiRequest("/property/floor/list", {
+  const { data: block, loading, error } = useApiData("/property/block/detail", { id: Number(blockId) });
+  const { data: floorData } = useApiData("/property/floor/list", {
     block_id: blockId,
     per_page: 100,
   });
