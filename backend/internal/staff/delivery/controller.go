@@ -4,9 +4,10 @@ import (
 	"backend/internal/pkg/httpx"
 	"backend/internal/pkg/middleware"
 	userdelivery "backend/internal/user/delivery"
+	"bytes"
 	"encoding/json"
+	"io"
 	"net/http"
-	"strconv"
 	"strings"
 	"time"
 
@@ -73,10 +74,33 @@ type Account struct {
 }
 
 func (Account) TableName() string        { return "staff_accounts" }
-func decode(r *http.Request, v any) bool { return json.NewDecoder(r.Body).Decode(v) == nil }
+
+// decode reads the JSON body into v and restores the body so id(r) can still read it afterwards.
+func decode(r *http.Request, v any) bool {
+	raw, err := io.ReadAll(r.Body)
+	if err != nil {
+		return false
+	}
+	r.Body = io.NopCloser(bytes.NewReader(raw))
+	return json.Unmarshal(raw, v) == nil
+}
+
+// id returns the record id sent in the body's "id" field.
 func id(r *http.Request) (uint, bool) {
-	n, e := strconv.ParseUint(r.PathValue("id"), 10, 64)
-	return uint(n), e == nil && n > 0
+	n, err := httpx.ParseIDParam(r)
+	return n, err == nil && n > 0
+}
+
+// requireID rejects the request unless the body carries a valid "id", so an update call
+// that forgets it fails instead of silently creating a new record.
+func requireID(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if _, ok := id(r); !ok {
+			httpx.WriteInvalidInput(w, "invalid id")
+			return
+		}
+		next(w, r)
+	}
 }
 func (c *Controller) SaveDepartment(w http.ResponseWriter, r *http.Request) {
 	var v Department
@@ -251,15 +275,15 @@ func NewRouter(c *Controller, secret string, origins []string) http.Handler {
 	adminMiddleware := middleware.RequireRole(secret, userdelivery.VerifyToken, "admin")
 	mux.HandleFunc("POST /api/v1/staff-account/list", adminMiddleware(c.ListAccounts))
 	mux.HandleFunc("POST /api/v1/staff-account/create", adminMiddleware(c.SaveAccount))
-	mux.HandleFunc("POST /api/v1/staff-account/update/{id}", adminMiddleware(c.SaveAccount))
-	mux.HandleFunc("POST /api/v1/staff-account/delete/{id}", adminMiddleware(c.Delete))
+	mux.HandleFunc("POST /api/v1/staff-account/update", adminMiddleware(requireID(c.SaveAccount)))
+	mux.HandleFunc("POST /api/v1/staff-account/delete", adminMiddleware(c.Delete))
 	mux.HandleFunc("POST /api/v1/staff-department/list", adminMiddleware(c.ListDepartments))
 	mux.HandleFunc("POST /api/v1/staff-department/create", adminMiddleware(c.SaveDepartment))
-	mux.HandleFunc("POST /api/v1/staff-department/update/{id}", adminMiddleware(c.SaveDepartment))
-	mux.HandleFunc("POST /api/v1/staff-department/delete/{id}", adminMiddleware(c.Delete))
+	mux.HandleFunc("POST /api/v1/staff-department/update", adminMiddleware(requireID(c.SaveDepartment)))
+	mux.HandleFunc("POST /api/v1/staff-department/delete", adminMiddleware(c.Delete))
 	mux.HandleFunc("POST /api/v1/staff-position/list", adminMiddleware(c.ListPositions))
 	mux.HandleFunc("POST /api/v1/staff-position/create", adminMiddleware(c.SavePosition))
-	mux.HandleFunc("POST /api/v1/staff-position/update/{id}", adminMiddleware(c.SavePosition))
-	mux.HandleFunc("POST /api/v1/staff-position/delete/{id}", adminMiddleware(c.Delete))
+	mux.HandleFunc("POST /api/v1/staff-position/update", adminMiddleware(requireID(c.SavePosition)))
+	mux.HandleFunc("POST /api/v1/staff-position/delete", adminMiddleware(c.Delete))
 	return middleware.WithCORS(mux, origins)
 }

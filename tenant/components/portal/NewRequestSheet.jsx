@@ -5,8 +5,8 @@ import { useLocale } from "@/i18n";
 import { Icon } from "@/components/ui/Icon";
 import { useToast } from "@/components/ui/Toast";
 import { useDropdown } from "@/hooks/useDropdown";
-import { maintenanceCreate } from "@/services/tenant-portal/maintenance";
-import { complaintCreate } from "@/services/tenant-portal/complaint";
+import { request, uploadFile } from "@/hooks/useApiRequest";
+import { api } from "@/services/api";
 import { Input, Select } from "@/components/ui";
 
 const MAX_PHOTOS = 5;
@@ -65,15 +65,17 @@ export default function NewRequestSheet({ initialKind = "maintenance", onClose, 
     setSubmitting(true);
     try {
       if (kind === "maintenance") {
-        await maintenanceCreate({
-          title: title.trim(),
-          description: description.trim(),
-          category: selectedCategory,
-          priority: selectedPriority,
-          files: photos,
+        await uploadFile(api.maintenance.create, photos, {
+          fieldName: "files",
+          fields: {
+            title: title.trim(),
+            description: description.trim(),
+            category: selectedCategory,
+            priority: selectedPriority,
+          },
         });
       } else {
-        await complaintCreate({ title: title.trim(), description: description.trim(), category: selectedCategory });
+        await request(api.complaint.create, { title: title.trim(), description: description.trim(), category: selectedCategory });
       }
       toast.show(t(kind === "maintenance" ? "portal_request_submitted" : "portal_complaint_submitted"), "success");
       onCreated(kind);

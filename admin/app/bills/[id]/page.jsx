@@ -3,8 +3,7 @@
 import { use, useState } from "react";
 import { Input, Select, StatusBadge, useToast, Spinner, Icon, Modal, PdfPreviewModal } from "@/components/ui";
 import { Link } from "@/i18n/navigation";
-import { useApiRequest } from "@/hooks/useApiRequest";
-import { request } from "@/services/request";
+import { useApiRequest, request } from "@/hooks/useApiRequest";
 import { useLocale } from "@/i18n";
 import { useDropdown } from "@/hooks/useDropdown";
 import { billRef, buildInvoicePdf } from "@/utils/documents";
@@ -22,7 +21,7 @@ export default function BillDetailPage({ params }) {
   const methodOptions = optionsOf("bill_payment_method");
   const toast = useToast();
 
-  const { data, loading, error, reload } = useApiRequest(api.bill.detail(id));
+  const { data, loading, error, reload } = useApiRequest(api.bill.detail, { id: Number(id) });
 
   const [amount, setAmount] = useState("");
   const [method, setMethod] = useState("bank_transfer");
@@ -81,7 +80,8 @@ export default function BillDetailPage({ params }) {
     e.preventDefault();
     setUpdating(true);
     try {
-      await request(api.bill.update(id), {
+      await request(api.bill.update, {
+        id: Number(id),
         amount: Number(edit.amount),
         late_fee: Number(edit.late_fee || 0),
         due_date: edit.due_date,
@@ -107,7 +107,8 @@ export default function BillDetailPage({ params }) {
     e.preventDefault();
     setAdding(true);
     try {
-      await request(api.bill.payment(id), {
+      await request(api.bill.payment, {
+        id: Number(id),
         amount: Number(amount),
         method,
         reference: reference.trim(),
@@ -134,7 +135,7 @@ export default function BillDetailPage({ params }) {
     if (!window.confirm(t("confirm_void_bill"))) return;
     setUpdating(true);
     try {
-      await request(api.bill.void(id), {});
+      await request(api.bill.void, { id: Number(id) });
       toast.success(t("bill_voided"));
       reload();
     } catch (err) {

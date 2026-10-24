@@ -1,5 +1,5 @@
 import * as XLSX from "xlsx";
-import { request } from "@/services/request";
+import { request } from "@/hooks/useApiRequest";
 
 // 导出用：把 rows 按 columns 生成 xlsx 并触发下载。
 // columns: [{ label, get: (row) => value }]

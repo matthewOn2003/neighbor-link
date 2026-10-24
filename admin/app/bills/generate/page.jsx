@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Link, useRouter } from "@/i18n/navigation";
 import { Icon, DataTable, SummaryCard, Input, useToast } from "@/components/ui";
-import { request } from "@/services/request";
+import { request } from "@/hooks/useApiRequest";
 import { useLocale } from "@/i18n";
 import { formatMoney } from "@/utils/format";
 import { apiErrorMessage } from "@/utils/errors";

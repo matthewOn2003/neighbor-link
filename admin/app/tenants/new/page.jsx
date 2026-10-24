@@ -2,9 +2,8 @@
 
 import { useState } from "react";
 import { Link, useRouter } from "@/i18n/navigation";
-import { useApiRequest } from "@/hooks/useApiRequest";
+import { useApiRequest, request } from "@/hooks/useApiRequest";
 import { useDropdown } from "@/hooks/useDropdown";
-import { request } from "@/services/request";
 import { useLocale } from "@/i18n";
 import { FormPage, FormSection, Select, Input, CopyableField, useToast, Spinner } from "@/components/ui";
 import { apiErrorMessage } from "@/utils/errors";

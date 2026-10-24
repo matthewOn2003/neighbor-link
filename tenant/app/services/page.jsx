@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useState } from "react";
+import { api } from "@/services/api";
 import { useSearchParams } from "next/navigation";
 import { useLocale } from "@/i18n";
 import { Icon } from "@/components/ui/Icon";
@@ -45,8 +46,8 @@ function ServicesContent() {
     keyword: debouncedKeyword,
     status: status === "all" ? "" : status,
   };
-  const repairs = useApiRequest("/tenant-portal/maintenance/list", params);
-  const complaints = useApiRequest("/tenant-portal/complaint/list", params);
+  const repairs = useApiRequest(api.maintenance.list, params);
+  const complaints = useApiRequest(api.complaint.list, params);
   const dict = useDropdown(["maintenance_category", "complaint_category"]);
 
   const current = kind === "maintenance" ? repairs : complaints;

@@ -2,10 +2,9 @@
 
 import { useState } from "react";
 import { FormSection, Input, useToast, Icon, Spinner } from "@/components/ui";
-import { useApiRequest } from "@/hooks/useApiRequest";
+import { useApiRequest, request } from "@/hooks/useApiRequest";
 import { Link } from "@/i18n/navigation";
 import { useLocale } from "@/i18n";
-import { request } from "@/services/request";
 import { apiErrorMessage } from "@/utils/errors";
 import { api } from "@/services/api";
 

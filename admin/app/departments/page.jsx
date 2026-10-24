@@ -10,7 +10,7 @@ import { RowActions, useStatusOptions } from "@/components/staff/common";
 import { apiErrorMessage } from "@/utils/errors";
 import { labelMap } from "@/utils/collections";
 import { api } from "@/services/api";
-import { request } from "@/services/request";
+import { request } from "@/hooks/useApiRequest";
 
 export default function DepartmentsPage() {
   const { t } = useLocale();
@@ -34,7 +34,7 @@ export default function DepartmentsPage() {
   async function confirmDelete() {
     setSubmitting(true);
     try {
-      await request(api.staffDepartment.delete(pending.id));
+      await request(api.staffDepartment.delete, { id: pending.id });
       toast.success(t("record_deleted"));
       pending.reload();
     } catch (err) {

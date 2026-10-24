@@ -15,8 +15,8 @@ func NewPaymentRouter(c *PaymentController, tokenSecret string, allowedOrigins [
 
 	mux.HandleFunc("POST /api/v1/payment/list", admin(c.PaymentList))
 	mux.HandleFunc("POST /api/v1/payment-proof/list", admin(c.ProofList))
-	mux.HandleFunc("POST /api/v1/payment-proof/approve/{id}", admin(c.Approve))
-	mux.HandleFunc("POST /api/v1/payment-proof/reject/{id}", admin(c.Reject))
+	mux.HandleFunc("POST /api/v1/payment-proof/approve", admin(c.Approve))
+	mux.HandleFunc("POST /api/v1/payment-proof/reject", admin(c.Reject))
 
 	return middleware.WithCORS(mux, allowedOrigins)
 }

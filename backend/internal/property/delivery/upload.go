@@ -54,13 +54,20 @@ var coverExtensions = map[string]string{
 // UploadCover accepts a multipart "file" field (JPEG, PNG or WebP up to 5 MiB), stores it in object
 // storage and points the property's cover at it.
 func (c *PropertyController) UploadCover(w http.ResponseWriter, r *http.Request) {
+	if c.storage == nil {
+		httpx.WriteServiceUnavailable(w, "object storage is not configured")
+		return
+	}
+	// Allow a little overhead for multipart framing on top of the file limit.
+	r.Body = http.MaxBytesReader(w, r.Body, maxCoverBytes+(1<<20))
+	if err := r.ParseMultipartForm(maxCoverBytes); err != nil {
+		httpx.WriteInvalidInput(w, "upload must be multipart form data no larger than 5 MiB")
+		return
+	}
+	// The property id is the "id" form field; the size limit above is applied first.
 	id, err := httpx.ParseIDParam(r)
 	if err != nil {
 		httpx.WriteInvalidInput(w, "invalid id")
-		return
-	}
-	if c.storage == nil {
-		httpx.WriteServiceUnavailable(w, "object storage is not configured")
 		return
 	}
 	property, err := c.usecase.FindByID(id)
@@ -73,12 +80,6 @@ func (c *PropertyController) UploadCover(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	// Allow a little overhead for multipart framing on top of the file limit.
-	r.Body = http.MaxBytesReader(w, r.Body, maxCoverBytes+(1<<20))
-	if err := r.ParseMultipartForm(maxCoverBytes); err != nil {
-		httpx.WriteInvalidInput(w, "upload must be multipart form data no larger than 5 MiB")
-		return
-	}
 	file, _, err := r.FormFile("file")
 	if err != nil {
 		httpx.WriteInvalidInput(w, "file is required")
