@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { useApiData } from "@/hooks/useApiData";
-import { request } from "@/utils/request";
+import { apiRequest } from "@/utils/apiRequest";
 import { useDropdown } from "@/hooks/useDropdown";
 import { useLocale } from "@/i18n";
 import { FormPage, FormSection, Select, Textarea, Input, useToast, Spinner } from "@/components/ui";
@@ -51,7 +51,7 @@ export default function NewPropertyPage() {
 
     setSubmitting(true);
     try {
-      const property = await request("/property/create", {
+      const property = await apiRequest("/property/create", {
         name: form.name.trim(),
         developer_id: form.developer_id ? Number(form.developer_id) : null,
         property_type: form.property_type,

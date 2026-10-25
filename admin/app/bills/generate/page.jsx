@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Link, useRouter } from "@/i18n/navigation";
 import { Icon, DataTable, SummaryCard, Input, useToast } from "@/components/ui";
-import { request } from "@/utils/request";
+import { apiRequest } from "@/utils/apiRequest";
 import { useLocale } from "@/i18n";
 import { formatMoney } from "@/utils/format";
 import { apiErrorMessage } from "@/utils/errors";
@@ -21,7 +21,7 @@ export default function GenerateBillsPage() {
   async function generate() {
     setSubmitting(true);
     try {
-      const result = await request("/bill/generate", { billing_period: period });
+      const result = await apiRequest("/bill/generate", { billing_period: period });
       const count = Number(result?.generated_count ?? 0);
       if (count > 0) {
         toast.success(t("bills_generated", { count }));

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { FormSection, Input, useToast, Icon, Spinner } from "@/components/ui";
 import { useApiData } from "@/hooks/useApiData";
-import { request } from "@/utils/request";
+import { apiRequest } from "@/utils/apiRequest";
 import { Link } from "@/i18n/navigation";
 import { useLocale } from "@/i18n";
 import { apiErrorMessage } from "@/utils/errors";
@@ -44,7 +44,7 @@ function BillingSettingsForm({ initial, onSaved }) {
 
     setSubmitting(true);
     try {
-      await request("/billing-settings/update", {
+      await apiRequest("/billing-settings/update", {
         due_day: dueDay,
         overdue_day: overdueDay,
         bank_name: form.bank_name.trim(),

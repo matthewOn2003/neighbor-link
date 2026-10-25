@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Link, useRouter } from "@/i18n/navigation";
 import { useApiData } from "@/hooks/useApiData";
-import { request } from "@/utils/request";
+import { apiRequest } from "@/utils/apiRequest";
 import { useDropdown } from "@/hooks/useDropdown";
 import { useLocale } from "@/i18n";
 import { FormPage, FormSection, Select, Input, CopyableField, useToast, Spinner } from "@/components/ui";
@@ -62,7 +62,7 @@ export default function NewTenantPage() {
 
     setSubmitting(true);
     try {
-      const result = await request("/tenant/create", {
+      const result = await apiRequest("/tenant/create", {
         username: form.username.trim(),
         name: form.name.trim(),
         phone: form.phone.trim(),

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Link, useRouter } from "@/i18n/navigation";
 import { useApiData } from "@/hooks/useApiData";
-import { request } from "@/utils/request";
+import { apiRequest } from "@/utils/apiRequest";
 import { useDropdown } from "@/hooks/useDropdown";
 import { useLocale } from "@/i18n";
 import { Input, Select, Textarea, useToast } from "@/components/ui";
@@ -70,7 +70,7 @@ export default function NewContractPage() {
 
     setSubmitting(true);
     try {
-      const r = await request("/contract/create", {
+      const r = await apiRequest("/contract/create", {
         tenant_id: Number(f.tenant_id),
         start_date: f.start_date,
         end_date: f.end_date,

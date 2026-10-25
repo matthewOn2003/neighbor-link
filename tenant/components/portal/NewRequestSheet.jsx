@@ -5,7 +5,7 @@ import { useLocale } from "@/i18n";
 import { Icon } from "@/components/ui/Icon";
 import { useToast } from "@/components/ui/Toast";
 import { useDropdown } from "@/hooks/useDropdown";
-import { request } from "@/utils/request";
+import { apiRequest } from "@/utils/apiRequest";
 import { uploadFile } from "@/utils/uploadFile";
 import { Input, Select } from "@/components/ui";
 
@@ -75,7 +75,7 @@ export default function NewRequestSheet({ initialKind = "maintenance", onClose, 
           },
         });
       } else {
-        await request("/tenant-portal/complaint/create", { title: title.trim(), description: description.trim(), category: selectedCategory });
+        await apiRequest("/tenant-portal/complaint/create", { title: title.trim(), description: description.trim(), category: selectedCategory });
       }
       toast.show(t(kind === "maintenance" ? "portal_request_submitted" : "portal_complaint_submitted"), "success");
       onCreated(kind);

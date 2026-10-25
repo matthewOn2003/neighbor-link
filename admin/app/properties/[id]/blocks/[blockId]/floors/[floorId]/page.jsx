@@ -5,7 +5,7 @@ import { Link } from "@/i18n/navigation";
 import { Icon, Spinner, DataTable, SummaryCard, Input, Select, StatusBadge } from "@/components/ui";
 import { useDraftFilters } from "@/hooks/useDraftFilters";
 import { useApiData } from "@/hooks/useApiData";
-import { request } from "@/utils/request";
+import { apiRequest } from "@/utils/apiRequest";
 import { useDropdown } from "@/hooks/useDropdown";
 import { useLocale } from "@/i18n";
 import { fdl } from "@/utils/date";
@@ -91,7 +91,7 @@ export default function FloorDetailPage({ params }) {
               { key: "status", label: t("status"), sample: "vacant" },
             ],
             onRow: (values) =>
-              request("/property/unit/create", {
+              apiRequest("/property/unit/create", {
                 block_id: Number(blockId),
                 floor_id: Number(floorId),
                 code: values.code,

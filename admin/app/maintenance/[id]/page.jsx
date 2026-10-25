@@ -7,7 +7,7 @@ import { FormPage, FormSection, Input, Select, Textarea, useToast, Spinner, Stat
 import { RecordFallback } from "@/components/staff/common";
 import { useDropdown } from "@/hooks/useDropdown";
 import { useApiData } from "@/hooks/useApiData";
-import { request } from "@/utils/request";
+import { apiRequest } from "@/utils/apiRequest";
 import { fdl } from "@/utils/date";
 import { apiErrorMessage } from "@/utils/errors";
 import { indexBy } from "@/utils/collections";
@@ -69,7 +69,7 @@ function MaintenanceDetailForm({ record, reload }) {
 
     setSubmitting(true);
     try {
-      await request("/maintenance/update", {
+      await apiRequest("/maintenance/update", {
         id: record.id,
         title: form.title.trim(),
         description: form.description.trim(),

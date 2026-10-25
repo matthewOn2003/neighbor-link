@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { Link, useRouter } from "@/i18n/navigation";
 import { useApiData } from "@/hooks/useApiData";
-import { request } from "@/utils/request";
+import { apiRequest } from "@/utils/apiRequest";
 import { useLocale } from "@/i18n";
 import { Input, Textarea, useToast, Select } from "@/components/ui";
 import { contractRef } from "@/utils/documents";
@@ -60,7 +60,7 @@ export default function NewBillPage() {
 
     setSubmitting(true);
     try {
-      const b = await request("/bill/create", {
+      const b = await apiRequest("/bill/create", {
         contract_id: Number(contractID),
         billing_period: period,
         due_date: dueDate,

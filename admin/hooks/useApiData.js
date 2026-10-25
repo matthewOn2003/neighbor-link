@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { request } from "@/utils/request";
+import { apiRequest } from "@/utils/apiRequest";
 
 const EMPTY = { key: null, data: null, error: null };
 
@@ -20,7 +20,7 @@ export function useApiData(path, params, { skip = false } = {}) {
   useEffect(() => {
     if (skip) return;
     const controller = new AbortController();
-    request(path, JSON.parse(paramsKey), { signal: controller.signal })
+    apiRequest(path, JSON.parse(paramsKey), { signal: controller.signal })
       .then((data) => setState({ key: requestKey, data, error: null }))
       .catch((error) => {
         if (error.name !== "AbortError") setState({ key: requestKey, data: null, error });

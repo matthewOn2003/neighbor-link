@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { useLocale } from "@/i18n";
 import { useApiData } from "@/hooks/useApiData";
-import { request } from "@/utils/request";
+import { apiRequest } from "@/utils/apiRequest";
 import { useDropdown } from "@/hooks/useDropdown";
 import { FormPage, FormSection, Input, Select, Textarea, useToast, Spinner } from "@/components/ui";
 import { useStatusOptions } from "./common";
@@ -73,9 +73,9 @@ export function PositionForm({ record }) {
     setSubmitting(true);
     try {
       if (isEdit) {
-        await request("/staff-position/update", { id: record.id, ...body });
+        await apiRequest("/staff-position/update", { id: record.id, ...body });
       } else {
-        await request("/staff-position/create", body);
+        await apiRequest("/staff-position/create", body);
       }
       toast.success(t("record_saved"));
       router.push("/positions");

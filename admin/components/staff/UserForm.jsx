@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { useLocale } from "@/i18n";
 import { useApiData } from "@/hooks/useApiData";
-import { request } from "@/utils/request";
+import { apiRequest } from "@/utils/apiRequest";
 import { FormPage, FormSection, Input, Select, useToast, DatePicker, Spinner } from "@/components/ui";
 import { useStatusOptions } from "./common";
 import { apiErrorMessage } from "@/utils/errors";
@@ -67,9 +67,9 @@ export function UserForm({ record }) {
     setSubmitting(true);
     try {
       if (isEdit) {
-        await request("/staff-account/update", { id: record.id, ...body });
+        await apiRequest("/staff-account/update", { id: record.id, ...body });
       } else {
-        await request("/staff-account/create", body);
+        await apiRequest("/staff-account/create", body);
       }
       toast.success(t("record_saved"));
       router.push("/users");

@@ -1,4 +1,4 @@
-// 统一把 request() 抛出的错误（ApiError：code / message）转成提示文字。
+// 统一把 apiRequest() 抛出的错误（ApiError：code / message）转成提示文字。
 //
 // codes：后端错误码 -> i18n key。命中则显示对应文案。
 //        DUPLICATE、IN_USE 是通用错误码，默认已映射，调用方不用再写。
