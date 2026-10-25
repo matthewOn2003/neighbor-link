@@ -5,7 +5,7 @@ import { ToastProvider } from "@/components/ui";
 import "@/styles/globals.css";
 
 export const metadata: Metadata = {
-  title: "Neighbor Link Admin",
+  title: "NeighborLink Admin",
   description: "Administrative portal",
 };
 

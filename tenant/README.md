@@ -1,4 +1,4 @@
-Neighbor Link tenant portal. Built with [Next.js](https://nextjs.org), sharing the same frontend architecture as `admin/` (hooks, services, UI components, styles, i18n); only the business pages differ.
+NeighborLink tenant portal. Built with [Next.js](https://nextjs.org), sharing the same frontend architecture as `admin/` (hooks, services, UI components, styles, i18n); only the business pages differ.
 
 ## Getting Started
 

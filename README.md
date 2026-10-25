@@ -1,6 +1,6 @@
-# Neighbor Link
+# NeighborLink
 
-Neighbor Link is a rental property management platform for tenants and administrators.
+NeighborLink is a rental property management platform for tenants and administrators.
 
 The project is designed to provide one shared foundation for rental operations while keeping the tenant portal and administrative portal as separate frontend applications.
 
