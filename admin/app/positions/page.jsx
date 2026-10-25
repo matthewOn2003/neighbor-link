@@ -5,7 +5,7 @@ import { Link } from "@/i18n/navigation";
 import { useDraftFilters } from "@/hooks/useDraftFilters";
 import { useDropdown } from "@/hooks/useDropdown";
 import { useApiData } from "@/hooks/useApiData";
-import { request } from "@/utils/request";
+import { apiRequest } from "@/utils/apiRequest";
 import { useLocale } from "@/i18n";
 import { Icon, DataTable, SummaryCard, Input, Select, ConfirmDialog, useToast, StatusBadge } from "@/components/ui";
 import { fdl } from "@/utils/date";
@@ -49,7 +49,7 @@ export default function PositionsPage() {
   async function confirmDelete() {
     setSubmitting(true);
     try {
-      await request("/staff-position/delete", { id: pending.id });
+      await apiRequest("/staff-position/delete", { id: pending.id });
       toast.success(t("record_deleted"));
       pending.reload();
     } catch (err) {
@@ -107,7 +107,7 @@ export default function PositionsPage() {
               const all = await fetchAllRows("/staff-department/list", {});
               const department = all.find((d) => d.name.toLowerCase() === values.department.toLowerCase());
               if (!department) throw new Error(t("import_department_not_found", { name: values.department }));
-              return request("/staff-position/create", {
+              return apiRequest("/staff-position/create", {
                 department_id: department.id,
                 name: values.name,
                 code: values.code,

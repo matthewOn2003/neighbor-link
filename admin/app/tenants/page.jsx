@@ -5,7 +5,7 @@ import { useDraftFilters } from "@/hooks/useDraftFilters";
 import { Icon, DataTable, SummaryCard, Input, DatePicker, Select, StatusBadge } from "@/components/ui";
 import { useDropdown } from "@/hooks/useDropdown";
 import { useLocale } from "@/i18n";
-import { request } from "@/utils/request";
+import { apiRequest } from "@/utils/apiRequest";
 import { fdl, formatMonth } from "@/utils/date";
 import { formatMoney } from "@/utils/format";
 import { indexBy } from "@/utils/collections";
@@ -78,7 +78,7 @@ export default function TenantsPage() {
               { key: "email", label: t("email"), sample: "john@example.com" },
               { key: "status", label: t("status"), sample: "active" },
             ],
-            onRow: (values) => request("/tenant/create", { ...values, status: values.status || "active" }),
+            onRow: (values) => apiRequest("/tenant/create", { ...values, status: values.status || "active" }),
           }}
           title={t("tenants")}
           description={t("manage_tenants_description")}

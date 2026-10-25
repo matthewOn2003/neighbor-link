@@ -4,7 +4,7 @@ import { Link } from "@/i18n/navigation";
 import { useDraftFilters } from "@/hooks/useDraftFilters";
 import { useDropdown } from "@/hooks/useDropdown";
 import { useApiData } from "@/hooks/useApiData";
-import { request } from "@/utils/request";
+import { apiRequest } from "@/utils/apiRequest";
 import { useLocale } from "@/i18n";
 import { Icon, DataTable, SummaryCard, Input, Select, DatePicker, StatusBadge } from "@/components/ui";
 import { fetchAllRows } from "@/utils/excel";
@@ -102,7 +102,7 @@ export default function MaintenancePage() {
             ],
             onRow: async (values) => {
               const unit = await resolveUnit(values.property_name, values.unit_code);
-              return request("/maintenance/create", {
+              return apiRequest("/maintenance/create", {
                 title: values.title,
                 description: values.description ?? "",
                 category: values.category || "other",

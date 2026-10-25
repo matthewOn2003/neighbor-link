@@ -4,7 +4,7 @@ import { use, useState } from "react";
 import { Input, Select, StatusBadge, useToast, Spinner, Icon, Modal, PdfPreviewModal } from "@/components/ui";
 import { Link } from "@/i18n/navigation";
 import { useApiData } from "@/hooks/useApiData";
-import { request } from "@/utils/request";
+import { apiRequest } from "@/utils/apiRequest";
 import { useLocale } from "@/i18n";
 import { useDropdown } from "@/hooks/useDropdown";
 import { billRef, buildInvoicePdf } from "@/utils/documents";
@@ -80,7 +80,7 @@ export default function BillDetailPage({ params }) {
     e.preventDefault();
     setUpdating(true);
     try {
-      await request("/bill/update", {
+      await apiRequest("/bill/update", {
         id: Number(id),
         amount: Number(edit.amount),
         late_fee: Number(edit.late_fee || 0),
@@ -107,7 +107,7 @@ export default function BillDetailPage({ params }) {
     e.preventDefault();
     setAdding(true);
     try {
-      await request("/bill/payment", {
+      await apiRequest("/bill/payment", {
         id: Number(id),
         amount: Number(amount),
         method,
@@ -135,7 +135,7 @@ export default function BillDetailPage({ params }) {
     if (!window.confirm(t("confirm_void_bill"))) return;
     setUpdating(true);
     try {
-      await request("/bill/void", { id: Number(id) });
+      await apiRequest("/bill/void", { id: Number(id) });
       toast.success(t("bill_voided"));
       reload();
     } catch (err) {

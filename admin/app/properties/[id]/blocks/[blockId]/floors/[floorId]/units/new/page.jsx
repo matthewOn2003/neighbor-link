@@ -5,7 +5,7 @@ import { useRouter } from "@/i18n/navigation";
 import { FormPage, FormSection, Input, Select, useToast, Spinner } from "@/components/ui";
 import { useDropdown } from "@/hooks/useDropdown";
 import { useApiData } from "@/hooks/useApiData";
-import { request } from "@/utils/request";
+import { apiRequest } from "@/utils/apiRequest";
 import { useLocale } from "@/i18n";
 import { apiErrorMessage } from "@/utils/errors";
 
@@ -45,7 +45,7 @@ export default function NewUnitPage({ params }) {
 
     setSubmitting(true);
     try {
-      await request("/property/unit/create", {
+      await apiRequest("/property/unit/create", {
         block_id: Number(blockId),
         floor_id: Number(floorId),
         code: form.code.trim(),

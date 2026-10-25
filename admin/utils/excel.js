@@ -1,5 +1,5 @@
 import * as XLSX from "xlsx";
-import { request } from "@/utils/request";
+import { apiRequest } from "@/utils/apiRequest";
 
 // 导出用：把 rows 按 columns 生成 xlsx 并触发下载。
 // columns: [{ label, get: (row) => value }]
@@ -48,7 +48,7 @@ export async function fetchAllRows(api, params, pageSize = 100) {
   let page = 1;
   // 上限保护，防止异常接口导致死循环
   for (let guard = 0; guard < 1000; guard += 1) {
-    const data = await request(api, { ...params, current_page: page, per_page: pageSize });
+    const data = await apiRequest(api, { ...params, current_page: page, per_page: pageSize });
     const list = data?.list ?? [];
     const total = data?.pagination?.total ?? 0;
     all.push(...list);

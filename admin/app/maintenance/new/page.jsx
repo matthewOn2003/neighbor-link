@@ -6,7 +6,7 @@ import { useLocale } from "@/i18n";
 import { FormPage, FormSection, Input, Select, Textarea, useToast, Spinner } from "@/components/ui";
 import { useDropdown } from "@/hooks/useDropdown";
 import { useApiData } from "@/hooks/useApiData";
-import { request } from "@/utils/request";
+import { apiRequest } from "@/utils/apiRequest";
 import { apiErrorMessage } from "@/utils/errors";
 
 export default function NewMaintenancePage() {
@@ -58,7 +58,7 @@ export default function NewMaintenancePage() {
 
     setSubmitting(true);
     try {
-      const created = await request("/maintenance/create", {
+      const created = await apiRequest("/maintenance/create", {
         title: form.title.trim(),
         description: form.description.trim(),
         category: form.category,

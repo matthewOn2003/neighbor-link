@@ -5,7 +5,7 @@ import { useRouter } from "@/i18n/navigation";
 import { EmptyState, FormPage, FormSection, Input, Select, useToast, Spinner } from "@/components/ui";
 import { useDropdown } from "@/hooks/useDropdown";
 import { useApiData } from "@/hooks/useApiData";
-import { request } from "@/utils/request";
+import { apiRequest } from "@/utils/apiRequest";
 import { useLocale } from "@/i18n";
 import { apiErrorMessage } from "@/utils/errors";
 
@@ -14,7 +14,7 @@ async function findUnitOnFloor(floorId, unitId) {
   let page = 1;
   let lastPage = 1;
   do {
-    const res = await request("/property/unit/list", {
+    const res = await apiRequest("/property/unit/list", {
       floor_id: String(floorId),
       current_page: page,
       per_page: 100,
@@ -122,7 +122,7 @@ function EditUnitForm({ unit, floorHref, backLabel, unitId }) {
 
     setSubmitting(true);
     try {
-      await request("/property/unit/update", {
+      await apiRequest("/property/unit/update", {
         id: Number(unitId),
         code: form.code.trim(),
         bedrooms: Number(form.bedrooms),

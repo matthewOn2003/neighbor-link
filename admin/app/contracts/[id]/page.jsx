@@ -3,7 +3,7 @@
 import { use, useState } from "react";
 import { Link } from "@/i18n/navigation";
 import { useApiData } from "@/hooks/useApiData";
-import { request } from "@/utils/request";
+import { apiRequest } from "@/utils/apiRequest";
 import { useLocale } from "@/i18n";
 import { Spinner, Input, Textarea, useToast, Icon, PdfPreviewModal, Select, StatusBadge } from "@/components/ui";
 import { buildContractSummaryPdf, contractRef } from "@/utils/documents";
@@ -12,7 +12,7 @@ import { useDropdown } from "@/hooks/useDropdown";
 import { apiErrorMessage } from "@/utils/errors";
 
 async function buildContractPdf(contract) {
-  const tenant = await request("/tenant/detail", { id: contract.tenant_id }).catch(() => null);
+  const tenant = await apiRequest("/tenant/detail", { id: contract.tenant_id }).catch(() => null);
   return buildContractSummaryPdf(contract, tenant);
 }
 
@@ -51,7 +51,7 @@ export default function ContractDetailPage({ params }) {
 
     setSubmitting(true);
     try {
-      await request("/contract/update", {
+      await apiRequest("/contract/update", {
         id: Number(id),
         ...form,
         tenant_id: Number(form.tenant_id),

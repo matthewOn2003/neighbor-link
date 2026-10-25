@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Link } from "@/i18n/navigation";
 import { useDraftFilters } from "@/hooks/useDraftFilters";
 import { useApiData } from "@/hooks/useApiData";
-import { request } from "@/utils/request";
+import { apiRequest } from "@/utils/apiRequest";
 import { useLocale } from "@/i18n";
 import { Icon, DataTable, SummaryCard, Input, Select, DatePicker, ConfirmDialog, useToast, StatusBadge } from "@/components/ui";
 import { fdl, fds } from "@/utils/date";
@@ -50,7 +50,7 @@ export default function UsersPage() {
   async function confirmDelete() {
     setSubmitting(true);
     try {
-      await request("/staff-account/delete", { id: pending.id });
+      await apiRequest("/staff-account/delete", { id: pending.id });
       toast.success(t("record_deleted"));
       pending.reload();
     } catch (err) {
@@ -112,7 +112,7 @@ export default function UsersPage() {
               const all = await fetchAllRows("/staff-position/list", {});
               const position = all.find((p) => p.code.toLowerCase() === values.position_code.toLowerCase());
               if (!position) throw new Error(t("import_position_not_found", { code: values.position_code }));
-              return request("/staff-account/create", {
+              return apiRequest("/staff-account/create", {
                 username: values.username,
                 password: values.password,
                 name: values.name,

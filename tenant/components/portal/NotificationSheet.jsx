@@ -4,7 +4,7 @@ import { useLocale } from "@/i18n";
 import { Icon } from "@/components/ui/Icon";
 import { useToast } from "@/components/ui/Toast";
 import { useApiData } from "@/hooks/useApiData";
-import { request } from "@/utils/request";
+import { apiRequest } from "@/utils/apiRequest";
 import { formatDateTime } from "./format";
 import { EmptyState, GhostButton, LoadingBlock, Sheet } from "./primitives";
 
@@ -20,7 +20,7 @@ export default function NotificationSheet({ onClose, onChanged }) {
 
   async function markRead(params) {
     try {
-      await request("/tenant-portal/notification/read", params);
+      await apiRequest("/tenant-portal/notification/read", params);
       list.reload();
       onChanged();
     } catch {

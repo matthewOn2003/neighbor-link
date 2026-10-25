@@ -5,7 +5,7 @@ import { Link } from "@/i18n/navigation";
 import { Icon, DataTable, Input, Select, StatusBadge, useToast, PdfPreviewModal } from "@/components/ui";
 import { useDropdown } from "@/hooks/useDropdown";
 import { useDraftFilters } from "@/hooks/useDraftFilters";
-import { request } from "@/utils/request";
+import { apiRequest } from "@/utils/apiRequest";
 import { useLocale } from "@/i18n";
 import { buildContractSummaryPdf, contractRef } from "@/utils/documents";
 import { formatMoney } from "@/utils/format";
@@ -14,7 +14,7 @@ import { apiErrorMessage } from "@/utils/errors";
 
 
 async function buildContractPdf(contract) {
-  const tenant = await request("/tenant/detail", { id: contract.tenant_id }).catch(() => null);
+  const tenant = await apiRequest("/tenant/detail", { id: contract.tenant_id }).catch(() => null);
   return buildContractSummaryPdf(contract, tenant);
 }
 
@@ -45,7 +45,7 @@ export default function ContractsPage() {
 
   async function activate(contract, reload) {
     try {
-      await request("/contract/update", {
+      await apiRequest("/contract/update", {
         id: contract.id,
         tenant_id: contract.tenant_id,
         start_date: contract.start_date,

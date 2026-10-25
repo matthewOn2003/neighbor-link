@@ -9,7 +9,7 @@ import { fdl } from "@/utils/date";
 import { RowActions, useStatusOptions } from "@/components/staff/common";
 import { apiErrorMessage } from "@/utils/errors";
 import { labelMap } from "@/utils/collections";
-import { request } from "@/utils/request";
+import { apiRequest } from "@/utils/apiRequest";
 
 export default function DepartmentsPage() {
   const { t } = useLocale();
@@ -33,7 +33,7 @@ export default function DepartmentsPage() {
   async function confirmDelete() {
     setSubmitting(true);
     try {
-      await request("/staff-department/delete", { id: pending.id });
+      await apiRequest("/staff-department/delete", { id: pending.id });
       toast.success(t("record_deleted"));
       pending.reload();
     } catch (err) {
@@ -88,7 +88,7 @@ export default function DepartmentsPage() {
               { key: "description", label: t("description"), sample: "" },
               { key: "status", label: t("status"), sample: "active" },
             ],
-            onRow: (values) => request("/staff-department/create", { ...values, status: values.status || "active" }),
+            onRow: (values) => apiRequest("/staff-department/create", { ...values, status: values.status || "active" }),
           }}
           title={t("departments")}
           description={t("departments_description")}

@@ -5,7 +5,7 @@ import { ConfirmDialog, DataTable, Input, Select, Textarea, useToast, DatePicker
 import { useDraftFilters } from "@/hooks/useDraftFilters";
 import { useDropdown } from "@/hooks/useDropdown";
 import { useLocale } from "@/i18n";
-import { request } from "@/utils/request";
+import { apiRequest } from "@/utils/apiRequest";
 import { fdl } from "@/utils/date";
 import { labelFor, money, usePropertyOptions, useUnitOptions } from "@/components/payments/shared";
 import { apiErrorMessage } from "@/utils/errors";
@@ -82,7 +82,7 @@ function ProofReviewTab() {
     const current = dialog;
     setSubmitting(true);
     try {
-      await request(`/payment-proof/${action}`, { id: current.row.id, ...body });
+      await apiRequest(`/payment-proof/${action}`, { id: current.row.id, ...body });
       toast.success(t(action === "approve" ? "payment_proof_approved" : "payment_proof_rejected"));
     } catch (err) {
       toast.error(

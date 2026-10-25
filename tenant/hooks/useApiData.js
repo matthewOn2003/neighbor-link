@@ -1,15 +1,15 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { request } from "@/utils/request";
+import { apiRequest } from "@/utils/apiRequest";
 
 const EMPTY = { key: null, data: null, error: null };
 
 /**
- * 进页面（或参数变化）时请求接口，返回 { data, loading, error, reload }。
- * - error 是完整的 ApiError 对象（code / message / status），没有错误时为 null。
- * - skip 为 true 时不发请求，例如要等另一个接口的结果才知道参数。
- * - reload() 用同样的参数重新请求。
+ * Enter a page (or when parameters change) and request the API, returning { data, loading, error, reload }.
+ * - error is the complete ApiError object (code / message / status), or null if no error.
+ * - skip is true to not send the request, e.g., when waiting for another API result to determine the parameters.
+ * - reload() re-requests with the same parameters.
  */
 export function useApiData(path, params, { skip = false } = {}) {
   const paramsKey = JSON.stringify(params ?? {});
@@ -20,7 +20,7 @@ export function useApiData(path, params, { skip = false } = {}) {
   useEffect(() => {
     if (skip) return;
     const controller = new AbortController();
-    request(path, JSON.parse(paramsKey), { signal: controller.signal })
+    apiRequest(path, JSON.parse(paramsKey), { signal: controller.signal })
       .then((data) => setState({ key: requestKey, data, error: null }))
       .catch((error) => {
         if (error.name !== "AbortError") setState({ key: requestKey, data: null, error });
