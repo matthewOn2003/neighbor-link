@@ -8,7 +8,6 @@
 body {
   background: var(--scene);
   color: var(--foreground);
-  font-family: SeekSans, "SeekSans Fallback", Arial, Tahoma, sans-serif;
 }
 
 .content-container {
@@ -379,6 +378,7 @@ h1 {
     transition-duration: 1ms !important;
   }
 }
+
 /* 通用卡片、链接、图标按钮、表格分页按钮（原本在各页面里重复写的 Tailwind 组合） */
 .card {
   @apply rounded-2xl border border-line/40 bg-accent p-5 shadow-sm;
