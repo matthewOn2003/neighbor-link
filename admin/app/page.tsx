@@ -25,7 +25,7 @@ export default function Home() {
   const router = useRouter();
   const [login] = useLoginMutation();
   const { t } = useLocale();
-  const [form, setForm] = useState<LoginFields>({ username: "admin", password: "" });
+  const [form, setForm] = useState<LoginFields>({ username: "", password: "" });
   const [fieldErrors, setFieldErrors] = useState<Partial<LoginFields>>({});
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -65,7 +65,7 @@ export default function Home() {
           <LangSelect />
         </div>
         <FormGuard
-          initialValues={{ username: "admin", password: "" }}
+          initialValues={{ username: "", password: "" }}
           onSubmit={handleSubmit}
           className="login-form"
           tokens={{ radius: "6px", focusColor: "#315b57", buttonBackground: "#315b57" }}
