@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"log"
 
 	staffdelivery "backend/internal/staff/delivery"
@@ -52,9 +51,11 @@ import (
 )
 
 func main() {
-	// .env is optional: on Render the variables come from the platform environment.
-	if err := godotenv.Load(); err != nil && !errors.Is(err, os.ErrNotExist) {
-		log.Fatalf("加载 .env 失败: %v", err)
+	// .env is optional: Cloud Run and Render provide configuration through the environment.
+	if _, err := os.Stat(".env"); err == nil {
+		if err := godotenv.Load(); err != nil {
+			log.Fatalf("加载 .env 失败: %v", err)
+		}
 	}
 
 	db, err := database.InitPostgres(requiredEnv("DATABASE_URL"))
@@ -124,7 +125,7 @@ func main() {
 	maintenanceUsecase := maintenanceusecase.NewMaintenanceUsecase(maintenancerepository.NewSQLiteRepository(db))
 	complaintUsecase := complaintusecase.NewComplaintUsecase(complaintrepository.NewSQLiteRepository(db))
 
-	serverAddress := requiredEnv("SERVER_ADDRESS")
+	serverAddress := listenAddress()
 	tokenSecret := requiredEnv("AUTH_SECRET")
 	allowedOrigins := splitEnv(requiredEnv("CORS_ALLOWED_ORIGINS"))
 	cookieSecure := strings.EqualFold(strings.TrimSpace(os.Getenv("COOKIE_SECURE")), "true")
@@ -176,6 +177,14 @@ func requiredEnv(name string) string {
 		log.Fatalf("required environment variable %s is not set", name)
 	}
 	return value
+}
+
+// listenAddress uses PORT when the platform sets it (Cloud Run), otherwise SERVER_ADDRESS.
+func listenAddress() string {
+	if port := strings.TrimSpace(os.Getenv("PORT")); port != "" {
+		return ":" + port
+	}
+	return requiredEnv("SERVER_ADDRESS")
 }
 
 func splitEnv(value string) []string {

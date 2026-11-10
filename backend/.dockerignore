@@ -1,0 +1,10 @@
+# Keep local secrets and databases out of the build context (gcloud --source uploads it to Cloud Build).
+.env
+.env.*
+!.env.example
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+.git
