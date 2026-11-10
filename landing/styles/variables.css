@@ -1,0 +1,21 @@
+:root {
+  --paper: #f6f5f1;
+  --ink: #1b1d2a;
+  --muted: #696b74;
+  --line: #ddddd9;
+  --night: #191d2a;
+  --lavender: #eeebf4;
+  --plum: #56436f;
+  --lilac: #d2c4ed;
+  --sage: #315b4d;
+  --mist: #e8efea;
+  --gold: #e9a52c;
+  --primary: #1b1d2a;
+  --primary-content: #ffffff;
+
+  /* Components */
+  --button-radius: 0.5rem;
+  --border-width: 1px;
+  --transition-duration: 160ms;
+  --focus-ring-width: 3px;
+}
