@@ -10,9 +10,7 @@
   "nav_tenants": "租客",
   "nav_tenant_portal": "租客门户",
   "nav_admin_portal": "物业管理门户",
-  "nav_open_menu": "打开菜单",
-  "nav_close_menu": "关闭菜单",
-  "nav_menu": "菜单",
+  "nav_toggle": "导航",
   "lang_other_label": "English",
   "lang_other_aria": "以英文查看此页面",
 

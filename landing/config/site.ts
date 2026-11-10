@@ -10,7 +10,7 @@ const DEFAULT_URLS = {
 export type Portal = keyof typeof DEFAULT_URLS;
 
 function baseUrl(portal: Portal): string {
-  const configured = portal === "tenant" ? process.env.NEXT_PUBLIC_TENANT_URL : process.env.NEXT_PUBLIC_ADMIN_URL;
+  const configured = portal === "tenant" ? "https://neighbor-link-tenant.onrender.com" : "https://neighbor-link-admin.onrender.com";
   return (configured || DEFAULT_URLS[portal]).replace(/\/+$/, "");
 }
 

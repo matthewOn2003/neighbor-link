@@ -1,7 +1,7 @@
 import Image from "next/image";
 import type { Locale, T } from "@/i18n";
 import { portalUrl } from "@/config/site";
-import { PortalButton, SvgIcon } from "@/components/ui";
+import { SvgIcon } from "@/components/ui";
 
 const chipTone = {
   lavender: "bg-lavender text-plum",
@@ -15,9 +15,9 @@ export function Hero({ locale, t }: { locale: Locale; t: T }) {
       <Image src="/design/e56f1.png" alt="" fill priority sizes="100vw" className="-z-10 object-cover" />
       <div className="absolute inset-0 -z-10 bg-gradient-to-r from-night via-night/85 to-night/20" />
 
-      <div className="mx-auto flex max-w-site flex-col px-6 pb-7 pt-12 md:px-8 md:pb-10 md:pt-20 lg:h-[720px] xl:h-[800px]">
+      <div className="mx-auto flex max-w-site flex-col px-6 pb-7 pt-12 md:px-8 md:pb-16 md:pt-20 lg:h-[720px] xl:h-[800px]">
         <div className="grid flex-1 items-end gap-12 lg:grid-cols-[1fr_22rem]">
-          <div className="flex flex-col justify-center lg:pt-24">
+          <div className="flex flex-col justify-center lg:pt-auto">
             <p className="kicker text-white/75 before:bg-lilac">{t("hero_eyebrow")}</p>
             <h1 className="display mt-8 text-[46px] md:text-[clamp(3rem,7vw,5.5rem)]">
               <span className="block">{t("hero_title")}</span>
@@ -26,26 +26,25 @@ export function Hero({ locale, t }: { locale: Locale; t: T }) {
             <p className="mt-6 max-w-md text-base leading-relaxed text-white/85 md:mt-7 md:text-lg">{t("hero_body")}</p>
 
             <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-              <a href="#platform" className="btn h-[52px] w-full bg-lilac text-ink hover:bg-lilac/90 sm:w-auto">
+              {/* <a href="#platform" className="btn h-[52px] w-full bg-lilac text-ink hover:bg-lilac/90 sm:w-auto">
                 {t("hero_explore")}
                 <SvgIcon src="/design/0e2db.svg" size={16} />
+              </a> */}
+              <a
+                href={portalUrl("admin", locale)}
+                className="btn h-[52px] w-full bg-lilac text-ink hover:bg-lilac/90 sm:w-auto"
+              >
+                {t("hero_admin_cta")}
+                <SvgIcon src="/design/0e2db.svg" size={16} />
               </a>
-              <PortalButton
-                portal="admin"
-                locale={locale}
-                label={t("hero_admin_cta")}
-                variant="outline"
-                arrow
-                arrowClassName="brightness-0 invert"
-                className="h-[52px] w-full border-white/40 bg-transparent text-white hover:border-white sm:w-auto"
-              />
+              <a
+                href={portalUrl("tenant", locale)}
+                className="btn btn-outline h-[52px] w-full border-white/40 bg-transparent text-white hover:border-white sm:w-auto"
+              >
+                {t("hero_tenant_cta")}
+                <SvgIcon src="/design/0e2db.svg" size={16} className="brightness-0 invert" />
+              </a>
             </div>
-            <a
-              href={portalUrl("tenant", locale)}
-              className="mt-3 flex h-[52px] w-full items-center justify-center text-sm font-medium text-white underline-offset-4 hover:underline md:mt-5 md:h-auto md:w-fit md:justify-start"
-            >
-              {t("hero_tenant_cta")}
-            </a>
           </div>
 
           <aside className="rounded-xl bg-paper p-[22px] text-ink shadow-2xl md:p-6">
@@ -66,10 +65,10 @@ export function Hero({ locale, t }: { locale: Locale; t: T }) {
           </aside>
         </div>
 
-        <div className="mt-12 hidden flex-col gap-3 text-sm text-white/80 lg:mt-16 lg:flex">
+        {/* <div className="mt-12 hidden flex-col gap-3 text-sm text-white/80 lg:mt-16 lg:flex">
           <SvgIcon src="/design/766a5.svg" size={16} className="brightness-0 invert" />
           <p>{t("ft_tagline")}</p>
-        </div>
+        </div> */}
       </div>
     </section>
   );
@@ -225,14 +224,13 @@ export function ManagerSection({ locale, t }: { locale: Locale; t: T }) {
         </ol>
 
         <div className="mt-10 md:mt-12">
-          <PortalButton
-            portal="admin"
-            locale={locale}
-            label={t("mg_cta")}
-            variant="light"
-            arrow
-            className="h-[52px] w-full bg-lilac text-ink hover:bg-lilac/90 md:w-auto"
-          />
+          <a
+            href={portalUrl("admin", locale)}
+            className="btn btn-light h-[52px] w-full bg-lilac text-ink hover:bg-lilac/90 md:w-auto"
+          >
+            {t("mg_cta")}
+            <SvgIcon src="/design/0e2db.svg" size={16} />
+          </a>
           <p className="mt-4 text-sm text-white/50">{t("mg_cta_note")}</p>
         </div>
       </div>
@@ -268,14 +266,10 @@ export function TenantSection({ locale, t }: { locale: Locale; t: T }) {
             ))}
           </ol>
 
-          <PortalButton
-            portal="tenant"
-            locale={locale}
-            label={t("tn_cta")}
-            variant="outline"
-            arrow
-            className="mt-10 h-[52px] w-full md:w-auto"
-          />
+          <a href={portalUrl("tenant", locale)} className="btn btn-outline mt-10 h-[52px] w-full md:w-auto">
+            {t("tn_cta")}
+            <SvgIcon src="/design/0e2db.svg" size={16} />
+          </a>
         </div>
 
         <figure>
@@ -396,23 +390,20 @@ export function FinalCta({ locale, t }: { locale: Locale; t: T }) {
         <h2 className="display mt-7 max-w-3xl text-[46px] font-medium md:text-7xl">{t("cta_title")}</h2>
         <p className="mt-6 max-w-xl text-base leading-relaxed text-[#e0e0e5] md:text-lg">{t("cta_body")}</p>
         <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-          <PortalButton
-            portal="admin"
-            locale={locale}
-            label={t("cta_admin")}
-            variant="light"
-            arrow
-            className="h-[52px] w-full bg-lilac text-ink hover:bg-lilac/90 sm:w-auto"
-          />
-          <PortalButton
-            portal="tenant"
-            locale={locale}
-            label={t("cta_tenant")}
-            variant="outline"
-            arrow
-            arrowClassName="brightness-0 invert"
-            className="h-[52px] w-full border-white/45 bg-transparent text-white hover:border-white sm:w-auto"
-          />
+          <a
+            href={portalUrl("admin", locale)}
+            className="btn btn-light h-[52px] w-full bg-lilac text-ink hover:bg-lilac/90 sm:w-auto"
+          >
+            {t("cta_admin")}
+            <SvgIcon src="/design/0e2db.svg" size={16} />
+          </a>
+          <a
+            href={portalUrl("tenant", locale)}
+            className="btn btn-outline h-[52px] w-full border-white/45 bg-transparent text-white hover:border-white sm:w-auto"
+          >
+            {t("cta_tenant")}
+            <SvgIcon src="/design/0e2db.svg" size={16} className="brightness-0 invert" />
+          </a>
         </div>
       </div>
     </section>

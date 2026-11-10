@@ -27,6 +27,18 @@ body {
   outline-offset: 2px;
 }
 
+#mobile-nav-toggle ~ label .mobile-nav-icon-close {
+  display: none;
+}
+
+#mobile-nav-toggle:checked ~ label .mobile-nav-icon-menu {
+  display: none;
+}
+
+#mobile-nav-toggle:checked ~ label .mobile-nav-icon-close {
+  display: inline-block;
+}
+
 .material-symbols-outlined {
   font-family: "Material Symbols Outlined";
   font-weight: normal;

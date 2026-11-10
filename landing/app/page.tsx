@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import Landing from "@/components/Landing";
 import { createT } from "@/i18n";
-import { getRequestLocale } from "@/i18n/request";
 
-export async function generateMetadata(): Promise<Metadata> {
-  const t = createT(await getRequestLocale());
+const locale = "en" as const;
+
+export function generateMetadata(): Metadata {
+  const t = createT(locale);
   return {
     title: t("meta_title"),
     description: t("meta_description"),
@@ -12,6 +13,6 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function Page() {
-  return <Landing locale={await getRequestLocale()} />;
+export default function Page() {
+  return <Landing locale={locale} />;
 }
