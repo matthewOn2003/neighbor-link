@@ -97,6 +97,12 @@ JOIN k ON k.n <= b.units_per_floor;
 -- 部分单位标记为维护中
 UPDATE units SET status = 'maintenance' WHERE id % 7 = 0;
 
+-- 预置登录账号 (预生成 bcrypt hash，明文均为 123456)
+-- admin / tenant 为本地测试账号
+INSERT INTO auth_users (id, username, password_hash, role) VALUES
+(1, 'admin', '$2a$10$BP5Jh2U6suq/gH6ilBOrTO7PVKNrE2Okn5Ywmz2s4EysDPbEg.KOy', 'admin'),
+(2, 'tenant', '$2a$10$BP5Jh2U6suq/gH6ilBOrTO7PVKNrE2Okn5Ywmz2s4EysDPbEg.KOy', 'tenant');
+
 -- 预置租客账号数据 (预生成 bcrypt hash，明文分别为 Tenant#Alice1, Tenant#Bob1, ...)
 -- Tenant#Alice1  -> $2a$10$wEeVnC33YV7WbL2K235kX.l0bL/y8eZc9K5V4m3oG2jL.Fh7oMWeW
 -- 所有 mock 租客账号 role 均为 'tenant'

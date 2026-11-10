@@ -18,23 +18,6 @@ func NewUserUsecase(repo *repository.SQLiteRepository) *UserUsecase {
 	return &UserUsecase{repo: repo}
 }
 
-func (uc *UserUsecase) SeedUser(username, password, role string) error {
-	_, err := uc.repo.FindByUsername(username)
-	if err == nil {
-		return nil
-	}
-	if !errors.Is(err, gorm.ErrRecordNotFound) {
-		return err
-	}
-
-	passwordHash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	if err != nil {
-		return err
-	}
-	_, err = uc.repo.Create(username, string(passwordHash), role)
-	return err
-}
-
 func (uc *UserUsecase) FindByUsername(username string) (*repository.User, error) {
 	return uc.repo.FindByUsername(username)
 }

@@ -76,14 +76,6 @@ func main() {
 	}
 	userUsecase := usecase.NewUserUsecase(userRepo)
 
-	adminPassword := requiredEnv("ADMIN_PASSWORD")
-	tenantPassword := requiredEnv("TENANT_PASSWORD")
-	if err := userUsecase.SeedUser("admin", adminPassword, "admin"); err != nil {
-		log.Fatalf("初始化 admin 账号失败: %v", err)
-	}
-	if err := userUsecase.SeedUser("tenant", tenantPassword, "tenant"); err != nil {
-		log.Fatalf("初始化 tenant 账号失败: %v", err)
-	}
 	if err := staffdelivery.SeedRootAdmin(db, "admin"); err != nil {
 		log.Fatalf("初始化 admin 员工账号失败: %v", err)
 	}

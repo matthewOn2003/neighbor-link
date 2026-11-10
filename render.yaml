@@ -21,11 +21,6 @@ services:
         value: https://neighbor-link-admin.onrender.com,https://neighbor-link-tenant.onrender.com
       - key: AUTH_SECRET
         generateValue: true
-      - key: ADMIN_PASSWORD
-        sync: false
-      - key: TENANT_PASSWORD
-        sync: false
-
   - type: web
     name: neighbor-link-admin
     runtime: node

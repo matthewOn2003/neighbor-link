@@ -107,8 +107,6 @@ Create `backend/.env` with the variables below. The server loads it automaticall
 DB_PATH=local.db
 SERVER_ADDRESS=:8080
 AUTH_SECRET=local-development-secret
-ADMIN_PASSWORD=123456
-TENANT_PASSWORD=123456
 CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:3001
 ```
 
@@ -150,8 +148,6 @@ npm --prefix admin run dev -- -p 3001  # http://localhost:3001
 | `DB_PATH` | Yes | backend | Path to the SQLite database file |
 | `SERVER_ADDRESS` | Yes | backend | Address the server listens on, such as `:8080` |
 | `AUTH_SECRET` | Yes | backend | Secret used to sign authentication tokens. Use a strong value outside local development |
-| `ADMIN_PASSWORD` | Yes | backend | Password for the admin account. Local development only |
-| `TENANT_PASSWORD` | Yes | backend | Password for the tenant account. Local development only |
 | `CORS_ALLOWED_ORIGINS` | Yes | backend | Comma-separated list of frontend origins allowed to call the API |
 | `APP_ENV` | No | backend | Set to `development` to enable demo seeding |
 | `DEMO_SEED_PATH` | No | backend | SQL file to load demo data from when `APP_ENV=development` |
@@ -170,7 +166,7 @@ File uploads (payment proofs, property covers, and attachments) require the `R2_
 
 ## Development Accounts
 
-Local accounts use the passwords set by `ADMIN_PASSWORD` and `TENANT_PASSWORD`. Do not reuse these values anywhere else.
+Local accounts for development: username `admin` (role admin) and `tenant` (role tenant), both with password `123456`. They are inserted by the `migrations/002_seed_data.sql` migration.
 
 ## Validation
 
@@ -192,7 +188,7 @@ npm --prefix tenant run build
 
 - Passwords are stored as bcrypt hashes.
 - Authentication tokens are sent in HttpOnly cookies.
-- Replace `AUTH_SECRET`, `ADMIN_PASSWORD`, and `TENANT_PASSWORD` before any shared or deployed environment.
+- Replace `AUTH_SECRET` and the seeded `admin` / `tenant` passwords before any shared or deployed environment.
 - Never commit `.env` files, database files, or R2 credentials.
 
 ## Roadmap
@@ -314,8 +310,6 @@ neighbor-link/
 DB_PATH=local.db
 SERVER_ADDRESS=:8080
 AUTH_SECRET=local-development-secret
-ADMIN_PASSWORD=123456
-TENANT_PASSWORD=123456
 CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:3001
 ```
 
@@ -357,8 +351,6 @@ npm --prefix admin run dev -- -p 3001  # http://localhost:3001
 | `DB_PATH` | 是 | 后端 | SQLite 数据库文件路径 |
 | `SERVER_ADDRESS` | 是 | 后端 | 服务监听地址，例如 `:8080` |
 | `AUTH_SECRET` | 是 | 后端 | 用于签发认证令牌的密钥。非本地环境请使用强随机值 |
-| `ADMIN_PASSWORD` | 是 | 后端 | 后台账号的密码，仅用于本地开发 |
-| `TENANT_PASSWORD` | 是 | 后端 | 租客账号的密码，仅用于本地开发 |
 | `CORS_ALLOWED_ORIGINS` | 是 | 后端 | 允许调用 API 的前端来源，用英文逗号分隔 |
 | `APP_ENV` | 否 | 后端 | 设为 `development` 时启用演示数据加载 |
 | `DEMO_SEED_PATH` | 否 | 后端 | `APP_ENV=development` 时加载的演示数据 SQL 文件 |
@@ -377,7 +369,7 @@ npm --prefix admin run dev -- -p 3001  # http://localhost:3001
 
 ## 开发账号
 
-本地账号使用 `ADMIN_PASSWORD` 和 `TENANT_PASSWORD` 设置的密码。请勿在其他地方复用这些值。
+本地开发账号：用户名 `admin`（admin 角色）和 `tenant`（tenant 角色），密码均为 `123456`。二者由 `migrations/002_seed_data.sql` 迁移写入数据库。
 
 ## 验证
 
@@ -399,7 +391,7 @@ npm --prefix tenant run build
 
 - 密码以 bcrypt 哈希形式存储。
 - 认证令牌通过 HttpOnly Cookie 传递。
-- 在任何共享或部署环境中，请替换 `AUTH_SECRET`、`ADMIN_PASSWORD` 和 `TENANT_PASSWORD`。
+- 在任何共享或部署环境中，请替换 `AUTH_SECRET` 以及种子数据中 `admin` / `tenant` 账号的密码。
 - 不要提交 `.env` 文件、数据库文件或 R2 凭证。
 
 ## 路线图
