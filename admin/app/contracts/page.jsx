@@ -96,7 +96,6 @@ export default function ContractsPage() {
           filters={
             <>
               <Input
-                variant="filter"
                 name="keyword"
                 label={t("search_keyword")}
                 value={draft.keyword}
@@ -105,7 +104,6 @@ export default function ContractsPage() {
               />
 
               <Select
-                variant="filter"
                 name="status"
                 label={t("status")}
                 value={draft.status}

@@ -99,7 +99,6 @@ export default function DepartmentsPage() {
           filters={(
             <>
               <Input
-                variant="filter"
                 name="keyword"
                 label={t("search_keyword")}
                 value={draft.keyword}
@@ -108,7 +107,6 @@ export default function DepartmentsPage() {
               />
 
               <Input
-                variant="filter"
                 name="code"
                 label={t("code")}
                 value={draft.code}
@@ -116,7 +114,6 @@ export default function DepartmentsPage() {
               />
 
               <Select
-                variant="filter"
                 name="status"
                 label={t("status")}
                 value={draft.status}
@@ -125,7 +122,6 @@ export default function DepartmentsPage() {
               />
 
               <Input
-                variant="filter"
                 name="location"
                 label={t("location")}
                 value={draft.location}
@@ -133,7 +129,6 @@ export default function DepartmentsPage() {
               />
 
               <Input
-                variant="filter"
                 name="manager_name"
                 label={t("manager_name")}
                 value={draft.manager_name}
@@ -141,7 +136,6 @@ export default function DepartmentsPage() {
               />
 
               <DatePicker
-                variant="filter"
                 name="created_from"
                 label={t("created_from")}
                 value={draft.created_from}
@@ -150,7 +144,6 @@ export default function DepartmentsPage() {
               />
 
               <DatePicker
-                variant="filter"
                 name="created_to"
                 label={t("created_to")}
                 value={draft.created_to}

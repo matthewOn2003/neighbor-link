@@ -89,7 +89,6 @@ export default function TenantsPage() {
           filters={(
             <>
               <Select
-                variant="filter"
                 name="status"
                 label={t("status")}
                 value={draft.status}
@@ -98,7 +97,6 @@ export default function TenantsPage() {
               />
 
               <Input
-                variant="filter"
                 name="property_unit"
                 label={t("property_and_unit")}
                 value={draft.property_unit}
@@ -106,7 +104,6 @@ export default function TenantsPage() {
               />
 
               <Input
-                variant="filter"
                 name="tenant_name"
                 label={t("tenant_name")}
                 value={draft.tenant_name}
@@ -114,7 +111,6 @@ export default function TenantsPage() {
               />
 
               <Input
-                variant="filter"
                 name="phone"
                 label={t("phone")}
                 value={draft.phone}
@@ -122,7 +118,6 @@ export default function TenantsPage() {
               />
 
               <Input
-                variant="filter"
                 name="email"
                 label={t("email")}
                 value={draft.email}
@@ -130,7 +125,6 @@ export default function TenantsPage() {
               />
 
               <DatePicker
-                variant="filter"
                 name="contract_end_from"
                 label={t("contract_end_from")}
                 value={draft.contract_end_from}
@@ -139,7 +133,6 @@ export default function TenantsPage() {
               />
 
               <DatePicker
-                variant="filter"
                 name="contract_end_to"
                 label={t("contract_end_to")}
                 value={draft.contract_end_to}

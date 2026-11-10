@@ -121,19 +121,17 @@ export default function MaintenancePage() {
           filters={(
             <>
               <Input
-                variant="filter"
                 name="keyword"
                 label={t("search_keyword")}
                 value={draft.keyword}
                 placeholder={t("search_maintenance")}
                 onChange={update("keyword")}
               />
-              <Select variant="filter" name="status" label={t("status")} value={draft.status} onChange={update("status")} options={statusOptions} />
-              <Select variant="filter" name="priority" label={t("priority")} value={draft.priority} onChange={update("priority")} options={priorityOptions} />
-              <Select variant="filter" name="category" label={t("category")} value={draft.category} onChange={update("category")} options={categoryOptions} />
-              <Select variant="filter" name="property_id" label={t("property")} value={draft.property_id} onChange={update("property_id")} options={propertyOptions} />
+              <Select name="status" label={t("status")} value={draft.status} onChange={update("status")} options={statusOptions} />
+              <Select name="priority" label={t("priority")} value={draft.priority} onChange={update("priority")} options={priorityOptions} />
+              <Select name="category" label={t("category")} value={draft.category} onChange={update("category")} options={categoryOptions} />
+              <Select name="property_id" label={t("property")} value={draft.property_id} onChange={update("property_id")} options={propertyOptions} />
               <DatePicker
-                variant="filter"
                 name="created_from"
                 label={t("created_from")}
                 value={draft.created_from}
@@ -141,7 +139,6 @@ export default function MaintenancePage() {
                 onChange={update("created_from")}
               />
               <DatePicker
-                variant="filter"
                 name="created_to"
                 label={t("created_to")}
                 value={draft.created_to}

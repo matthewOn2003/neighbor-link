@@ -48,7 +48,6 @@ export default function BillsPage() {
           filters={(
             <>
               <Input
-                variant="filter"
                 name="keyword"
                 label={t("search_keyword")}
                 value={draft.keyword}
@@ -57,7 +56,6 @@ export default function BillsPage() {
               />
 
               <Select
-                variant="filter"
                 name="status"
                 label={t("status")}
                 value={draft.status}
@@ -66,7 +64,6 @@ export default function BillsPage() {
               />
 
               <Input
-                variant="filter"
                 type="month"
                 name="period"
                 label={t("billing_period")}

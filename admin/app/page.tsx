@@ -7,7 +7,6 @@ import { useLocale } from "@/i18n";
 import { useLoginMutation } from "@/store/authApi";
 import LangSelect from "@/components/LangSelect";
 import { Input } from "@/components/ui";
-import { FormButton, FormError, FormGuard } from "@matthew2003/formguard";
 
 function getErrorMessage(error: unknown): string | undefined {
   if (typeof error === "object" && error !== null && "data" in error) {
@@ -58,17 +57,25 @@ export default function Home() {
   }
 
   return (
-    <main className="login-shell">
-      <section className="login-panel">
-        <div className="login-header">
-          <Image className="eyebrow" src="/neighbor-link-logo.svg" alt={t("brand_name")} width={1197} height={356} priority />
+    <main className="min-h-screen grid place-items-center p-6 bg-[url('/login-bg.jpg')] bg-cover bg-center">
+      <section className="panel w-full max-w-md">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3 min-w-0">
+            <Image src="/brand/logo.png" alt="" width={40} height={40} priority />
+            <span className="text-lg font-bold text-scene-content truncate">{t("brand_name")}</span>
+          </div>
           <LangSelect />
         </div>
-        <FormGuard
-          initialValues={{ username: "", password: "" }}
-          onSubmit={handleSubmit}
-          className="login-form"
-          tokens={{ radius: "6px", focusColor: "#315b57", buttonBackground: "#315b57" }}
+
+        <h1 className="text-2xl font-bold text-scene-content">{t("sign_in")}</h1>
+
+        <form
+          noValidate
+          className="grid gap-[var(--field-gap)]"
+          onSubmit={(event) => {
+            event.preventDefault();
+            handleSubmit();
+          }}
         >
           <Input
             name="username"
@@ -85,9 +92,15 @@ export default function Home() {
             error={fieldErrors.password}
             onChange={updateField("password")}
           />
-          <FormError>{error}</FormError>
-          <FormButton loading={isLoading}>{isLoading ? t("signing_in") : t("sign_in")}</FormButton>
-        </FormGuard>
+          {error && (
+            <p role="alert" className="field-error">
+              {error}
+            </p>
+          )}
+          <button type="submit" className="btn btn-primary w-full" disabled={isLoading}>
+            {isLoading ? t("signing_in") : t("sign_in")}
+          </button>
+        </form>
       </section>
     </main>
   );

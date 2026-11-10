@@ -114,7 +114,6 @@ export default function FloorDetailPage({ params }) {
           filters={(
             <>
               <Input
-                variant="filter"
                 name="keyword"
                 label={t("unit_code")}
                 value={draft.keyword}
@@ -122,7 +121,6 @@ export default function FloorDetailPage({ params }) {
               />
 
               <Select
-                variant="filter"
                 name="status"
                 label={t("status")}
                 value={draft.status}
@@ -131,7 +129,6 @@ export default function FloorDetailPage({ params }) {
               />
 
               <Select
-                variant="filter"
                 name="bedrooms"
                 label={t("bedrooms")}
                 value={draft.bedrooms}
@@ -140,7 +137,6 @@ export default function FloorDetailPage({ params }) {
               />
 
               <Input
-                variant="filter"
                 name="size_min"
                 type="number"
                 label={t("size_min")}
@@ -149,7 +145,6 @@ export default function FloorDetailPage({ params }) {
               />
 
               <Input
-                variant="filter"
                 name="size_max"
                 type="number"
                 label={t("size_max")}
@@ -158,7 +153,6 @@ export default function FloorDetailPage({ params }) {
               />
 
               <Input
-                variant="filter"
                 name="tenant_name"
                 label={t("tenant_name")}
                 value={draft.tenant_name}

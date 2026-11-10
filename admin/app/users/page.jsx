@@ -134,7 +134,6 @@ export default function UsersPage() {
           filters={(
             <>
               <Input
-                variant="filter"
                 name="keyword"
                 label={t("search_keyword")}
                 value={draft.keyword}
@@ -143,7 +142,6 @@ export default function UsersPage() {
               />
 
               <Input
-                variant="filter"
                 name="username"
                 label={t("username")}
                 value={draft.username}
@@ -151,7 +149,6 @@ export default function UsersPage() {
               />
 
               <Select
-                variant="filter"
                 name="department_id"
                 label={t("department")}
                 value={draft.department_id}
@@ -160,7 +157,6 @@ export default function UsersPage() {
               />
 
               <Select
-                variant="filter"
                 name="position_id"
                 label={t("position")}
                 value={draft.position_id}
@@ -169,7 +165,6 @@ export default function UsersPage() {
               />
 
               <Select
-                variant="filter"
                 name="status"
                 label={t("status")}
                 value={draft.status}
@@ -178,7 +173,6 @@ export default function UsersPage() {
               />
 
               <DatePicker
-                variant="filter"
                 name="hire_date_from"
                 label={t("hire_date_from")}
                 value={draft.hire_date_from}
@@ -187,7 +181,6 @@ export default function UsersPage() {
               />
 
               <DatePicker
-                variant="filter"
                 name="hire_date_to"
                 label={t("hire_date_to")}
                 value={draft.hire_date_to}

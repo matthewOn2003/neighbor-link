@@ -23,32 +23,28 @@ export default function LangSelect() {
       <button
         type="button"
         onClick={() => setIsOpen((open) => !open)}
-        className="px-3 py-2 text-sm rounded-md font-semibold transition-colors"
-        style={{ color: "var(--foreground)" }}
+        aria-haspopup="listbox"
+        aria-expanded={isOpen}
+        className="btn btn-ghost"
       >
         {localeProperties.name_short}
       </button>
 
       {isOpen && (
-        <div
-          className="absolute right-0 top-full mt-2 min-w-[8rem] py-2 z-50"
-          style={{
-            background: "#ffffff",
-            border: "var(--border-width) solid var(--panel-border)",
-            borderRadius: "var(--button-radius)",
-            boxShadow: "var(--panel-shadow)",
-          }}
-        >
+        <div role="listbox" className="absolute right-0 top-full mt-2 min-w-[8rem] p-1 z-50 flex flex-col gap-0.5 rounded-xl border border-line bg-accent shadow-lg">
           {locales.map((item) => (
             <button
               key={item.code}
               type="button"
+              role="option"
+              aria-selected={item.code === locale}
               onClick={() => {
                 setLocale(item.code);
                 setIsOpen(false);
               }}
-              className="block w-full text-left px-4 py-2 text-sm transition-colors hover:opacity-70"
-              style={{ color: item.code === locale ? "var(--primary)" : "var(--foreground)" }}
+              className={`block w-full text-left rounded-lg px-3 py-2 text-sm transition-colors hover:bg-primary/10 ${
+                item.code === locale ? "text-primary font-semibold" : "text-scene-content"
+              }`}
             >
               {item.name}
             </button>

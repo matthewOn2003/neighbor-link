@@ -128,7 +128,6 @@ export default function PositionsPage() {
           filters={(
             <>
               <Input
-                variant="filter"
                 name="keyword"
                 label={t("search_keyword")}
                 value={draft.keyword}
@@ -137,7 +136,6 @@ export default function PositionsPage() {
               />
 
               <Input
-                variant="filter"
                 name="code"
                 label={t("code")}
                 value={draft.code}
@@ -145,7 +143,6 @@ export default function PositionsPage() {
               />
 
               <Select
-                variant="filter"
                 name="department_id"
                 label={t("department")}
                 value={draft.department_id}
@@ -154,7 +151,6 @@ export default function PositionsPage() {
               />
 
               <Select
-                variant="filter"
                 name="level"
                 label={t("level")}
                 value={draft.level}
@@ -163,7 +159,6 @@ export default function PositionsPage() {
               />
 
               <Select
-                variant="filter"
                 name="employment_type"
                 label={t("employment_type")}
                 value={draft.employment_type}
@@ -172,7 +167,6 @@ export default function PositionsPage() {
               />
 
               <Select
-                variant="filter"
                 name="status"
                 label={t("status")}
                 value={draft.status}

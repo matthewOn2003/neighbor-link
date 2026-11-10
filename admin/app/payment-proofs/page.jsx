@@ -144,16 +144,14 @@ function ProofReviewTab() {
         filters={(
           <>
             <Input
-              variant="filter"
               name="keyword"
               label={t("search_keyword")}
               value={draft.keyword}
               placeholder={t("search_payments")}
               onChange={update("keyword")}
             />
-            <Select variant="filter" name="status" label={t("status")} value={draft.status} onChange={update("status")} options={statusOptions} />
+            <Select name="status" label={t("status")} value={draft.status} onChange={update("status")} options={statusOptions} />
             <Select
-              variant="filter"
               name="property_id"
               label={t("property")}
               value={draft.property_id}
@@ -163,11 +161,11 @@ function ProofReviewTab() {
               }}
               options={propertyOptions}
             />
-            <Select variant="filter" name="unit_id" label={t("unit")} value={draft.unit_id} onChange={update("unit_id")} options={unitOptions} />
-            <DatePicker variant="filter" name="paid_from" label={t("paid_from")} value={draft.paid_from} max={draft.paid_to || undefined} onChange={update("paid_from")} />
-            <DatePicker variant="filter" name="paid_to" label={t("paid_to")} value={draft.paid_to} min={draft.paid_from || undefined} onChange={update("paid_to")} />
-            <Input variant="filter" name="amount_min" type="number" label={t("amount_min")} value={draft.amount_min} onChange={update("amount_min")} />
-            <Input variant="filter" name="amount_max" type="number" label={t("amount_max")} value={draft.amount_max} onChange={update("amount_max")} />
+            <Select name="unit_id" label={t("unit")} value={draft.unit_id} onChange={update("unit_id")} options={unitOptions} />
+            <DatePicker name="paid_from" label={t("paid_from")} value={draft.paid_from} max={draft.paid_to || undefined} onChange={update("paid_from")} />
+            <DatePicker name="paid_to" label={t("paid_to")} value={draft.paid_to} min={draft.paid_from || undefined} onChange={update("paid_to")} />
+            <Input name="amount_min" type="number" label={t("amount_min")} value={draft.amount_min} onChange={update("amount_min")} />
+            <Input name="amount_max" type="number" label={t("amount_max")} value={draft.amount_max} onChange={update("amount_max")} />
           </>
         )}
         resetFilters={reset}

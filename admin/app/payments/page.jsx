@@ -79,7 +79,6 @@ function ReceiptsTab() {
         filters={
           <>
             <Input
-              variant="filter"
               name="keyword"
               label={t("search_keyword")}
               value={draft.keyword}
@@ -87,7 +86,6 @@ function ReceiptsTab() {
               onChange={update("keyword")}
             />
             <Select
-              variant="filter"
               name="property_id"
               label={t("property")}
               value={draft.property_id}
@@ -98,7 +96,6 @@ function ReceiptsTab() {
               options={propertyOptions}
             />
             <Select
-              variant="filter"
               name="unit_id"
               label={t("unit")}
               value={draft.unit_id}
@@ -106,7 +103,6 @@ function ReceiptsTab() {
               options={unitOptions}
             />
             <DatePicker
-              variant="filter"
               name="paid_from"
               label={t("paid_from")}
               value={draft.paid_from}
@@ -114,7 +110,6 @@ function ReceiptsTab() {
               onChange={update("paid_from")}
             />
             <DatePicker
-              variant="filter"
               name="paid_to"
               label={t("paid_to")}
               value={draft.paid_to}
@@ -122,7 +117,6 @@ function ReceiptsTab() {
               onChange={update("paid_to")}
             />
             <Input
-              variant="filter"
               name="amount_min"
               type="number"
               label={t("amount_min")}
@@ -130,7 +124,6 @@ function ReceiptsTab() {
               onChange={update("amount_min")}
             />
             <Input
-              variant="filter"
               name="amount_max"
               type="number"
               label={t("amount_max")}

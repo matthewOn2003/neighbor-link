@@ -131,7 +131,6 @@ export default function PropertiesPage() {
 
             <div className="flex flex-wrap items-center gap-3">
               <Select
-                variant="filter"
                 name="region"
                 label={t("region")}
                 value={filters.region}
@@ -141,7 +140,6 @@ export default function PropertiesPage() {
               />
 
               <Select
-                variant="filter"
                 name="developer_id"
                 label={t("developer")}
                 value={filters.developer_id}

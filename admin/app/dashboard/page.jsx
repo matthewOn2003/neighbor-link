@@ -204,7 +204,6 @@ export default function DashboardPage() {
           <Icon name="calendar_month" className="text-lg text-primary" />
           <span className="sr-only">Billing cycle</span>
           <Select
-            variant="filter"
             name="cycle"
             label={t("cycle")}
             value={selectedCycle || data.cycle}
