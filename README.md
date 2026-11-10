@@ -166,7 +166,7 @@ File uploads (payment proofs, property covers, and attachments) require the `R2_
 
 ## Development Accounts
 
-Local accounts for development: username `admin` (role admin) and `tenant` (role tenant), both with password `123456`. They are inserted by the `migrations/002_seed_data.sql` migration.
+Local accounts for development: username `admin` (role admin) and `tenant` (role tenant). Their password hashes are seeded by `migrations/002_seed_data.sql` and rotated by `migrations/006_rotate_account_passwords.sql`, so no plaintext password is stored in this repository. The `ADMIN_PASSWORD` and `TENANT_PASSWORD` variables are only used when those accounts do not exist yet.
 
 ## Validation
 
@@ -369,7 +369,7 @@ npm --prefix admin run dev -- -p 3001  # http://localhost:3001
 
 ## 开发账号
 
-本地开发账号：用户名 `admin`（admin 角色）和 `tenant`（tenant 角色），密码均为 `123456`。二者由 `migrations/002_seed_data.sql` 迁移写入数据库。
+本地开发账号：用户名 `admin`（admin 角色）和 `tenant`（tenant 角色）。密码哈希由 `migrations/002_seed_data.sql` 写入，并由 `migrations/006_rotate_account_passwords.sql` 轮换，因此本仓库中不保存任何明文密码。环境变量 `ADMIN_PASSWORD` 和 `TENANT_PASSWORD` 仅在这两个账号不存在时才会用于创建账号。
 
 ## 验证
 
