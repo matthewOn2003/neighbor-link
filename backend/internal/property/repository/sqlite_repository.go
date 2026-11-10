@@ -156,10 +156,8 @@ type SQLiteRepository struct {
 	db *gorm.DB
 }
 
+// Schema comes from backend/migrations only; AutoMigrate would drift column types on PostgreSQL.
 func NewSQLiteRepository(db *gorm.DB) (*SQLiteRepository, error) {
-	if err := db.AutoMigrate(&Property{}); err != nil {
-		return nil, err
-	}
 	return &SQLiteRepository{db: db}, nil
 }
 

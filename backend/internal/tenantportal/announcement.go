@@ -23,8 +23,9 @@ func (c *Controller) propertyAnnouncements(propertyID uint, limit int) ([]announ
 	if err := c.db.Raw(`SELECT COUNT(*) FROM property_announcements WHERE property_id = ?`, propertyID).Scan(&total).Error; err != nil {
 		return nil, 0, err
 	}
-	if limit < 1 {
-		limit = -1 // SQLite treats a negative LIMIT as no limit.
+	var limitArg any // nil (LIMIT NULL) means no limit in PostgreSQL.
+	if limit >= 1 {
+		limitArg = limit
 	}
 	rows := []announcementItem{}
 	err := c.db.Raw(`
@@ -32,7 +33,7 @@ func (c *Controller) propertyAnnouncements(propertyID uint, limit int) ([]announ
 		FROM property_announcements
 		WHERE property_id = ?
 		ORDER BY published_at DESC, id DESC
-		LIMIT ?`, propertyID, limit).Scan(&rows).Error
+		LIMIT ?`, propertyID, limitArg).Scan(&rows).Error
 	if err != nil {
 		return nil, 0, err
 	}

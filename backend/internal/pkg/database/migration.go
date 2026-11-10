@@ -18,7 +18,7 @@ func RunMigrations(db *gorm.DB, migrationsDir string) error {
 	err := db.Exec(`
 		CREATE TABLE IF NOT EXISTS schema_migrations (
 			version TEXT PRIMARY KEY,
-			applied_at DATETIME DEFAULT CURRENT_TIMESTAMP
+			applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 		);
 	`).Error
 	if err != nil {

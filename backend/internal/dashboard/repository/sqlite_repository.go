@@ -112,9 +112,9 @@ func (r *SQLiteRepository) MaintenanceStats(weekStart string) (MaintenanceCounts
 	err := r.db.Raw(`SELECT
 		COALESCE(SUM(CASE WHEN status IN ('open', 'in_progress') THEN 1 ELSE 0 END), 0) AS open,
 		COALESCE(SUM(CASE WHEN status IN ('open', 'in_progress') AND priority = 'urgent' THEN 1 ELSE 0 END), 0) AS urgent,
-		COALESCE(SUM(CASE WHEN date(created_at) >= ? THEN 1 ELSE 0 END), 0) AS new_this_week,
-		COALESCE(SUM(CASE WHEN date(created_at) >= ? AND tenant_id IS NOT NULL THEN 1 ELSE 0 END), 0) AS new_from_tenant,
-		COALESCE(SUM(CASE WHEN date(created_at) >= ? AND tenant_id IS NULL THEN 1 ELSE 0 END), 0) AS new_from_admin
+		COALESCE(SUM(CASE WHEN CAST(created_at AS date) >= ? THEN 1 ELSE 0 END), 0) AS new_this_week,
+		COALESCE(SUM(CASE WHEN CAST(created_at AS date) >= ? AND tenant_id IS NOT NULL THEN 1 ELSE 0 END), 0) AS new_from_tenant,
+		COALESCE(SUM(CASE WHEN CAST(created_at AS date) >= ? AND tenant_id IS NULL THEN 1 ELSE 0 END), 0) AS new_from_admin
 		FROM maintenance_requests`, weekStart, weekStart, weekStart).Scan(&counts).Error
 	return counts, err
 }
@@ -139,16 +139,16 @@ func (r *SQLiteRepository) OccupiedUnitsOn(day string) (int64, error) {
 func (r *SQLiteRepository) OpenComplaintsOpenedBefore(day string) (int64, error) {
 	var total int64
 	err := r.db.Raw(`SELECT COUNT(*) FROM complaints
-		WHERE status IN ('open', 'in_progress') AND date(created_at) < ?`, day).Scan(&total).Error
+		WHERE status IN ('open', 'in_progress') AND CAST(created_at AS date) < ?`, day).Scan(&total).Error
 	return total, err
 }
 
 // AvgMaintenanceResolutionDays averages the days from creation to resolution for requests resolved in cycle (YYYY-MM).
 func (r *SQLiteRepository) AvgMaintenanceResolutionDays(cycle string) (float64, error) {
 	var avg float64
-	err := r.db.Raw(`SELECT COALESCE(AVG(julianday(resolved_at) - julianday(created_at)), 0)
+	err := r.db.Raw(`SELECT COALESCE(AVG(EXTRACT(EPOCH FROM (resolved_at - created_at)) / 86400.0), 0)::float8
 		FROM maintenance_requests
-		WHERE resolved_at IS NOT NULL AND substr(resolved_at, 1, 7) = ?`, cycle).Scan(&avg).Error
+		WHERE resolved_at IS NOT NULL AND to_char(resolved_at, 'YYYY-MM') = ?`, cycle).Scan(&avg).Error
 	return avg, err
 }
 

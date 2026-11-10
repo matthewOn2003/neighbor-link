@@ -1,6 +1,6 @@
 -- 002_seed_data.sql
 -- 预置字典选项数据
-INSERT OR IGNORE INTO options (id, slug, value, label, variant, sort_order) VALUES
+INSERT INTO options (id, slug, value, label, variant, sort_order) VALUES
 (1, 'unit_status', 'vacant', 'Vacant', 'neutral', 1),
 (2, 'unit_status', 'occupied', 'Occupied', 'success', 2),
 (3, 'unit_status', 'maintenance', 'Maintenance', 'warning', 3),
@@ -18,18 +18,20 @@ INSERT OR IGNORE INTO options (id, slug, value, label, variant, sort_order) VALU
 (15, 'property_region', 'melaka', 'Melaka', 'info', 5),
 (16, 'property_region', 'negeri_sembilan', 'Negeri Sembilan', 'info', 6),
 (17, 'property_region', 'sabah', 'Sabah', 'info', 7),
-(18, 'property_region', 'sarawak', 'Sarawak', 'info', 8);
+(18, 'property_region', 'sarawak', 'Sarawak', 'info', 8)
+ON CONFLICT DO NOTHING;
 
 -- 预置开发商数据
-INSERT OR IGNORE INTO developers (id, name, contact_email, created_at, updated_at) VALUES
+INSERT INTO developers (id, name, contact_email, created_at, updated_at) VALUES
 (1, 'Sunrise Holdings', 'contact@sunrise-holdings.example', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 (2, 'Greenfield Developments', 'hello@greenfield.example', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 (3, 'Pacific Urban', 'info@pacificurban.example', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 (4, 'Harbor Living', 'sales@harborliving.example', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-(5, 'Nova Land', 'enquiry@novaland.example', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+(5, 'Nova Land', 'enquiry@novaland.example', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+ON CONFLICT DO NOTHING;
 
 -- 预置房产数据
-INSERT OR IGNORE INTO properties (id, developer_id, name, property_type, address, city, region, description, cover_image, wifi_ssid, wifi_password, notes, created_at, updated_at) VALUES
+INSERT INTO properties (id, developer_id, name, property_type, address, city, region, description, cover_image, wifi_ssid, wifi_password, notes, created_at, updated_at) VALUES
 (1, 1, 'Maple Court #1', 'terrace', '12 Maple Court', 'Subang Jaya, SEL', 'klang_valley', 'Corner terrace homes beside the park.', 'https://images.pexels.com/photos/39485848/pexels-photo-39485848.jpeg?auto=compress&cs=tinysrgb&w=800', 'MapleWifi1', 'maple-pass-1', 'Recently renovated', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 (2, 1, 'Maple Court #2', 'semi_d', '14 Maple Court', 'Ampang, KL', 'klang_valley', 'Semi-detached family homes with private gardens.', 'https://images.pexels.com/photos/15951714/pexels-photo-15951714.jpeg?auto=compress&cs=tinysrgb&w=800', 'MapleWifi2', 'maple-pass-2', '', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 (3, 2, 'Oak Street #1', 'terrace', '8 Oak Street', 'Cheras, KL', 'klang_valley', 'Three-storey terrace row near the transit line.', 'https://images.pexels.com/photos/33244441/pexels-photo-33244441.jpeg?auto=compress&cs=tinysrgb&w=800', 'OakWifi1', 'oak-pass-1', '', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
@@ -39,10 +41,11 @@ INSERT OR IGNORE INTO properties (id, developer_id, name, property_type, address
 (7, 3, 'Pavillion Suites', 'apartment', 'Bukit Bintang, KL', 'Bukit Bintang, KL', 'klang_valley', 'Serviced suites in the heart of the city.', 'https://images.pexels.com/photos/18153132/pexels-photo-18153132.jpeg?auto=compress&cs=tinysrgb&w=800', NULL, NULL, '', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 (8, 4, 'Green Valley', 'condo', 'Petaling Jaya, SEL', 'Petaling Jaya, SEL', 'klang_valley', 'Garden condominium with three low-rise blocks.', 'https://images.pexels.com/photos/9308434/pexels-photo-9308434.jpeg?auto=compress&cs=tinysrgb&w=800', NULL, NULL, '', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 (9, 4, 'Skyline Res', 'apartment', '18 Jalan Tebrau', 'Johor Bahru, JHR', 'johor', 'High-rise residences with city views.', 'https://images.pexels.com/photos/15951714/pexels-photo-15951714.jpeg?auto=compress&cs=tinysrgb&w=800', NULL, NULL, '', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-(10, 5, 'Central Loft', 'apartment', '45 Lebuh Chulia', 'George Town, PNG', 'penang', 'Loft-style apartments above the retail podium.', 'https://images.pexels.com/photos/39319453/pexels-photo-39319453.jpeg?auto=compress&cs=tinysrgb&w=800', NULL, NULL, '', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+(10, 5, 'Central Loft', 'apartment', '45 Lebuh Chulia', 'George Town, PNG', 'penang', 'Loft-style apartments above the retail podium.', 'https://images.pexels.com/photos/39319453/pexels-photo-39319453.jpeg?auto=compress&cs=tinysrgb&w=800', NULL, NULL, '', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+ON CONFLICT DO NOTHING;
 
 -- 预置 block（楼栋）数据，(floor_count, units_per_floor) 决定楼层与单位的生成数量
-INSERT OR IGNORE INTO blocks (id, property_id, code, name, floor_count, units_per_floor) VALUES
+INSERT INTO blocks (id, property_id, code, name, floor_count, units_per_floor) VALUES
 (1, 1, 'A', 'Block A', 4, 2),
 (2, 1, 'B', 'Block B', 4, 2),
 (3, 2, 'A', 'Block A', 5, 2),
@@ -61,7 +64,8 @@ INSERT OR IGNORE INTO blocks (id, property_id, code, name, floor_count, units_pe
 (16, 8, 'B', 'Block B', 3, 2),
 (17, 8, 'C', 'Block C', 3, 2),
 (18, 9, 'A', 'Block A', 10, 4),
-(19, 10, 'A', 'Block A', 8, 2);
+(19, 10, 'A', 'Block A', 8, 2)
+ON CONFLICT DO NOTHING;
 
 -- 按 block 的楼层数生成 floors（level 从 1 开始）
 WITH RECURSIVE lvl(n) AS (
@@ -82,7 +86,7 @@ INSERT INTO units (block_id, floor_id, code, bedrooms, size_sqft, status)
 SELECT
     b.id,
     f.id,
-    b.code || '-' || printf('%02d', f.level) || '-' || printf('%02d', k.n),
+    b.code || '-' || lpad(f.level::text, 2, '0') || '-' || lpad(k.n::text, 2, '0'),
     1 + (f.id + k.n) % 3,
     350 + (1 + (f.id + k.n) % 3) * 200,
     'vacant'
@@ -96,7 +100,7 @@ UPDATE units SET status = 'maintenance' WHERE id % 7 = 0;
 -- 预置租客账号数据 (预生成 bcrypt hash，明文分别为 Tenant#Alice1, Tenant#Bob1, ...)
 -- Tenant#Alice1  -> $2a$10$wEeVnC33YV7WbL2K235kX.l0bL/y8eZc9K5V4m3oG2jL.Fh7oMWeW
 -- 所有 mock 租客账号 role 均为 'tenant'
-INSERT OR IGNORE INTO auth_users (id, username, password_hash, role) VALUES
+INSERT INTO auth_users (id, username, password_hash, role) VALUES
 (3, 'tenant_john_tan', '$2a$10$tZ261xSj942hF1K2/Q0d4el3OQ.t2h6x/sVw3Xz19W1y1s1.r2G5W', 'tenant'),
 (4, 'tenant_elena_rostova', '$2a$10$tZ261xSj942hF1K2/Q0d4el3OQ.t2h6x/sVw3Xz19W1y1s1.r2G5W', 'tenant'),
 (5, 'tenant_marcus_lee', '$2a$10$tZ261xSj942hF1K2/Q0d4el3OQ.t2h6x/sVw3Xz19W1y1s1.r2G5W', 'tenant'),
@@ -144,10 +148,11 @@ INSERT OR IGNORE INTO auth_users (id, username, password_hash, role) VALUES
 (47, 'tenant_tom', '$2a$10$tZ261xSj942hF1K2/Q0d4el3OQ.t2h6x/sVw3Xz19W1y1s1.r2G5W', 'tenant'),
 (48, 'tenant_uma', '$2a$10$tZ261xSj942hF1K2/Q0d4el3OQ.t2h6x/sVw3Xz19W1y1s1.r2G5W', 'tenant'),
 (49, 'tenant_victor', '$2a$10$tZ261xSj942hF1K2/Q0d4el3OQ.t2h6x/sVw3Xz19W1y1s1.r2G5W', 'tenant'),
-(50, 'tenant_wendy', '$2a$10$tZ261xSj942hF1K2/Q0d4el3OQ.t2h6x/sVw3Xz19W1y1s1.r2G5W', 'tenant');
+(50, 'tenant_wendy', '$2a$10$tZ261xSj942hF1K2/Q0d4el3OQ.t2h6x/sVw3Xz19W1y1s1.r2G5W', 'tenant')
+ON CONFLICT DO NOTHING;
 
 -- 预置租客档案数据（unit_id 在下方统一分配）
-INSERT OR IGNORE INTO tenants (id, user_id, name, phone, email, property_id, status, city, contract_end, monthly_rent, outstanding_balance, balance_note, created_at, updated_at) VALUES
+INSERT INTO tenants (id, user_id, name, phone, email, property_id, status, city, contract_end, monthly_rent, outstanding_balance, balance_note, created_at, updated_at) VALUES
 (1, 3, 'John Tan', '+60 12-345 6789', 'johntan@email.com', 6, 'active', 'Kuala Lumpur, MY', '2026-12-31', 1800, 0, '', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 (2, 4, 'Elena Rostova', '+60 17-889 0123', 'elena.r@global.io', 7, 'active', 'Bukit Bintang, KL', '2026-08-15', 2400, 150, 'Repair fee', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 (3, 5, 'Marcus Lee', '+60 11-234 5678', 'marcus.lee@gmail.com', 8, 'active', 'Petaling Jaya, SEL', '2026-11-30', 1200, 1200, 'Overdue 5d', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
@@ -195,7 +200,8 @@ INSERT OR IGNORE INTO tenants (id, user_id, name, phone, email, property_id, sta
 (45, 47, 'Tom Walsh', '555-0145', 'tom@example.com', 1, 'active', 'Subang Jaya, SEL', '2028-12-31', 1750, 0, '', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 (46, 48, 'Uma Rao', '555-0146', 'uma@example.com', 2, 'active', 'Ampang, KL', '2029-01-31', 1650, 0, '', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 (47, 49, 'Victor Lee', '555-0147', 'victor@example.com', 3, 'active', 'Cheras, KL', '2029-02-28', 1950, 0, '', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-(48, 50, 'Wendy Xu', '555-0148', 'wendy@example.com', NULL, 'former', 'Setapak, KL', '2026-07-31', NULL, 0, '', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+(48, 50, 'Wendy Xu', '555-0148', 'wendy@example.com', NULL, 'former', 'Setapak, KL', '2026-07-31', NULL, 0, '', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+ON CONFLICT DO NOTHING;
 
 -- 为有所属房产的租客分配空置单位（同一房产内不重复，跳过维护中的单位）
 WITH ranked_units AS (
@@ -221,3 +227,11 @@ WHERE property_id IS NOT NULL;
 -- 已分配租客的单位标记为已入住
 UPDATE units SET status = 'occupied'
 WHERE id IN (SELECT unit_id FROM tenants WHERE unit_id IS NOT NULL);
+
+-- Seed rows above set explicit ids. Move each identity sequence past them so later inserts do not collide.
+SELECT setval(pg_get_serial_sequence('options', 'id'), (SELECT MAX(id) FROM options));
+SELECT setval(pg_get_serial_sequence('developers', 'id'), (SELECT MAX(id) FROM developers));
+SELECT setval(pg_get_serial_sequence('properties', 'id'), (SELECT MAX(id) FROM properties));
+SELECT setval(pg_get_serial_sequence('blocks', 'id'), (SELECT MAX(id) FROM blocks));
+SELECT setval(pg_get_serial_sequence('auth_users', 'id'), (SELECT MAX(id) FROM auth_users));
+SELECT setval(pg_get_serial_sequence('tenants', 'id'), (SELECT MAX(id) FROM tenants));

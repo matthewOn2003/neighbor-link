@@ -57,7 +57,7 @@ func main() {
 		log.Fatalf("加载 .env 失败: %v", err)
 	}
 
-	db, err := database.InitSQLite(requiredEnv("DB_PATH"))
+	db, err := database.InitPostgres(requiredEnv("DATABASE_URL"))
 	if err != nil {
 		log.Fatalf("数据库初始化失败: %v", err)
 	}

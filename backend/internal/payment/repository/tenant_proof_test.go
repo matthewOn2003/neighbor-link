@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"path/filepath"
+	"os"
 	"testing"
 
 	"backend/internal/pkg/database"
@@ -9,22 +9,31 @@ import (
 	"gorm.io/gorm"
 )
 
+// setupProofDB needs a disposable PostgreSQL database in TEST_DATABASE_URL and is skipped otherwise.
+// It drops the bills and payment_proofs tables first, so never point it at a real database.
 func setupProofDB(t *testing.T) *gorm.DB {
 	t.Helper()
-	db, err := database.InitSQLite(filepath.Join(t.TempDir(), "proof.db"))
+	dsn := os.Getenv("TEST_DATABASE_URL")
+	if dsn == "" {
+		t.Skip("TEST_DATABASE_URL not set; skipping PostgreSQL payment proof test")
+	}
+	db, err := database.InitPostgres(dsn)
 	if err != nil {
-		t.Fatalf("InitSQLite failed: %v", err)
+		t.Fatalf("InitPostgres failed: %v", err)
 	}
 	if sqlDB, err := db.DB(); err == nil {
 		t.Cleanup(func() { sqlDB.Close() })
 	}
+	if err := db.Exec(`DROP TABLE IF EXISTS payment_proofs, bills`).Error; err != nil {
+		t.Fatalf("reset tables: %v", err)
+	}
 	if err := db.Exec(`CREATE TABLE bills (
-		id INTEGER PRIMARY KEY,
+		id BIGINT PRIMARY KEY,
 		tenant_id INTEGER NOT NULL,
 		status TEXT NOT NULL,
-		amount REAL NOT NULL,
-		late_fee REAL NOT NULL DEFAULT 0,
-		amount_paid REAL NOT NULL DEFAULT 0
+		amount DOUBLE PRECISION NOT NULL,
+		late_fee DOUBLE PRECISION NOT NULL DEFAULT 0,
+		amount_paid DOUBLE PRECISION NOT NULL DEFAULT 0
 	)`).Error; err != nil {
 		t.Fatalf("create bills: %v", err)
 	}

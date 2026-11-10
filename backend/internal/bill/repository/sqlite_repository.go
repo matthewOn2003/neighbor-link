@@ -109,7 +109,7 @@ func (r *SQLiteRepository) List(f BillFilter, page, perPage int) ([]BillListItem
 		return nil, 0, BillSummary{}, err
 	}
 	var summary BillSummary
-	s := r.base(f).Select("COUNT(*) AS total_bills, COALESCE(SUM(bills.amount + bills.late_fee),0) AS total_amount, COALESCE(SUM(bills.amount_paid),0) AS total_paid, COALESCE(SUM(MAX(bills.amount + bills.late_fee - bills.amount_paid,0)),0) AS outstanding, COALESCE(SUM(CASE WHEN bills.status = 'overdue' THEN 1 ELSE 0 END),0) AS overdue_count")
+	s := r.base(f).Select("COUNT(*) AS total_bills, COALESCE(SUM(bills.amount + bills.late_fee),0) AS total_amount, COALESCE(SUM(bills.amount_paid),0) AS total_paid, COALESCE(SUM(GREATEST(bills.amount + bills.late_fee - bills.amount_paid,0)),0) AS outstanding, COALESCE(SUM(CASE WHEN bills.status = 'overdue' THEN 1 ELSE 0 END),0) AS overdue_count")
 	if err := s.Scan(&summary).Error; err != nil {
 		return nil, 0, BillSummary{}, err
 	}
@@ -355,14 +355,15 @@ func (r *SQLiteRepository) Generate(period string) (int64, error) {
 			notify.KindBilling, period, time.Now(), lastDay, firstDay, period).Error; err != nil {
 			return err
 		}
-		result := tx.Exec(`INSERT OR IGNORE INTO bills
+		result := tx.Exec(`INSERT INTO bills
   (contract_id, tenant_id, billing_period, due_date, amount, late_fee, amount_paid, status, issued_at, notes, created_at, updated_at)
-  SELECT c.id, c.tenant_id, ?, date(?, printf('+%d days', c.billing_day - 1)),
+  SELECT c.id, c.tenant_id, ?, to_char(CAST(? AS date) + (c.billing_day - 1), 'YYYY-MM-DD'),
    c.monthly_rent, 0, 0,
-   CASE WHEN date(?, printf('+%d days', c.billing_day - 1)) < date('now') THEN 'overdue' ELSE 'unpaid' END,
-   date('now'), 'Generated monthly bill', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+   CASE WHEN CAST(? AS date) + (c.billing_day - 1) < CURRENT_DATE THEN 'overdue' ELSE 'unpaid' END,
+   to_char(CURRENT_DATE, 'YYYY-MM-DD'), 'Generated monthly bill', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
   FROM contracts c
-  WHERE c.status = 'active' AND c.start_date <= ? AND c.end_date >= ?`,
+  WHERE c.status = 'active' AND c.start_date <= ? AND c.end_date >= ?
+  ON CONFLICT DO NOTHING`,
 			period, firstDay, firstDay, lastDay, firstDay)
 		if result.Error != nil {
 			return result.Error

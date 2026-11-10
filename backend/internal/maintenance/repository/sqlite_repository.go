@@ -128,10 +128,10 @@ func (r *SQLiteRepository) filtered(f Filter) *gorm.DB {
 	}
 	// created_at is stored in local time, so the first 10 characters are the local date.
 	if f.CreatedFrom != "" {
-		q = q.Where("substr(maintenance_requests.created_at, 1, 10) >= ?", f.CreatedFrom)
+		q = q.Where("CAST(maintenance_requests.created_at AS date) >= ?", f.CreatedFrom)
 	}
 	if f.CreatedTo != "" {
-		q = q.Where("substr(maintenance_requests.created_at, 1, 10) <= ?", f.CreatedTo)
+		q = q.Where("CAST(maintenance_requests.created_at AS date) <= ?", f.CreatedTo)
 	}
 	return q
 }

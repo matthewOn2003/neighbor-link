@@ -6,9 +6,14 @@ import (
 	"testing"
 )
 
+// TestRunMigrations needs a disposable PostgreSQL database in TEST_DATABASE_URL.
+// It drops test_items and schema_migrations first, so never point it at a real database.
 func TestRunMigrations(t *testing.T) {
+	dsn := os.Getenv("TEST_DATABASE_URL")
+	if dsn == "" {
+		t.Skip("TEST_DATABASE_URL not set; skipping PostgreSQL migration test")
+	}
 	tempDir := t.TempDir()
-	dbPath := filepath.Join(tempDir, "test.db")
 	migrationsDir := filepath.Join(tempDir, "migrations")
 
 	if err := os.MkdirAll(migrationsDir, 0755); err != nil {
@@ -26,13 +31,16 @@ func TestRunMigrations(t *testing.T) {
 		t.Fatalf("failed to write 001_init.sql: %v", err)
 	}
 
-	db, err := InitSQLite(dbPath)
+	db, err := InitPostgres(dsn)
 	if err != nil {
-		t.Fatalf("InitSQLite failed: %v", err)
+		t.Fatalf("InitPostgres failed: %v", err)
 	}
 	sqlDB, err := db.DB()
 	if err == nil {
 		defer sqlDB.Close()
+	}
+	if err := db.Exec(`DROP TABLE IF EXISTS test_items, schema_migrations`).Error; err != nil {
+		t.Fatalf("reset test tables failed: %v", err)
 	}
 
 	// 首次运行迁移

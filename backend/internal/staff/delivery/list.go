@@ -165,7 +165,7 @@ func (c *Controller) ListDepartments(w http.ResponseWriter, r *http.Request) {
 		q = whereEqual(q, "staff_departments.status", req.Status)
 		q = whereLike(q, "staff_departments.location", req.Location)
 		q = whereLike(q, "staff_departments.manager_name", req.ManagerName)
-		q = whereDateRange(q, "date(staff_departments.created_at)", req.CreatedFrom, req.CreatedTo)
+		q = whereDateRange(q, "CAST(staff_departments.created_at AS date)", req.CreatedFrom, req.CreatedTo)
 		return q
 	}
 	writePagedList[Department](w, build, "staff_departments.*, "+departmentHeadcount, "staff_departments.name", currentPage, perPage, "failed to list departments")
